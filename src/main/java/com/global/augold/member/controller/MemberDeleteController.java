@@ -49,6 +49,6 @@ public class MemberDeleteController {
         session.invalidate();
 
         redirectAttributes.addFlashAttribute("successMessage", "회원 탈퇴가 정상 처리되었습니다.");
-        return "redirect:/main";
+        return "redirect:/";
     }
 }

@@ -48,6 +48,6 @@ public class AddressController {
         customerRepository.save(loginUser);
 
         redirectAttributes.addFlashAttribute("successMessage", "주소가 성공적으로 변경되었습니다.");
-        return "redirect:/main";
+        return "redirect:/";
     }
 }

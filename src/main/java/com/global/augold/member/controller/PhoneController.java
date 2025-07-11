@@ -42,6 +42,6 @@ public class PhoneController {
         customerRepository.save(loginUser); // DB 반영
 
         redirectAttributes.addFlashAttribute("successMessage", "전화번호가 성공적으로 변경되었습니다.");
-        return "redirect:/main";
+        return "redirect:/";
     }
 }

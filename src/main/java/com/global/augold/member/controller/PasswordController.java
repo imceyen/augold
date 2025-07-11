@@ -47,6 +47,6 @@ public class PasswordController {
         customerRepository.save(loginUser); // DB 반영
 
         redirectAttributes.addFlashAttribute("successMessage", "비밀번호가 수정되었습니다.");
-        return "redirect:/main";
+        return "redirect:/";
     }
 }
