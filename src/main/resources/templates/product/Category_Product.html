@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>카테고리별 상품 | AuGold</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body class="bg-white text-gray-900">
+
+<!-- Header -->
+<header class="bg-white shadow border-b">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+            <div class="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center">
+                <span class="text-white font-bold text-lg">A</span>
+            </div>
+            <div>
+                <h1 class="text-2xl font-bold bg-gradient-to-r from-yellow-600 to-yellow-800 bg-clip-text text-transparent">AuGold</h1>
+                <p class="text-xs text-gray-500">프리미엄 금 전문몰</p>
+            </div>
+        </div>
+        <nav class="flex space-x-6">
+            <a href="/" class="text-gray-700 hover:text-yellow-600 font-medium">홈</a>
+            <a href="/login" class="text-gray-700 hover:text-yellow-600 font-medium">로그인</a>
+            <a href="/signup" class="text-gray-700 hover:text-yellow-600 font-medium">회원가입</a>
+            <a href="/cart" class="text-gray-700 hover:text-yellow-600 font-medium">장바구니</a>
+        </nav>
+    </div>
+</header>
+
+<!-- Category Navigation -->
+<section class="bg-yellow-50 py-6">
+    <div class="container mx-auto px-4 text-center space-x-4">
+        <a href="#goldbar" class="text-yellow-700 font-bold hover:underline">골드바</a>
+        <a href="#jewelry" class="text-yellow-700 font-bold hover:underline">주얼리</a>
+        <a href="#gift" class="text-yellow-700 font-bold hover:underline">기념품</a>
+    </div>
+</section>
+
+<!-- 골드바 섹션 -->
+<section id="goldbar" class="py-24">
+    <div class="container mx-auto px-4">
+        <h2 class="text-3xl font-bold text-center mb-12">골드바</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div th:each="product : ${goldbars}" class="bg-white rounded-xl shadow p-4">
+                <a th:href="@{/product/{id}(id=${product.productId})}">
+                    <div class="aspect-w-1 aspect-h-1">
+                        <img th:src="${product.imageUrl}" alt="상품 이미지" class="object-cover w-full h-full rounded">
+                    </div>
+                    <h3 class="mt-4 font-bold text-lg" th:text="${product.productName}">상품명</h3>
+                    <p class="text-yellow-700 font-semibold mt-1" th:text="'₩' + ${#numbers.formatInteger(product.finalPrice, 3, 'COMMA')}">가격</p>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 주얼리 섹션 -->
+<section id="jewelry" class="py-24 bg-gray-50">
+    <div class="container mx-auto px-4">
+        <h2 class="text-3xl font-bold text-center mb-16">주얼리</h2>
+
+        <!-- 목걸이 -->
+        <div class="flex items-center justify-center mb-12">
+            <div class="flex-grow border-t border-gray-300"></div>
+            <h3 class="text-xl font-semibold mx-4 text-center whitespace-nowrap">목걸이</h3>
+            <div class="flex-grow border-t border-gray-300"></div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+            <div th:each="product : ${necklaces}" class="bg-white rounded-xl shadow p-4">
+                <a th:href="@{/product/{id}(id=${product.productId})}">
+                    <div class="aspect-square">
+                        <img th:src="${product.imageUrl}" alt="상품 이미지" class="object-cover w-full h-full rounded">
+                    </div>
+                    <h4 class="mt-4 font-bold text-lg" th:text="${product.productName}">상품명</h4>
+                    <p class="text-yellow-700 font-semibold mt-1"
+                       th:text="'₩' + ${#numbers.formatInteger(product.finalPrice, 3, 'COMMA')}">가격</p>
+                </a>
+            </div>
+        </div>
+
+        <!-- 귀걸이 -->
+        <div class="flex items-center justify-center mb-12">
+            <div class="flex-grow border-t border-gray-300"></div>
+            <h3 class="text-xl font-semibold mx-4 text-center whitespace-nowrap">귀걸이</h3>
+            <div class="flex-grow border-t border-gray-300"></div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+            <div th:each="product : ${earrings}" class="bg-white rounded-xl shadow p-4">
+                <a th:href="@{/product/{id}(id=${product.productId})}">
+                    <div class="aspect-square">
+                        <img th:src="${product.imageUrl}" alt="상품 이미지" class="object-cover w-full h-full rounded">
+                    </div>
+                    <h4 class="mt-4 font-bold text-lg" th:text="${product.productName}">상품명</h4>
+                    <p class="text-yellow-700 font-semibold mt-1"
+                       th:text="'₩' + ${#numbers.formatInteger(product.finalPrice, 3, 'COMMA')}">가격</p>
+                </a>
+            </div>
+        </div>
+
+        <!-- 반지 -->
+        <div class="flex items-center justify-center mb-12">
+            <div class="flex-grow border-t border-gray-300"></div>
+            <h3 class="text-xl font-semibold mx-4 text-center whitespace-nowrap">반지</h3>
+            <div class="flex-grow border-t border-gray-300"></div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div th:each="product : ${rings}" class="bg-white rounded-xl shadow p-4">
+                <a th:href="@{/product/{id}(id=${product.productId})}">
+                    <div class="aspect-square">
+                        <img th:src="${product.imageUrl}" alt="상품 이미지" class="object-cover w-full h-full rounded">
+                    </div>
+                    <h4 class="mt-4 font-bold text-lg" th:text="${product.productName}">상품명</h4>
+                    <p class="text-yellow-700 font-semibold mt-1"
+                       th:text="'₩' + ${#numbers.formatInteger(product.finalPrice, 3, 'COMMA')}">가격</p>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+
+<!-- 기념품 섹션 -->
+<section id="gift" class="py-24">
+    <div class="container mx-auto px-4">
+        <h2 class="text-3xl font-bold text-center mb-12">기념품</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div th:each="product : ${gifts}" class="bg-white rounded-xl shadow p-4">
+                <a th:href="@{/product/{id}(id=${product.productId})}">
+                    <div class="aspect-w-1 aspect-h-1">
+                        <img th:src="${product.imageUrl}" alt="상품 이미지" class="object-cover w-full h-full rounded">
+                    </div>
+                    <h3 class="mt-4 font-bold text-lg" th:text="${product.productName}">상품명</h3>
+                    <p class="text-yellow-700 font-semibold mt-1" th:text="'₩' + ${#numbers.formatInteger(product.finalPrice, 3, 'COMMA')}">가격</p>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="bg-gray-900 text-white py-12 mt-16">
+    <div class="container mx-auto grid md:grid-cols-4 gap-8 px-4">
+        <div>
+            <h3 class="text-xl font-bold mb-2">AuGold</h3>
+            <p class="text-gray-400 text-sm">믿을 수 있는 프리미엄 금 전문 플랫폼</p>
+        </div>
+        <div>
+            <h4 class="font-semibold mb-4">고객서비스</h4>
+            <ul class="space-y-2 text-gray-400 text-sm">
+                <li><a href="#">주문/배송 조회</a></li>
+                <li><a href="#">반품/교환</a></li>
+                <li><a href="#">FAQ</a></li>
+                <li><a href="#">1:1 문의</a></li>
+            </ul>
+        </div>
+        <div>
+            <h4 class="font-semibold mb-4">회사정보</h4>
+            <ul class="space-y-2 text-gray-400 text-sm">
+                <li><a href="#">회사소개</a></li>
+                <li><a href="#">이용약관</a></li>
+                <li><a href="#">개인정보처리방침</a></li>
+                <li><a href="#">사업자정보</a></li>
+            </ul>
+        </div>
+        <div>
+            <h4 class="font-semibold mb-4">연락처</h4>
+            <p class="text-gray-400 text-sm">1588-1234</p>
+            <p class="text-gray-400 text-sm">help@augold.co.kr</p>
+            <p class="text-gray-400 text-sm">평일 09:00-18:00</p>
+            <p class="text-gray-400 text-sm">주말/공휴일 휴무</p>
+        </div>
+    </div>
+    <div class="border-t border-gray-800 mt-8 pt-6 text-center text-gray-400 text-sm">
+        &copy; 2025 AuGold. All rights reserved.
+    </div>
+</footer>
+
+</body>
+</html>

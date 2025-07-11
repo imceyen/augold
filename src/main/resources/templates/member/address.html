@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>주소 수정</title>
+    <style>
+        body {
+          font-family: Arial, sans-serif;
+          background-color: #f9f9f9;
+          padding: 50px;
+        }
+        .container {
+          max-width: 600px;
+          margin: 0 auto;
+          background: #fff;
+          padding: 30px 40px;
+          border-radius: 8px;
+          box-shadow: 0 0 8px rgba(0,0,0,0.1);
+        }
+        h2 {
+          text-align: center;
+          color: #333;
+          margin-bottom: 30px;
+        }
+        label {
+          display: block;
+          margin-top: 15px;
+          font-weight: bold;
+        }
+        input[type="text"] {
+          width: 100%;
+          padding: 10px;
+          margin-top: 6px;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+          box-sizing: border-box;
+          font-size: 16px;
+          cursor: pointer;
+          background-color: #fff;
+        }
+        input[type="text"]:focus {
+          outline-color: #007bff;
+        }
+        .btn-submit {
+          margin-top: 30px;
+          width: 100%;
+          padding: 14px;
+          background-color: #28a745;
+          color: white;
+          border: none;
+          border-radius: 6px;
+          font-size: 18px;
+          cursor: pointer;
+          transition: background-color 0.3s ease;
+        }
+        .btn-submit:hover {
+          background-color: #218838;
+        }
+    </style>
+
+    <!-- 카카오 우편번호 서비스 스크립트 -->
+    <script src="https://ssl.daumcdn.net/dmaps/map_js_init/postcode.v2.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <h2>주소 수정</h2>
+
+    <form th:action="@{/addressOk}" method="post">
+        <label for="postcode">우편번호</label>
+        <input type="text" id="postcode" name="postcode" readonly required
+               onclick="execDaumPostcode()" placeholder="우편번호를 클릭하여 검색하세요" />
+
+        <label for="address">주소</label>
+        <input type="text" id="address" name="address" readonly required
+               onclick="execDaumPostcode()" placeholder="주소를 클릭하여 검색하세요" />
+
+        <label for="detailAddress">상세주소</label>
+        <input type="text" id="detailAddress" name="detailAddress" placeholder="상세주소를 입력하세요" required />
+
+        <button type="submit" class="btn-submit">주소 수정</button>
+    </form>
+
+    <div th:if="${successMessage}" style="color:green; text-align:center; margin-top:20px;">
+        <p th:text="${successMessage}"></p>
+    </div>
+    <div th:if="${errorMessage}" style="color:red; text-align:center; margin-top:20px;">
+        <p th:text="${errorMessage}"></p>
+    </div>
+</div>
+
+<script>
+    function execDaumPostcode() {
+      new daum.Postcode({
+        oncomplete: function(data) {
+          document.getElementById('postcode').value = data.zonecode;
+          document.getElementById('address').value = data.address;
+          document.getElementById('detailAddress').focus();
+        }
+      }).open();
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th = "http://www.thymeleaf.org"> <!--여기서 타임리프 문법 쓸꺼라 선언하는 것이다. = import 브라우저와 IDE에게 알려주는 역할 -->
+<head>
+    <meta charset="UTF-8">
+    <title>AuGold 장바구니</title>
+
+
+</head>
+<body>
+<div th:each="item: ${cartlist}"><!-- th:each 반복하겠다는 의미, item 각 반복에 사용할 변수명, ${cartlist} = Controller에서 넘어온 데이터-->
+    <p th:text="${item.productName}">상품명</p>
+    <p th:text="${item.finalPrice}">가격</p>
+</div> <!--즉 cartlist에 있는 item들을 하나씩 꺼내서 div로 만들어줘 라는 의미-->
+</body>
+</html>

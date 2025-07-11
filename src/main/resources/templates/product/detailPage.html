@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${product.productName} + ' | AuGold'">제품 상세페이지</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+<!-- 헤더 -->
+<header class="border-b border-gray-200 bg-white relative">
+    <div class="max-w-7xl mx-auto px-6 py-14">
+        <!-- 로고 -->
+        <div class="flex flex-col items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-14 h-14 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-full flex items-center justify-center font-bold text-white text-2xl">A</div>
+                <div>
+                    <div class="text-2xl font-bold text-yellow-800">AuGold</div>
+                    <div class="text-sm text-gray-500">프리미엄 금 전문몰</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 카테고리 -->
+        <nav class="flex justify-center gap-10 mt-10">
+            <a href="/category?type=goldbar" class="text-gray-700 font-semibold hover:text-yellow-600">골드바</a>
+            <a href="/category?type=jewelry" class="text-gray-700 font-semibold hover:text-yellow-600">주얼리</a>
+            <a href="/category?type=gift" class="text-gray-700 font-semibold hover:text-yellow-600">기념품</a>
+        </nav>
+
+        <!-- 로그인 메뉴 -->
+        <nav class="absolute top-4 right-6 flex gap-4 text-sm">
+            <a href="/login" class="text-gray-700 hover:text-yellow-600">로그인</a>
+            <a href="/signup" class="text-gray-700 hover:text-yellow-600">회원가입</a>
+            <a href="/mypage" class="text-gray-700 hover:text-yellow-600">마이페이지</a>
+            <a href="/cart" class="text-gray-700 hover:text-yellow-600">장바구니</a>
+        </nav>
+    </div>
+</header>
+
+<!-- 본문 -->
+<main class="max-w-6xl mx-auto px-4 py-12 grid md:grid-cols-2 gap-12">
+    <!-- 이미지 -->
+    <div class="flex justify-center">
+        <img th:src="${product.imageUrl}" alt="상품 이미지" class="max-w-[600px] w-full rounded-lg border"/>
+    </div>
+
+    <!-- 상세 정보 -->
+    <div class="flex flex-col justify-center">
+        <h2 class="text-3xl font-bold mb-3" th:text="${product.productName}">상품명</h2>
+        <p class="text-gray-700 mb-6 leading-relaxed" th:text="${product.description}">상품 설명이 들어갑니다.</p>
+        <p class="text-sm text-gray-500 mb-4">중량 및 옵션 정보</p>
+        <p class="text-2xl font-semibold text-yellow-700 mb-4"
+           th:text="'₩' + ${#numbers.formatInteger(product.finalPrice, 3, 'COMMA')}">가격</p>
+
+        <ul class="text-sm text-gray-600 mb-6 space-y-1">
+            <li><strong>제조사:</strong> AuGold</li>
+            <li><strong>원산지:</strong> KOREA</li>
+            <li><strong>소재:</strong> K24 GOLD</li>
+        </ul>
+
+        <div class="mb-4">
+            <label class="block mb-1 font-medium">중량 선택</label>
+            <select class="w-full border rounded p-2">
+                <option>옵션을 선택해 주세요</option>
+                <option>1g</option>
+                <option>1.875g (반돈)</option>
+                <option>3.75g (한돈)</option>
+            </select>
+        </div>
+
+        <div class="mb-6">
+            <label class="block mb-1 font-medium">수량</label>
+            <input type="number" value="1" min="1" class="w-24 border rounded p-2"/>
+        </div>
+
+        <div class="flex space-x-4">
+            <button class="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-3 rounded">장바구니 담기</button>
+            <button class="flex-1 border border-yellow-500 text-yellow-700 hover:bg-yellow-50 font-semibold py-3 rounded">구매하기</button>
+        </div>
+    </div>
+</main>
+
+<!-- 상세 이미지 영역 -->
+<section style="max-width: 1200px; margin: 0 auto; padding: 20px;">
+    <img th:src="@{${product.imageUrl1}}" alt="상세 이미지1">
+    <img th:src="@{${product.imageUrl2}}" alt="상세 이미지2">
+    <img th:src="@{${product.imageUrl3}}" alt="상세 이미지3">
+</section>
+
+
+<p th:text="${product.imageUrl1}"></p>
+<p th:text="${product.imageUrl2}"></p>
+<p th:text="${product.imageUrl3}"></p>
+
+<!-- A/S 및 반품 안내 (정적 콘텐츠) -->
+<section class="max-w-3xl mx-auto px-4 py-12 text-sm leading-relaxed text-gray-700">
+    <h2 class="text-xl font-bold border-b pb-2 mb-4">A/S 서비스</h2>
+    <ul class="list-disc pl-5 mb-6 space-y-2">
+        <li>보증기간은 6개월이며, 무상 A/S 처리됩니다.</li>
+        <li>고객 부주의로 인한 손상은 비용 발생 가능.</li>
+        <li>A/S 상품 수령 시 직원과 상태 확인 필수.</li>
+    </ul>
+
+    <h2 class="text-xl font-bold border-b pb-2 mb-4">교환 및 반품 안내</h2>
+    <p class="mb-2 font-medium">교환/반품 가능</p>
+    <ul class="list-disc pl-5 mb-4">
+        <li>상품 수령 후 7일 이내</li>
+        <li>불량 또는 오배송 시 3개월 이내</li>
+    </ul>
+
+    <p class="mb-2 font-medium">교환/반품 불가</p>
+    <ul class="list-disc pl-5 mb-6">
+        <li>상품 훼손, 사용한 경우</li>
+        <li>시간 경과로 재판매가 어려운 경우</li>
+    </ul>
+
+    <p class="text-gray-500">※ 단순 변심 시 왕복 배송비는 고객 부담입니다.</p>
+</section>
+
+<!-- Footer -->
+<footer class="bg-gray-800 text-gray-400 py-8 mt-12">
+    <div class="container mx-auto px-4 grid md:grid-cols-3 gap-8">
+        <div>
+            <h3 class="text-white font-bold mb-2">AuGold</h3>
+            <p>믿을 수 있는 프리미엄 금 전문 플랫폼</p>
+        </div>
+        <div>
+            <h4 class="text-white font-semibold mb-2">고객센터</h4>
+            <p>1588-0000</p>
+            <p>help@augold.co.kr</p>
+            <p>평일 09:00~18:00</p>
+        </div>
+        <div>
+            <h4 class="text-white font-semibold mb-2">정보</h4>
+            <p>회사소개 | 이용약관 | 개인정보처리방침</p>
+        </div>
+    </div>
+    <div class="text-center text-gray-500 mt-6 text-sm">
+        &copy; 2025 AuGold. All rights reserved.
+    </div>
+</footer>
+</body>
+</html>

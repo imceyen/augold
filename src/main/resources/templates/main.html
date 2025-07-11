@@ -1,0 +1,285 @@
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <title>AuGold - 프리미엄 금 전문몰</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .gold-gradient {
+          background: linear-gradient(135deg, #facc15, #f59e0b);
+        }
+    </style>
+</head>
+<body class="bg-white text-gray-900">
+
+<!-- Header -->
+<header class="bg-white shadow border-b">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+            <div class="w-10 h-10 gold-gradient rounded-full flex items-center justify-center">
+                <span class="text-white font-bold text-lg">A</span>
+            </div>
+            <div>
+                <h1 class="text-2xl font-bold bg-gradient-to-r from-yellow-600 to-yellow-800 bg-clip-text text-transparent">AuGold</h1>
+                <p class="text-xs text-gray-500">프리미엄 금 전문몰</p>
+            </div>
+        </div>
+        <nav class="flex space-x-8 justify-center py-4">
+            <a href="/login"
+               class="text-gray-700 hover:text-yellow-600 font-medium transition-colors">
+                로그인
+            </a>
+            <a href="/customer/register"
+               class="text-gray-700 hover:text-yellow-600 font-medium transition-colors">
+                회원가입
+            </a>
+            <a href="/mypage"
+               class="text-gray-700 hover:text-yellow-600 font-medium transition-colors">
+                마이페이지
+            </a>
+            <a href="/cart"
+               class="text-gray-700 hover:text-yellow-600 font-medium transition-colors">
+                장바구니
+            </a>
+        </nav>
+
+    </div>
+</header>
+
+<!-- Hero Section -->
+<section class="bg-gradient-to-b from-yellow-50 via-amber-50 to-orange-50 py-16">
+    <div class="container mx-auto px-4 text-center">
+        <h2 class="text-5xl font-bold mb-6">프리미엄 골드 <br> 투자의 시작</h2>
+        <p class="text-gray-700 mb-8">
+            순도 99.99% 국제 인증 골드바부터 럭셔리 주얼리까지<br>
+            믿을 수 있는 금 전문 플랫폼에서 만나보세요
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <button class="bg-yellow-500 text-white px-6 py-3 rounded font-semibold hover:opacity-90">골드바 둘러보기</button>
+            <button class="border border-yellow-500 text-yellow-700 px-6 py-3 rounded font-semibold hover:bg-yellow-50">투자 가이드 보기</button>
+        </div>
+    </div>
+</section>
+
+
+
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>금 시세</title>
+</head>
+<body>
+<section class="py-16 bg-white">
+    <div style="display: flex; justify-content: center;">
+        <div style="background-color: #fffbe9; padding: 20px; border-radius: 10px;">
+            <h3 style="text-align: center; margin-bottom: 10px;">한국금거래소 시세 라인업</h3>
+            <table style="width: 100%; border-collapse: collapse; text-align: center;">
+                <thead>
+                <tr style="background-color: #fff1a1;">
+                    <th>구분</th>
+                    <th>내가 살 때</th>
+                    <th>내가 팔 때</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>
+                        <strong>순금 시세</strong><br>
+                        <small>Gold24k·3.75g</small>
+                    </td>
+                    <td id="buy-price">-</td>
+                    <td>541,000원</td>
+                </tr>
+                <tr>
+                    <td><strong>18K 금 시세</strong><br><small>Gold18k·3.75g</small></td>
+                    <td colspan="2">제품 시세 적용</td>
+                </tr>
+                <tr>
+                    <td><strong>14K 금 시세</strong><br><small>Gold14k·3.75g</small></td>
+                    <td colspan="2">제품 시세 적용</td>
+                </tr>
+                </tbody>
+            </table>
+            <div style="margin-top: 10px; font-size: 12px;">* 시세는 매일 변동됩니다. VAT 포함.</div>
+        </div>
+    </div>
+</section>
+
+<script>
+    fetch('http://localhost:5000/api/gold-price')
+        .then(res => res.json())
+        .then(data => {
+            const perGram = parseFloat(data.price_per_gram);
+            const totalPrice = (perGram * 3.75).toLocaleString();
+            document.getElementById("buy-price").innerText = `${totalPrice}원`;
+        })
+        .catch(err => {
+            document.getElementById("buy-price").innerText = "불러오기 실패";
+            console.error(err);
+        });
+</script>
+</body>
+</html>
+
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('goldPriceChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['02.01', '03.01', '04.01', '05.01', '06.01', '07.01'],
+        datasets: [{
+          label: '금 시세 (KRW/3.75g)',
+          data: [610000, 620000, 640000, 630000, 650000, 634000],
+          borderColor: '#facc15',
+          backgroundColor: 'rgba(250,204,21,0.2)',
+          borderWidth: 2,
+          fill: true,
+          tension: 0.3,
+          pointRadius: 4
+        }]
+      },
+      options: {
+        scales: {
+          y: {
+            ticks: {
+              callback: function(value) {
+                return value.toLocaleString() + '원';
+              }
+            }
+          }
+        },
+        plugins: {
+          legend: { display: false }
+        }
+      }
+    });
+</script>
+
+
+
+
+
+
+<!-- 카테고리별 상품 -->
+<section class="py-16 bg-white">
+    <div class="container mx-auto px-4 text-center">
+        <h2 class="text-3xl font-bold mb-2">카테고리별 상품</h2>
+        <p class="text-gray-600 mb-8">다양한 골드 상품을 카테고리별로 만나보세요</p>
+        <div class="grid md:grid-cols-3 gap-6">
+
+            <!-- 골드바 카드 -->
+            <a href="/category#goldbar" class="block relative group overflow-hidden rounded-2xl shadow hover:shadow-lg transition-transform">
+                <img src="https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=400" alt="골드바" class="w-full h-60 object-cover group-hover:scale-105 transition-transform duration-300" />
+                <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent p-4 flex flex-col justify-end">
+                    <h3 class="text-xl font-bold text-white">골드바</h3>
+                    <p class="text-sm text-gray-200">순도 99.99% 투자용 금괴</p>
+                </div>
+            </a>
+
+            <!-- 주얼리 카드 -->
+            <a href="/category#jewelry" class="block relative group overflow-hidden rounded-2xl shadow hover:shadow-lg transition-transform">
+                <img src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400" alt="주얼리" class="w-full h-60 object-cover group-hover:scale-105 transition-transform duration-300" />
+                <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent p-4 flex flex-col justify-end">
+                    <h3 class="text-xl font-bold text-white">주얼리</h3>
+                    <p class="text-sm text-gray-200">럭셔리 골드 액세서리</p>
+                </div>
+            </a>
+
+            <!-- 기념품 카드 -->
+            <a href="/category#gift" class="block relative group overflow-hidden rounded-2xl shadow hover:shadow-lg transition-transform">
+                <img src="https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=400" alt="기념품" class="w-full h-60 object-cover group-hover:scale-105 transition-transform duration-300" />
+                <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent p-4 flex flex-col justify-end">
+                    <h3 class="text-xl font-bold text-white">기념품</h3>
+                    <p class="text-sm text-gray-200">특별한 순간을 위한 선물</p>
+                </div>
+            </a>
+
+        </div>
+    </div>
+</section>
+
+
+
+
+<!-- 베스트 아이템 -->
+<section class="py-16 bg-gray-50">
+    <div class="container mx-auto px-4 text-center">
+        <h2 class="text-3xl font-bold mb-2">추천 아이템</h2>
+        <p class="text-gray-600 mb-8">고객을 위한 추천 상품을 확인해보세요</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div th:each="product : ${products}" class="bg-white rounded-2xl shadow hover:shadow-lg transition flex flex-col">
+                <a th:href="@{/product/{id}(id=${product.productId})}">
+                    <div class="relative w-full aspect-square overflow-hidden rounded-t-2xl">
+                        <img th:src="${product.imageUrl}" alt="상품 이미지" class="w-full h-full object-cover" />
+                        <div class="absolute top-3 left-3 bg-pink-500 text-white text-xs font-bold px-2 py-1 rounded-full">추천</div>
+                    </div>
+                </a>
+                <div class="p-4 flex flex-col flex-1">
+                    <h3 class="font-semibold text-gray-800 mb-2" th:text="${product.productName}">상품명</h3>
+                    <div class="mb-4">
+                        <div class="text-xl font-bold text-gray-900"
+                             th:text="'₩' + ${#numbers.formatInteger(product.finalPrice, 3, 'COMMA')}">가격</div>
+                    </div>
+                    <a th:href="@{/cart/add/{id}(id=${product.productId})}"
+                       class="mt-auto block w-full text-center bg-gradient-to-r from-yellow-500 to-amber-600 text-white py-2 rounded hover:opacity-90 font-semibold">
+                        구매하기
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+
+
+
+<!-- Footer -->
+<footer class="bg-gray-900 text-white py-12">
+    <div class="container mx-auto px-4 grid md:grid-cols-4 gap-8">
+        <div>
+            <h3 class="text-xl font-bold mb-2">AuGold</h3>
+            <p class="text-gray-400 text-sm">믿을 수 있는 프리미엄 금 전문 플랫폼</p>
+        </div>
+        <div>
+            <h4 class="font-semibold mb-4">고객서비스</h4>
+            <ul class="space-y-2 text-gray-400 text-sm">
+                <li><a href="#">주문/배송 조회</a></li>
+                <li><a href="#">반품/교환</a></li>
+                <li><a href="#">FAQ</a></li>
+                <li><a href="#">1:1 문의</a></li>
+            </ul>
+        </div>
+        <div>
+            <h4 class="font-semibold mb-4">회사정보</h4>
+            <ul class="space-y-2 text-gray-400 text-sm">
+                <li><a href="#">회사소개</a></li>
+                <li><a href="#">이용약관</a></li>
+                <li><a href="#">개인정보처리방침</a></li>
+                <li><a href="#">사업자정보</a></li>
+            </ul>
+        </div>
+        <div>
+            <h4 class="font-semibold mb-4">연락처</h4>
+            <p class="text-gray-400 text-sm">1588-1234</p>
+            <p class="text-gray-400 text-sm">help@augold.co.kr</p>
+            <p class="text-gray-400 text-sm">평일 09:00-18:00</p>
+            <p class="text-gray-400 text-sm">주말/공휴일 휴무</p>
+        </div>
+    </div>
+    <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400 text-sm">
+        &copy; 2025 AuGold. All rights reserved.
+    </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <title>AuGold 로그인</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .login-container {
+            background-color: white;
+            padding: 30px 40px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 320px;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #333;
+        }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            color: #555;
+        }
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 10px 8px;
+            margin-bottom: 18px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        .cstmPwd-field {
+            position: relative;
+        }
+        .cstmPwd-field input {
+            padding-right: 38px;
+        }
+        .toggle-cstmPwd {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            font-size: 18px;
+            color: #666;
+            user-select: none;
+        }
+        button {
+            width: 100%;
+            padding: 10px 0;
+            background-color: #007bff;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            font-size: 1em;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .back-link {
+            display: block;
+            margin-top: 15px;
+            text-align: center;
+            color: #007bff;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<div class="login-container">
+    <h2>로그인</h2>
+    <form method="post" action="/loginOk">
+        <label for="cstmId">아이디:</label>
+        <input type="text" name="cstmId" id="cstmId" required>
+        <label for="cstmPwd">비밀번호:</label>
+        <div class="cstmPwd-field">
+            <input type="password" name="cstmPwd" id="cstmPwd" required>
+            <span class="toggle-cstmPwd" onclick="toggleVisibility('cstmPwd', this)">🔒</span>
+        </div>
+
+        <button type="submit">로그인</button>
+        <a href="/main" class="back-link">← 메인페이지로 돌아가기</a>
+    </form>
+</div>
+
+<script>
+    // 로그인 실패 경고
+    window.addEventListener('DOMContentLoaded', () => {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get("error") === "true") {
+            alert("아이디 또는 비밀번호가 올바르지 않습니다.");
+        }
+    });
+
+    // 비밀번호 보기/숨기기
+    function toggleVisibility(fieldId, iconElement) {
+        const field = document.getElementById(fieldId);
+        const isHidden = field.getAttribute("type") === "password";
+        field.setAttribute("type", isHidden ? "text" : "password");
+        iconElement.textContent = isHidden ? "👁️" : "🔒";
+    }
+</script>
+</body>
+</html>
