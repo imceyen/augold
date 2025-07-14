@@ -40,14 +40,19 @@ public class AddressController {
             return "redirect:/login";
         }
 
-        // 우편번호 + 주소 + 상세주소 합치기
+        if (postcode == null || postcode.trim().isEmpty()
+                || address == null || address.trim().isEmpty()
+                || detailAddress == null || detailAddress.trim().isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "우편번호, 주소, 상세주소를 모두 입력해야 합니다.");
+            return "redirect:/address";
+        }
+
         String fullAddr = postcode + " " + address + " " + detailAddress;
         loginUser.setCstmAddr(fullAddr);
-
-        // DB 저장
         customerRepository.save(loginUser);
 
         redirectAttributes.addFlashAttribute("successMessage", "주소가 성공적으로 변경되었습니다.");
         return "redirect:/";
     }
+
 }

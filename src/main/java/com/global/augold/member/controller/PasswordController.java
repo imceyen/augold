@@ -28,7 +28,8 @@ public class PasswordController {
 
     // 비밀번호 변경 처리
     @PostMapping("/passwordinsert")
-    public String updatePassword(@RequestParam String newPassword,
+    public String updatePassword(@RequestParam String currentPassword,
+                                 @RequestParam String newPassword,
                                  @RequestParam String confirmPassword,
                                  HttpSession session,
                                  RedirectAttributes redirectAttributes) {
@@ -38,15 +39,25 @@ public class PasswordController {
             return "redirect:/login";
         }
 
-        if (!newPassword.equals(confirmPassword)) {
-            redirectAttributes.addFlashAttribute("errorMessage", "비밀번호가 일치하지 않습니다.");
+        // 1. 현재 비밀번호 체크
+        if (!loginUser.getCstmPwd().equals(currentPassword)) {
+            redirectAttributes.addFlashAttribute("errorMessage", "현재 비밀번호가 일치하지 않습니다.");
             return "redirect:/password";
         }
 
+        // 2. 새 비밀번호와 확인 비밀번호 일치 체크
+        if (!newPassword.equals(confirmPassword)) {
+            redirectAttributes.addFlashAttribute("errorMessage", "새 비밀번호가 일치하지 않습니다.");
+            return "redirect:/password";
+        }
+
+        // 3. 비밀번호 변경 및 저장
         loginUser.setCstmPwd(newPassword);
-        customerRepository.save(loginUser); // DB 반영
+        customerRepository.save(loginUser);
 
         redirectAttributes.addFlashAttribute("successMessage", "비밀번호가 수정되었습니다.");
         return "redirect:/";
     }
+
 }
+

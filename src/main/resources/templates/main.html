@@ -37,10 +37,15 @@
                 </a>
             </th:block>
             <th:block th:if="${loginName != null}">
-                <span class="text-gray-700 font-medium">[[${loginName}]]님 환영합니다</span>
+                <span class="text-gray-700 font-medium" th:text="${loginName} + '님 환영합니다'">홍길동님 환영합니다</span>
                 <a href="/logout"
                    class="text-gray-700 hover:text-yellow-600 font-medium transition-colors">
                     로그아웃
+                </a>
+                <!-- 여기부터 고객센터 추가 -->
+                <a href="/support"
+                   class="text-gray-700 hover:text-yellow-600 font-medium transition-colors">
+                    고객센터
                 </a>
             </th:block>
 
@@ -262,5 +267,22 @@
         &copy; 2025 AuGold. All rights reserved.
     </div>
 </footer>
+
+<!-- 알림용 alert 팝업 스크립트 -->
+<script th:inline="javascript">
+    /*<![CDATA[*/
+        var successMessage = [[${successMessage != null}]] ? '[[${successMessage}]]' : null;
+        var passwordUpdated = [[${passwordUpdated != null}]] ? '[[${passwordUpdated}]]' : null;
+        var phoneUpdated = [[${phoneUpdated != null}]] ? '[[${phoneUpdated}]]' : null;
+        var accountDeleted = [[${accountDeleted != null}]] ? '[[${accountDeleted}]]' : null;
+
+        if(successMessage) alert(successMessage);
+        if(passwordUpdated) alert(passwordUpdated);
+        if(phoneUpdated) alert(phoneUpdated);
+        if(accountDeleted) alert(accountDeleted);
+    /*]]>*/
+</script>
+
+
 </body>
 </html>
