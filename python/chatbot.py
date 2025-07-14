@@ -2,7 +2,7 @@ import google.generativeai as genai
 import streamlit as st
 
 st.title("Augold-Bot")
-
+python -m pip --version
 @st.cache_resource
 def load_model():
     model = genai.GenerativeModel('gemini-2.0-flash')
