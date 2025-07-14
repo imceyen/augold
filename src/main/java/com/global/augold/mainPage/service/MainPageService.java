@@ -25,7 +25,7 @@ public class MainPageService {
                     MainPageInfoDTO dto = new MainPageInfoDTO();
                     dto.setProductId(p.getProductId());
                     dto.setKaratCode(p.getKaratCode());
-                    dto.setCategoryId(p.getCategoryId());
+                    dto.setCategoryId(p.getCtgrId());
                     dto.setProductName(p.getProductName());
                     dto.setFinalPrice(p.getFinalPrice());
                     dto.setImageUrl(p.getImageUrl());
@@ -40,13 +40,13 @@ public class MainPageService {
         return productRepository.findAll().stream()
                 .map(p -> {
 
-                    System.out.println("💬 category=" + p.getCategoryId());
+                    System.out.println("💬 category=" + p.getCtgrId());
 
 
                     MainPageInfoDTO dto = new MainPageInfoDTO();
                     dto.setProductId(p.getProductId());
                     dto.setKaratCode(p.getKaratCode());
-                    dto.setCategoryId(p.getCategoryId());
+                    dto.setCategoryId(p.getCtgrId());
                     dto.setProductName(p.getProductName());
                     dto.setFinalPrice(p.getFinalPrice());
                     dto.setImageUrl(p.getImageUrl());
