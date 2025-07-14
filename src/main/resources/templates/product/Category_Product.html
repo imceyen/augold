@@ -25,14 +25,24 @@
                 <p class="text-xs text-gray-500">프리미엄 금 전문몰</p>
             </div>
         </div>
-        <nav class="flex space-x-6">
+
+        <nav class="flex space-x-6 items-center">
             <a href="/" class="text-gray-700 hover:text-yellow-600 font-medium">홈</a>
-            <a href="/login" class="text-gray-700 hover:text-yellow-600 font-medium">로그인</a>
-            <a href="/signup" class="text-gray-700 hover:text-yellow-600 font-medium">회원가입</a>
+
+            <span th:if="${loginName != null}" class="text-gray-700">
+                <strong th:text="${loginName}">회원님</strong> 안녕하세요!
+            </span>
+
+            <a href="/logout" th:if="${loginName != null}" class="text-gray-700 hover:text-yellow-600 font-medium">로그아웃</a>
+
+            <a href="/login" th:if="${loginName == null}" class="text-gray-700 hover:text-yellow-600 font-medium">로그인</a>
+            <a href="/signup" th:if="${loginName == null}" class="text-gray-700 hover:text-yellow-600 font-medium">회원가입</a>
+
             <a href="/cart" class="text-gray-700 hover:text-yellow-600 font-medium">장바구니</a>
         </nav>
     </div>
 </header>
+
 
 <!-- Category Navigation -->
 <section class="bg-yellow-50 py-6">

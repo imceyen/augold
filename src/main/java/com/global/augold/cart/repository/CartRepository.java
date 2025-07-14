@@ -39,11 +39,14 @@ public interface CartRepository extends JpaRepository<Cart, String> {
     @Query("SELECT c FROM Cart c WHERE c.cstmNumber = :cstmNumber ORDER BY c.cartDate DESC")
     List<Cart> findByCstmNumberSimple(@Param("cstmNumber") String cstmNumber);
 
-//    @Query("SELECT new com.global.augold.cart.dto.CartDTO(c.cartNumber, c.productId, c.cartDate, c.cstmNumber, p.productName, p.finalPrice, p.imageUrl, cat.ctgrNm, gk.karatName, p.goldWeight) " +
-//            "FROM Cart c JOIN Product p ON c.productId = p.productId " +
-//            "JOIN Category cat ON p.ctgrId = cat.ctgrId " +
-//            "JOIN GoldKarat gk ON p.karatCode = gk.karatCode " +
-//            "WHERE c.cstmNumber = :cstmNumber " +
-//            "ORDER BY c.cartDate DESC")
-//    List<CartDTO> findByCstmNumberWithProduct(@Param("cstmNumber") String cstmNumber);
+    @Query(value = "SELECT c.cart_number, c.product_id, c.cart_date, c.cstm_number, " +
+            "p.product_name, p.final_price, p.image_url, cat.ctgr_nm, " +
+            "gk.karat_name, p.gold_weight " +
+            "FROM cart c JOIN product p ON c.product_id = p.product_id " +
+            "JOIN category cat ON p.ctgr_id = cat.ctgr_id " +
+            "JOIN gold_karat gk ON p.karat_code = gk.karat_code " +
+            "WHERE c.cstm_number = :cstmNumber " +
+            "ORDER BY c.cart_date DESC",
+            nativeQuery = true)
+    List<CartDTO> findByCstmNumberWithProduct(@Param("cstmNumber") String cstmNumber);
 }
