@@ -1,46 +1,131 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
 <head>
     <meta charset="UTF-8" />
     <title>회원가입</title>
     <script src="https://ssl.daumcdn.net/dmaps/map_js_init/postcode.v2.js"></script>
     <style>
-        label, input, select, button {
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .signup-container {
+            background-color: white;
+            padding: 30px 40px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 400px;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #333;
+        }
+        label {
             display: block;
-            margin: 8px 0;
+            margin-bottom: 6px;
+            color: #555;
+        }
+        input[type="text"],
+        input[type="password"],
+        input[type="date"],
+        select {
+            width: 100%;
+            padding: 10px 8px;
+            margin-bottom: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        button {
+            width: 100%;
+            padding: 10px 0;
+            background-color: #28a745;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            font-size: 1em;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .back-link {
+            display: block;
+            margin-top: 15px;
+            text-align: center;
+            color: #007bff;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            text-decoration: underline;
         }
     </style>
+
+    <style>
+        .error {
+            border: 1px solid red;
+        }
+        .error-msg {
+            color: red;
+            font-size: 0.85em;
+            margin-top: -10px;
+            margin-bottom: 10px;
+            display: block;
+        }
+    </style>
+
 </head>
 <body>
-<h2>회원가입</h2>
+<div class="signup-container">
+    <h2>회원가입</h2>
+    <form th:action="@{/customer/register}" method="post" th:object="${customer}">
+        <label for="cstmId">아이디</label>
+        <input type="text" th:field="*{cstmId}" id="cstmId" required oninput="validateId()" />
+        <span id="idError" class="error-msg"></span>
 
-<form th:action="@{/customer/register}" method="post" th:object="${customer}">
-    <p>아이디: <input type="text" th:field="*{cstmId}" required /></p>
-    <p>비밀번호: <input type="password" th:field="*{cstmPwd}" required /></p>
-    <p>이름: <input type="text" th:field="*{cstmName}" required /></p>
+        <label for="cstmPwd">비밀번호</label>
+        <input type="password" th:field="*{cstmPwd}" id="cstmPwd" required />
 
-    <label for="postcode">우편번호</label>
-    <input type="text" id="postcode" name="postcode" readonly required
-           onclick="execDaumPostcode()" placeholder="우편번호를 클릭하여 검색하세요" />
 
-    <label for="address">주소</label>
-    <input type="text" id="address" name="address" readonly required
-           onclick="execDaumPostcode()" placeholder="주소를 클릭하여 검색하세요" />
+        <label for="cstmName">이름</label>
+        <input type="text" th:field="*{cstmName}" id="cstmName" required oninput="validateName()" />
+        <span id="nameError" class="error-msg"></span>
 
-    <label for="detailAddress">상세주소</label>
-    <input type="text" id="detailAddress" name="detailAddress" placeholder="상세주소를 입력하세요" required />
+        <label for="postcode">우편번호</label>
+        <input type="text" id="postcode" name="postcode" readonly required
+               onclick="execDaumPostcode()" placeholder="우편번호를 클릭하여 검색하세요" />
 
-    <p>전화번호: <input type="text" th:field="*{cstmPhone}" required /></p>
-    <p>성별:
-        <select th:field="*{cstmGender}" required>
+        <label for="address">주소</label>
+        <input type="text" id="address" name="address" readonly required
+               onclick="execDaumPostcode()" placeholder="주소를 클릭하여 검색하세요" />
+
+        <label for="detailAddress">상세주소</label>
+        <input type="text" id="detailAddress" name="detailAddress" placeholder="상세주소를 입력하세요" required />
+
+        <label for="cstmPhone">전화번호</label>
+        <input type="text" th:field="*{cstmPhone}" id="cstmPhone" required />
+
+        <label for="cstmGender">성별</label>
+        <select th:field="*{cstmGender}" id="cstmGender" required>
             <option value="" disabled selected>선택하세요</option>
             <option value="M">남성</option>
             <option value="F">여성</option>
         </select>
-    </p>
-    <p>생년월일: <input type="date" th:field="*{cstmBirth}" required /></p>
-    <p><button type="submit">가입하기</button></p>
-</form>
+
+        <label for="cstmBirth">생년월일</label>
+        <input type="date" th:field="*{cstmBirth}" id="cstmBirth" required />
+
+        <button type="submit">가입하기</button>
+        <a href="/" class="back-link">← 메인페이지로 돌아가기</a>
+    </form>
+</div>
 
 <script>
     function execDaumPostcode() {
@@ -58,5 +143,34 @@
     alert('아이디가 중복되었습니다.');
 </script>
 
+<script>
+    function validateId() {
+        const idInput = document.getElementById("cstmId");
+        const idError = document.getElementById("idError");
+        const valid = /^[a-zA-Z0-9]+$/.test(idInput.value);
+
+        if (!valid && idInput.value !== "") {
+            idInput.classList.add("error");
+            idError.textContent = "아이디는 영문과 숫자만 입력 가능합니다.";
+        } else {
+            idInput.classList.remove("error");
+            idError.textContent = "";
+        }
+    }
+
+    function validateName() {
+        const nameInput = document.getElementById("cstmName");
+        const nameError = document.getElementById("nameError");
+        const valid = /^[가-힣]+$/.test(nameInput.value);
+
+        if (!valid && nameInput.value !== "") {
+            nameInput.classList.add("error");
+            nameError.textContent = "이름은 한글만 입력 가능합니다.";
+        } else {
+            nameInput.classList.remove("error");
+            nameError.textContent = "";
+        }
+    }
+</script>
 </body>
 </html>
