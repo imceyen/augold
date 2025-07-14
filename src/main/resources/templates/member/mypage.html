@@ -4,34 +4,145 @@
     <meta charset="UTF-8" />
     <title>AuGold 마이페이지</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; background: #f9f9f9; }
-        header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; border-bottom: 1px solid #ccc; }
-        nav a { margin-left: 15px; text-decoration: none; color: #333; }
-        nav a:first-child { margin-left: 0; }
-        h1 { margin: 0; }
-        .container { max-width: 900px; margin: 30px auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 8px rgba(0,0,0,0.1); }
-        .info-row { display: flex; align-items: center; margin-bottom: 20px; }
-        .info-label { width: 120px; font-weight: bold; }
-        .info-value { flex: 1; color: #333; }
-        .btn-edit {
-            margin-left: 10px;
-            padding: 5px 10px;
-            font-size: 14px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            text-decoration: none;
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap');
+
+        body {
+          font-family: 'Nunito', sans-serif;
+          background-color: #f9fafb;
+          color: #333;
+          margin: 0;
+          padding: 20px;
         }
+
+        header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding-bottom: 12px;
+          border-bottom: 1px solid #ddd;
+          margin-bottom: 30px;
+        }
+
+        header h1 a {
+          text-decoration: none;
+          color: #2c3e50;
+          font-weight: 700;
+          font-size: 1.8rem;
+        }
+
+        nav a {
+          color: #4a4a4a;
+          margin-left: 20px;
+          font-weight: 600;
+          text-decoration: none;
+          transition: color 0.3s ease;
+        }
+
+        nav a:first-child {
+          margin-left: 0;
+        }
+
+        nav a:hover {
+          color: #3498db;
+        }
+
+        nav a.login-btn {
+          color: #e74c3c;
+          font-weight: 700;
+        }
+
+        nav a.login-btn:hover {
+          color: #c0392b;
+        }
+
+        main.container {
+          max-width: 800px;
+          margin: 0 auto;
+          background: #fff;
+          padding: 30px 40px;
+          border-radius: 8px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        main.container h2 {
+          font-weight: 700;
+          font-size: 2rem;
+          margin-bottom: 25px;
+          color: #2c3e50;
+          letter-spacing: 0.05em;
+        }
+
+        .info-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 16px 0;
+          border-bottom: 1px solid #eee;
+        }
+
+        .info-label {
+          font-weight: 600;
+          color: #555;
+          width: 140px;
+        }
+
+        .info-value {
+          flex: 1;
+          font-size: 1rem;
+          color: #333;
+        }
+
+        .btn-edit {
+          background-color: #3498db;
+          color: white;
+          padding: 8px 18px;
+          border-radius: 5px;
+          font-weight: 600;
+          font-size: 0.9rem;
+          text-decoration: none;
+          border: none;
+          cursor: pointer;
+          transition: background-color 0.25s ease;
+          user-select: none;
+        }
+
         .btn-edit:hover {
-            background-color: #0056b3;
+          background-color: #2980b9;
+          text-decoration: none;
+        }
+
+        .btn-edit.danger {
+          background-color: #e74c3c;
+        }
+
+        .btn-edit.danger:hover {
+          background-color: #c0392b;
+        }
+
+        @media (max-width: 600px) {
+          main.container {
+            padding: 20px;
+          }
+          .info-row {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+          }
+          .info-label {
+            width: 100%;
+          }
+          .info-value {
+            width: 100%;
+          }
+          nav a {
+            margin-left: 12px;
+          }
         }
     </style>
 </head>
 <body>
 <header>
-    <h1><a href="/" style="text-decoration:none; color:inherit;">AuGold</a></h1>
+    <h1><a href="/" style="user-select:none;">AuGold</a></h1>
     <nav>
         <a href="/" style="font-weight:bold;">메인</a>
         <a href="/support">고객센터</a>
@@ -39,34 +150,39 @@
     </nav>
 </header>
 
-<div class="container">
+<main class="container" role="main">
     <h2>회원 정보</h2>
 
     <div class="info-row">
         <div class="info-label">이름</div>
         <div class="info-value" th:text="${user.cstmName}">홍길동</div>
-        <!-- 이름은 수정 불가 -->
     </div>
 
     <div class="info-row">
         <div class="info-label">비밀번호</div>
-        <a href="/password" class="btn-edit">수정</a>
+        <a href="/password" class="btn-edit" role="button" tabindex="0">수정</a>
     </div>
 
     <div class="info-row">
         <div class="info-label">주소</div>
-        <a href="/address" class="btn-edit">수정</a>
+        <a href="/address" class="btn-edit" role="button" tabindex="0">수정</a>
     </div>
 
     <div class="info-row">
         <div class="info-label">전화번호</div>
-        <a href="/phone" class="btn-edit">수정</a>
+        <a href="/phone" class="btn-edit" role="button" tabindex="0">수정</a>
+    </div>
+
+    <div class="info-row">
+        <div class="info-label">문의 내역</div>
+        <a href="/mypage/inquiries" class="btn-edit" role="button" tabindex="0">내 문의내역</a>
     </div>
 
     <div class="info-row">
         <div class="info-label">회원 탈퇴</div>
-        <a href="/member/delete" class="btn-edit" style="background-color:#dc3545;">탈퇴</a>
+        <a href="/member/delete" class="btn-edit danger" role="button" tabindex="0">탈퇴</a>
     </div>
-</div>
+
+</main>
 </body>
 </html>

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>문의 수정</title>
+    <style>
+        body {
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          background: #f0f2f5;
+          margin: 0; padding: 0;
+          display: flex;
+          justify-content: center;
+          align-items: flex-start;
+          min-height: 100vh;
+          padding-top: 60px;
+          color: #333;
+        }
+
+        .container {
+          background: #fff;
+          padding: 30px 40px;
+          border-radius: 12px;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+          width: 420px;
+          animation: fadeIn 0.5s ease forwards;
+        }
+
+        h1 {
+          margin-bottom: 25px;
+          font-weight: 700;
+          font-size: 1.8rem;
+          color: #222;
+          text-align: center;
+        }
+
+        form label {
+          display: block;
+          margin-bottom: 18px;
+          font-weight: 600;
+          font-size: 1rem;
+          color: #444;
+        }
+
+        input[type="text"], textarea {
+          width: 100%;
+          padding: 12px 14px;
+          border: 1.8px solid #ccc;
+          border-radius: 8px;
+          font-size: 1rem;
+          resize: vertical;
+          transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus {
+          border-color: #007bff;
+          outline: none;
+        }
+
+        textarea {
+          min-height: 120px;
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        button {
+          display: block;
+          width: 100%;
+          padding: 14px 0;
+          background-color: #007bff;
+          border: none;
+          border-radius: 8px;
+          font-size: 1.1rem;
+          font-weight: 700;
+          color: white;
+          cursor: pointer;
+          transition: background-color 0.3s;
+        }
+
+        button:hover {
+          background-color: #0056b3;
+        }
+
+        a {
+          display: inline-block;
+          margin-top: 22px;
+          text-decoration: none;
+          color: #666;
+          font-size: 0.9rem;
+          transition: color 0.3s;
+        }
+
+        a:hover {
+          color: #222;
+          text-decoration: underline;
+        }
+
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(-15px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>문의 수정</h1>
+    <form th:action="@{/mypage/inquiries/{id}/edit(id=${inquiry.inqNumber})}" method="post">
+        <label>제목:
+            <input type="text" name="inqTitle" th:value="${inquiry.inqTitle}" required/>
+        </label>
+        <label>내용:
+            <textarea name="inqContent" rows="6" th:text="${inquiry.inqContent}" required></textarea>
+        </label>
+        <button type="submit">저장</button>
+    </form>
+    <a href="/mypage/inquiries">← 돌아가기</a>
+</div>
+</body>
+</html>
