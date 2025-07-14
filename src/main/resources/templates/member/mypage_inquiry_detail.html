@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>문의 상세</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f9f9f9;
+            color: #333;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ccc;
+            margin-bottom: 30px;
+        }
+        nav a {
+            margin-left: 15px;
+            text-decoration: none;
+            color: #333;
+        }
+        nav a:first-child {
+            margin-left: 0;
+        }
+        h1 {
+            margin: 0 0 20px 0;
+            color: #222;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 8px rgba(0,0,0,0.1);
+        }
+        p {
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        strong {
+            color: #555;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #555;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            color: #222;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h1><a href="/" style="text-decoration:none; color:inherit;">AuGold</a></h1>
+    <nav>
+        <a href="/" style="font-weight:bold;">메인</a>
+        <a href="/support">고객센터</a>
+        <a href="/logout">로그아웃</a>
+    </nav>
+</header>
+
+<div class="container">
+    <h1 th:text="${inquiry.inqTitle}">문의 제목</h1>
+    <p><strong>작성일:</strong> <span th:text="${#temporals.format(inquiry.inqDate, 'yyyy-MM-dd HH:mm')}">2025-07-14 11:45</span></p>
+    <p><strong>내용:</strong></p>
+    <p th:text="${inquiry.inqContent}">문의 내용</p>
+
+    <div style="margin-top: 20px;">
+        <a href="/mypage/inquiries" class="back-link">← 문의 내역으로 돌아가기</a>
+        <a th:href="@{/mypage/inquiries/{id}/confirm(id=${inquiry.inqNumber}, action='edit')}"
+           style="margin-left:10px; color:green; font-weight:bold;">✏️ 수정</a>
+
+        <a th:href="@{/mypage/inquiries/{id}/confirm(id=${inquiry.inqNumber}, action='delete')}"
+           style="margin-left:10px; color:red; font-weight:bold;">🗑️ 삭제</a>
+
+    </div>
+
+</div>
+</body>
+</html>
