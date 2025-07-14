@@ -49,12 +49,12 @@ def draw_expense_receipt():
     draw.text((start_x[3], y), "금액", font=font_bold, fill=text_color)
     y += 50
 
-    items = [("고등어 정식", 15000, 4)]
+    items = [("고등어정식", 15000, 4)]
     total = 0
     for name, unit_price, qty in items:
         amount = unit_price * qty
         total += amount
-        draw.text((start_x[0], y), name, font=font_regular, fill=text_color)
+        draw.text((start_x[0], y), name, font=font_regular, fill=text_color)  # 붙여서 출력
         draw.text((start_x[1], y), f"{unit_price:,}원", font=font_regular, fill=text_color)
         draw.text((start_x[2], y), str(qty), font=font_regular, fill=text_color)
         draw.text((start_x[3], y), f"{amount:,}원", font=font_regular, fill=text_color)
