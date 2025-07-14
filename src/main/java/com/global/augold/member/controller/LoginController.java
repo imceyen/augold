@@ -21,6 +21,7 @@ public class LoginController {
     public String login(
             @RequestParam String cstmId,
             @RequestParam String cstmPwd,
+            @RequestParam(required = false) String returnUrl,
             HttpSession session
     ) {
         Optional<Customer> optCustomer = customerRepository.findByCstmIdAndCstmPwd(cstmId, cstmPwd);
@@ -28,10 +29,21 @@ public class LoginController {
         if (optCustomer.isPresent()) {
             // 로그인 성공 - 세션에 회원 정보 저장
             session.setAttribute("loginUser", optCustomer.get());
-            return "redirect:/";
+
+            //returnUrl 이 있으면 해당 페이지로 이동하게 추가, 없으면 메인으로
+            if (returnUrl != null && !returnUrl.isEmpty()){
+                return "redirect:" + returnUrl;
+            }else {
+                return "redirect:/";
+            }
         } else {
+            // 로그인 실패시에도 returnurl 유지
+            String redirectUrl = "redirect:/login?error=true";
+            if (returnUrl != null && !returnUrl.isEmpty()){
+                redirectUrl += "&returnUrl=" + returnUrl;
+            }
             // 로그인 실패 - 쿼리 파라미터로 error=true 전달
-            return "redirect:/login?error=true";
+            return redirectUrl;
         }
     }
 
