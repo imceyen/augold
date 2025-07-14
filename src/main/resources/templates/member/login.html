@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8" />
     <title>AuGold 로그인</title>
@@ -48,7 +48,7 @@
         .toggle-cstmPwd {
             position: absolute;
             right: 10px;
-            top: 50%;
+            top: 32%;
             transform: translateY(-50%);
             cursor: pointer;
             font-size: 18px;
@@ -92,6 +92,8 @@
             <span class="toggle-cstmPwd" onclick="toggleVisibility('cstmPwd', this)">🔒</span>
         </div>
 
+        <input type="hidden" name="returnUrl" th:value="${param.returnUrl != null ? param.returnUrl[0] : ''}">
+
         <button type="submit">로그인</button>
         <a href="/" class="back-link">← 메인페이지로 돌아가기</a>
     </form>
@@ -104,6 +106,11 @@
         if (params.get("error") === "true") {
             alert("아이디(로그인 전화번호, 로그인 전용 아이디) 또는 비밀번호가 잘못 되었습니다. 아이디와 비밀번호를 정확히 입력해 주세요.");
         }
+    // 로그인 필요 경고 추가
+    if (params.get("error") === "login") {
+        alert("로그인 후 사용할 수 있는 서비스입니다.");
+    }
+
     });
 
     // 비밀번호 보기/숨기기

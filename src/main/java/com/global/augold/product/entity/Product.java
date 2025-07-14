@@ -1,44 +1,44 @@
 package com.global.augold.product.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.Data;
+import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
-@Table(name = "PRODUCT")
-@Data
+@Table(name = "product")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Product {
-
     @Id
-    @Column(name = "PRODUCT_ID")
+    @Column(name = "product_id")
     private String productId;
 
-    @Column(name = "KARAT_CODE", nullable = false)
+    @Column(name = "karat_code")
     private String karatCode;
 
-    @Column(name = "CTGR_ID", nullable = false)
-    private String categoryId;
+    @Column(name = "ctgr_id")
+    private String ctgrId;
 
-    @Column(name = "PRODUCT_NAME", nullable = false)
+    @Column(name = "product_name")
     private String productName;
 
-    @Column(name = "BASE_PRICE", nullable = false)
-    private double basePrice;
+    @Column(name = "base_price")
+    private Double basePrice;
 
-    @Column(name = "GOLD_WEIGHT", nullable = false)
-    private double goldWeight;
+    @Column(name = "gold_weight")
+    private Double goldWeight;
 
-    @Column(name = "FINAL_PRICE", nullable = false)
-    private double finalPrice;
+    @Column(name = "final_price")
+    private Double finalPrice;
 
-    @Column(name = "IMAGE_URL")
+    @Column(name = "image_url")
     private String imageUrl;
 
-    @Column(name = "DESCRIPTION")
+    @Column(name = "description")
     private String description;
 
-    @Column(name = "SUB_CTGR")
+    @Column(name = "sub_ctgr")
     private String subCtgr;
 }
