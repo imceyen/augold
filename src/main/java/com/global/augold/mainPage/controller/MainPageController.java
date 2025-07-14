@@ -9,7 +9,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import java.security.Principal;
 import java.util.List;
 
 @Controller
@@ -28,7 +27,7 @@ public class MainPageController {
             model.addAttribute("loginName", loginCustomer.getCstmName());
         }
 
+        // templates/main.html 경로에 맞게 뷰 이름은 "main"
         return "main";
     }
-
 }

@@ -6,7 +6,8 @@
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; background: #f9f9f9; }
         header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; border-bottom: 1px solid #ccc; }
-        nav a { margin-right: 15px; text-decoration: none; color: #333; }
+        nav a { margin-left: 15px; text-decoration: none; color: #333; }
+        nav a:first-child { margin-left: 0; }
         h1 { margin: 0; }
         .container { max-width: 900px; margin: 30px auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 8px rgba(0,0,0,0.1); }
         .info-row { display: flex; align-items: center; margin-bottom: 20px; }
@@ -30,9 +31,10 @@
 </head>
 <body>
 <header>
-    <h1>AuGold</h1>
+    <h1><a href="/" style="text-decoration:none; color:inherit;">AuGold</a></h1>
     <nav>
         <a href="/" style="font-weight:bold;">메인</a>
+        <a href="/support">고객센터</a>
         <a href="/logout" class="login-btn">로그아웃</a>
     </nav>
 </header>
