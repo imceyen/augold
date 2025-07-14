@@ -24,6 +24,13 @@ public class LoginController {
             @RequestParam(required = false) String returnUrl,
             HttpSession session
     ) {
+        // 관리자 로그인 체크
+        if ("admin".equals(cstmId) && "1234".equals(cstmPwd)) {
+            session.setAttribute("loginUser", "admin"); // 문자열로 저장
+            return "redirect:/admin";  // 관리자 페이지 URL
+        }
+
+        // 일반 사용자 로그인 처리
         Optional<Customer> optCustomer = customerRepository.findByCstmIdAndCstmPwd(cstmId, cstmPwd);
 
         if (optCustomer.isPresent()) {
@@ -56,5 +63,13 @@ public class LoginController {
     public String logout(HttpSession session) {
         session.invalidate();
         return "redirect:/login";
+    }
+    @GetMapping("/admin")
+    public String adminPage(HttpSession session) {
+        Object user = session.getAttribute("loginUser");
+        if (user == null || !"admin".equals(user)) {
+            return "redirect:/login"; // 비로그인 접근 방지
+        }
+        return "admin/admin"; // Thymeleaf 기준. 또는 static/admin.html 이면 "redirect:/admin.html"
     }
 }

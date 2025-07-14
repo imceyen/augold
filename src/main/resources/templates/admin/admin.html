@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>AuGold 관리자 페이지</title>
+  <style>
+    body { margin: 0; font-family: 'Segoe UI', sans-serif; }
+    header {
+        background-color: #343a40;
+        color: white;
+        padding: 15px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .tab-bar {
+        background-color: #f8f9fa;
+        display: flex;
+        border-bottom: 1px solid #dee2e6;
+    }
+    .tab-bar button {
+        flex: 1;
+        padding: 15px;
+        font-size: 16px;
+        border: none;
+        background-color: #f8f9fa;
+        cursor: pointer;
+    }
+    .tab-bar button.active {
+        background-color: white;
+        border-bottom: 3px solid goldenrod;
+        font-weight: bold;
+    }
+    .content {
+        padding: 30px;
+    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-top: 20px;
+    }
+    th, td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: center;
+    }
+    th {
+        background-color: #f2f2f2;
+    }
+    .form-container {
+        margin-top: 30px;
+        border: 1px solid #ccc;
+        padding: 20px;
+    }
+    .form-container input, .form-container select {
+        padding: 8px;
+        margin: 5px 0;
+        width: 100%;
+    }
+    .form-container button {
+        margin-top: 10px;
+        padding: 10px 20px;
+        background-color: goldenrod;
+        border: none;
+        color: white;
+        cursor: pointer;
+    }
+    .form-container .delete-btn {
+        background-color: #dc3545;
+        margin-left: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h2>관리자 페이지</h2>
+  <div>AuGold Admin</div>
+</header>
+
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="showTab('productTab')">상품 관리</button>
+  <button class="tab-btn" onclick="showTab('statsTab')">통계</button>
+  <button class="tab-btn" onclick="showTab('receiptTab')">영수증 등록</button>
+</div>
+
+<div class="content">
+  <div id="productTab" class="tab-content active">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <h3>상품 관리</h3>
+      <button onclick="toggleForm()">상품 등록</button>
+    </div>
+
+    <div class="form-container" id="productForm" style="display:none;">
+      <form onsubmit="submitProduct(event)">
+        <label>상품 ID:
+          <input type="text" name="productId" readonly>
+        </label><br><br>
+        <label>상품명:
+          <input type="text" name="productName" required>
+        </label><br><br>
+        <label>카테고리:
+          <select name="ctgrId" required>
+            <option value="">선택</option>
+            <option value="0001">0001 [주얼리]</option>
+            <option value="0002">0002 [골드바]</option>
+            <option value="0003">0003 [기념품]</option>
+          </select>
+        </label><br><br>
+        <label>서브 카테고리:
+          <select name="subCtgr" required>
+            <option value="">선택</option>
+            <option value="귀걸이">귀걸이</option>
+            <option value="반지">반지</option>
+            <option value="목걸이">목걸이</option>
+            <option value="골드바">골드바</option>
+            <option value="기념품">기념품</option>
+          </select>
+        </label><br><br>
+        <label>금 함량:
+          <select name="karatCode" required>
+            <option value="">선택</option>
+            <option value="14K">14K</option>
+            <option value="18K">18K</option>
+            <option value="24K">24K</option>
+          </select>
+        </label><br><br>
+        <label>금 무게 (g):
+          <input type="number" name="goldWeight" step="0.01" required>
+        </label><br><br>
+        <label>원가:
+          <input type="number" name="basePrice" step="0.01" required>
+        </label><br><br>
+        <label>판매가:
+          <input type="number" name="finalPrice" step="0.01" required>
+        </label><br><br>
+        <label>상품 설명:
+          <input type="text" name="description">
+        </label><br><br>
+        <label>이미지 URL:
+          <input type="text" name="imageUrl">
+        </label><br><br>
+
+        <button type="submit">상품 저장</button>
+        <button type="button" class="delete-btn" onclick="deleteProduct()" style="display: none;">상품 삭제</button>
+      </form>
+    </div>
+
+    <table id="productTable">
+      <thead>
+      <tr>
+        <th>ID</th><th>이름</th><th>금 함량</th><th>카테고리</th><th>가격</th><th>무게</th><th>최종가</th><th>서브</th>
+      </tr>
+      </thead>
+      <tbody>
+      <!-- JS로 상품목록 추가 -->
+      </tbody>
+    </table>
+  </div>
+
+  <div id="statsTab" class="tab-content">
+    <h3>통계</h3>
+    <p>여기에 매출 통계, 월별 판매 그래프 등을 넣자.</p>
+  </div>
+
+  <div id="receiptTab" class="tab-content">
+    <h3>영수증 등록</h3>
+    <form id="receiptForm" enctype="multipart/form-data" onsubmit="uploadReceipt(event)">
+      <h4>영수증 이미지 업로드</h4>
+      <input type="file" name="receiptImage" accept="image/*" required><br><br>
+      <button type="submit">업로드</button>
+    </form>
+
+    <div id="ocrResult" style="margin-top: 20px;"></div>
+  </div>
+</div>
+
+<script>
+  let editing = false;
+  let editProductId = null;
+
+  function showTab(tabId) {
+      const tabs = document.querySelectorAll('.tab-content');
+      const buttons = document.querySelectorAll('.tab-btn');
+      tabs.forEach(tab => tab.classList.remove('active'));
+      buttons.forEach(btn => btn.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      event.target.classList.add('active');
+  }
+
+  function toggleForm(show = null) {
+      const form = document.getElementById('productForm');
+      form.style.display = (show === true || (show === null && form.style.display === 'none')) ? 'block' : 'none';
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+      document.querySelector('select[name="subCtgr"]').addEventListener("change", function () {
+          const subCtgr = this.value;
+          if (!subCtgr || editing) return;
+
+          fetch(`/api/products/next-id?subCtgr=${encodeURIComponent(subCtgr)}`)
+              .then(res => res.text())
+              .then(productId => {
+                  document.querySelector('#productForm input[name="productId"]').value = productId;
+              });
+      });
+
+      fetchProducts();
+  });
+
+  function fetchProducts() {
+      fetch('/api/products')
+          .then(res => res.json())
+          .then(data => {
+              const tbody = document.querySelector("#productTable tbody");
+              tbody.innerHTML = "";
+              data.forEach(p => {
+                  const row = `<tr>
+                      <td>${p.productId}</td>
+                      <td><a href="#" onclick="editProduct('${p.productId}')">${p.productName}</a></td>
+                      <td>${p.karatCode}</td>
+                      <td>${p.ctgrId}</td>
+                      <td>${p.basePrice}</td>
+                      <td>${p.goldWeight}</td>
+                      <td>${p.finalPrice}</td>
+                      <td>${p.subCtgr}</td>
+                  </tr>`;
+                  tbody.insertAdjacentHTML("beforeend", row);
+              });
+          });
+  }
+
+  function editProduct(id) {
+      fetch(`/api/products/${id}`)
+          .then(res => res.json())
+          .then(p => {
+              const form = document.querySelector('#productForm form');
+              form.productId.value = p.productId;
+              form.productName.value = p.productName;
+              form.ctgrId.value = p.ctgrId;
+              form.subCtgr.value = p.subCtgr;
+              form.karatCode.value = p.karatCode;
+              form.goldWeight.value = p.goldWeight;
+              form.basePrice.value = p.basePrice;
+              form.finalPrice.value = p.finalPrice;
+              form.description.value = p.description;
+              form.imageUrl.value = p.imageUrl;
+
+              editProductId = id;
+              editing = true;
+              toggleForm(true);
+              form.querySelector("button[type='submit']").innerText = "상품 수정";
+              form.querySelector(".delete-btn").style.display = "inline-block";
+          });
+  }
+
+  function submitProduct(event) {
+      event.preventDefault();
+      const form = event.target;
+      const formData = new FormData(form);
+      const json = {};
+      formData.forEach((v, k) => json[k] = v);
+
+      const method = editing ? 'PUT' : 'POST';
+      const url = editing ? `/api/products/${editProductId}` : '/api/products';
+
+      fetch(url, {
+          method: method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(json)
+      }).then(res => {
+          if (res.ok) {
+              alert(editing ? "수정 완료!" : "상품이 등록되었습니다!");
+              form.reset();
+              toggleForm(false);
+              fetchProducts();
+              editing = false;
+              editProductId = null;
+              form.querySelector("button[type='submit']").innerText = "상품 저장";
+              form.querySelector(".delete-btn").style.display = "none";
+          } else {
+              alert("저장 실패");
+          }
+      });
+  }
+
+  function deleteProduct() {
+      if (!editProductId) return;
+      if (!confirm("정말로 삭제하시겠습니까?")) return;
+
+      fetch(`/api/products/${editProductId}`, {
+          method: 'DELETE'
+      }).then(res => {
+          if (res.ok) {
+              alert("삭제 완료!");
+              const form = document.querySelector('#productForm form');
+              form.reset();
+              toggleForm(false);
+              fetchProducts();
+              editing = false;
+              editProductId = null;
+              form.querySelector("button[type='submit']").innerText = "상품 저장";
+              form.querySelector(".delete-btn").style.display = "none";
+          } else {
+              alert("삭제 실패");
+          }
+      });
+  }
+
+  function uploadReceipt(event) {
+      event.preventDefault();
+      const form = document.getElementById("receiptForm");
+      const formData = new FormData(form);
+
+      fetch('/api/receipt/upload', {
+          method: 'POST',
+          body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+          document.getElementById("ocrResult").innerText = "📄 OCR 결과:\n" + data.text;
+      })
+      .catch(err => {
+          alert("업로드 실패");
+          console.error(err);
+      });
+  }
+</script>
+
+</body>
+</html>

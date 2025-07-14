@@ -1,16 +1,24 @@
 package com.global.augold.product.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
+/**
+ * 상품 정보를 담는 DTO 클래스
+ */
 @Getter
 @Setter
-@NoArgsConstructor   // 기본 생성자
-@AllArgsConstructor  // 모든 필드를 파라미터로 받는 생성자
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class ProductDTO {
-    private Long id;
-    private String name;
-    private int price;
+    private String productId;     // 상품 ID (PK)
+    private String karatCode;     // 금 함량 코드 (예: 14K, 18K)
+    private String ctgrId;        // 카테고리 ID (FK)
+    private String productName;   // 상품명
+    private Double basePrice;     // 기본 가격
+    private Double goldWeight;    // 금 무게 (g)
+    private Double finalPrice;    // 최종 가격
+    private String imageUrl;      // 이미지 URL
+    private String description;   // 상품 설명
+    private String subCtgr;       // 서브 카테고리 (ex. 귀걸이, 반지 등)
 }
