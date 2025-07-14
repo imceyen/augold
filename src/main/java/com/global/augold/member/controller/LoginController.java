@@ -8,7 +8,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.Optional;
 
@@ -22,8 +21,7 @@ public class LoginController {
     public String login(
             @RequestParam String cstmId,
             @RequestParam String cstmPwd,
-            HttpSession session,
-            RedirectAttributes redirectAttributes
+            HttpSession session
     ) {
         Optional<Customer> optCustomer = customerRepository.findByCstmIdAndCstmPwd(cstmId, cstmPwd);
 
@@ -32,9 +30,8 @@ public class LoginController {
             session.setAttribute("loginUser", optCustomer.get());
             return "redirect:/";
         } else {
-            // 로그인 실패 - 에러 메시지 전달 후 로그인 페이지로
-            redirectAttributes.addFlashAttribute("error", "아이디 또는 비밀번호가 일치하지 않습니다.");
-            return "redirect:/login";
+            // 로그인 실패 - 쿼리 파라미터로 error=true 전달
+            return "redirect:/login?error=true";
         }
     }
 

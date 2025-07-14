@@ -2,6 +2,8 @@ package com.global.augold.categoryPage.controller;
 
 import com.global.augold.mainPage.dto.MainPageInfoDTO;
 import com.global.augold.mainPage.service.MainPageService;
+import com.global.augold.member.entity.Customer;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,7 +20,13 @@ public class CategoryPageController {
     private final MainPageService mainPageService;
 
     @GetMapping("/category")
-    public String showCategoryPage(Model model) {
+    public String showCategoryPage(HttpSession session, Model model) {
+        // 로그인 유저 정보 가져오기
+        Customer loginUser = (Customer) session.getAttribute("loginUser");
+        if (loginUser != null) {
+            model.addAttribute("loginName", loginUser.getCstmName());
+        }
+
         List<MainPageInfoDTO> allProducts = mainPageService.getAllProducts();
 
         // 골드바 (37.5g 제외)
@@ -48,7 +56,6 @@ public class CategoryPageController {
                         Collectors.toMap(
                                 p -> extractDesignKey(p.getProductName()),
                                 p -> {
-                                    // 상품명에서 g 제거
                                     p.setProductName(cleanProductName(p.getProductName()));
                                     return p;
                                 },
@@ -80,6 +87,7 @@ public class CategoryPageController {
 
         return "product/Category_Product";
     }
+
 
     // 주얼리 중복 제거
     private List<MainPageInfoDTO> filterJewelryUniqueDesign(List<MainPageInfoDTO> products, String keyword) {
