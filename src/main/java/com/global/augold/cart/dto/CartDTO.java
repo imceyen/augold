@@ -19,6 +19,7 @@ public class CartDTO {
     private String ctgrNm;
     private String karatName;
     private BigDecimal goldWeight;
+    private int quantity = 1;
 
     // JPQL용 생성자
     public CartDTO(String cartNumber, String productId, LocalDateTime cartDate,

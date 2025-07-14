@@ -4,6 +4,7 @@ package com.global.augold.cart.controller;
 import com.global.augold.cart.dto.CartDTO;
 import com.global.augold.cart.service.CartService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -90,6 +91,18 @@ public class CartController {
             return cartService.getCartCount(cstmNumber);
         } catch (RuntimeException e) {
             return 0; // 로그인하지 않은 경우 0 반환
+        }
+    }
+
+    @PostMapping("/decrease")
+    @ResponseBody
+    public ResponseEntity<String> decreaseQuantity(@RequestParam String productId, HttpSession session) {
+        try {
+            String cstmNumber = getCstmNumberFromSession(session);
+            boolean result = cartService.decreaseQuantity(cstmNumber, productId);
+            return ResponseEntity.ok(result ? "success" : "failure");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(401).body("login_required");
         }
     }
 }
