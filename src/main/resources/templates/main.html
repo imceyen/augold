@@ -70,6 +70,9 @@
 </head>
 <body class="bg-white text-gray-900">
 
+</head>
+<body class="bg-white text-gray-900">
+
 <header class="bg-white shadow border-b">
     <div class="container mx-auto px-4 py-4 flex items-center justify-between">
         <div class="flex items-center space-x-2">
@@ -92,30 +95,30 @@
                     회원가입
                 </a>
             </th:block>
+
             <th:block th:if="${loginName != null}">
                 <span class="text-gray-700 font-medium" th:text="${loginName} + '님 환영합니다'">홍길동님 환영합니다</span>
                 <a href="/logout"
                    class="text-gray-700 hover:text-yellow-600 font-medium transition-colors">
                     로그아웃
                 </a>
-                <!-- 여기부터 고객센터 추가 -->
                 <a href="/support"
                    class="text-gray-700 hover:text-yellow-600 font-medium transition-colors">
                     고객센터
                 </a>
+                <a href="/mypage"
+                   class="text-gray-700 hover:text-yellow-600 font-medium transition-colors">
+                    마이페이지
+                </a>
+                <a href="/cart"
+                   class="text-gray-700 hover:text-yellow-600 font-medium transition-colors">
+                    장바구니
+                </a>
             </th:block>
-
-            <a href="/mypage"
-               class="text-gray-700 hover:text-yellow-600 font-medium transition-colors">
-                마이페이지
-            </a>
-            <a href="/cart"
-               class="text-gray-700 hover:text-yellow-600 font-medium transition-colors">
-                장바구니
-            </a>
         </nav>
     </div>
 </header>
+
 
 <!-- Hero Section -->
 <section class="bg-gradient-to-b from-yellow-50 via-amber-50 to-orange-50 py-16">
