@@ -41,4 +41,10 @@ public class Product {
 
     @Column(name = "sub_ctgr")
     private String subCtgr;
+
+    private String productGroup;
+
+    public String getSubCtgr() {
+        return subCtgr;
+    }
 }

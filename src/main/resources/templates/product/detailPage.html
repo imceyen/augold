@@ -5,141 +5,463 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title th:text="${product.productName} + ' | AuGold'">제품 상세페이지</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .gold-gradient {
+          background: linear-gradient(135deg, #facc15, #f59e0b);
+        }
+        .luxury-gradient {
+          background: linear-gradient(135deg, #1f2937, #374151);
+        }
+        .glass-effect {
+          backdrop-filter: blur(10px);
+          background: rgba(255, 255, 255, 0.1);
+        }
+        .hover-lift {
+          transition: all 0.3s ease;
+        }
+        .hover-lift:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+        .fade-in {
+          animation: fadeIn 0.8s ease-in;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .image-gallery {
+          scrollbar-width: thin;
+          scrollbar-color: #f59e0b #f3f4f6;
+        }
+        .image-gallery::-webkit-scrollbar {
+          width: 6px;
+        }
+        .image-gallery::-webkit-scrollbar-track {
+          background: #f3f4f6;
+          border-radius: 3px;
+        }
+        .image-gallery::-webkit-scrollbar-thumb {
+          background: #f59e0b;
+          border-radius: 3px;
+        }
+    </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
 
 <!-- 헤더 -->
-<header class="border-b border-gray-200 bg-white relative">
-    <div class="max-w-7xl mx-auto px-6 py-14">
-        <!-- 로고 -->
-        <div class="flex flex-col items-center">
-            <div class="flex items-center gap-3">
-                <div class="w-14 h-14 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-full flex items-center justify-center font-bold text-white text-2xl">A</div>
+<header class="bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-100 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-6 py-4">
+        <div class="flex items-center justify-between">
+            <!-- 로고 -->
+            <div class="flex items-center space-x-3">
+                <div class="w-12 h-12 gold-gradient rounded-full flex items-center justify-center shadow-lg">
+                    <span class="text-white font-bold text-xl">A</span>
+                </div>
                 <div>
-                    <div class="text-2xl font-bold text-yellow-800">AuGold</div>
-                    <div class="text-sm text-gray-500">프리미엄 금 전문몰</div>
+                    <div class="text-2xl font-bold bg-gradient-to-r from-yellow-600 to-yellow-800 bg-clip-text text-transparent">AuGold</div>
+                    <div class="text-sm text-gray-500 font-medium">프리미엄 금 전문몰</div>
                 </div>
             </div>
+
+            <!-- 네비게이션 -->
+            <nav class="hidden md:flex space-x-8">
+                <a href="/category?type=goldbar" class="text-gray-700 font-semibold hover:text-yellow-600 transition-colors duration-300 flex items-center space-x-1">
+                    <i class="fas fa-gem text-sm"></i>
+                    <span>골드바</span>
+                </a>
+                <a href="/category?type=jewelry" class="text-gray-700 font-semibold hover:text-yellow-600 transition-colors duration-300 flex items-center space-x-1">
+                    <i class="fas fa-ring text-sm"></i>
+                    <span>주얼리</span>
+                </a>
+                <a href="/category?type=gift" class="text-gray-700 font-semibold hover:text-yellow-600 transition-colors duration-300 flex items-center space-x-1">
+                    <i class="fas fa-gift text-sm"></i>
+                    <span>기념품</span>
+                </a>
+            </nav>
+
+            <!-- 로그인 메뉴 -->
+            <nav class="flex space-x-4 text-sm">
+                <a href="/login" class="text-gray-700 hover:text-yellow-600 transition-colors duration-300 flex items-center space-x-1">
+                    <i class="fas fa-user text-sm"></i>
+                    <span>로그인</span>
+                </a>
+                <a href="/signup" class="text-gray-700 hover:text-yellow-600 transition-colors duration-300 flex items-center space-x-1">
+                    <i class="fas fa-user-plus text-sm"></i>
+                    <span>회원가입</span>
+                </a>
+                <a href="/mypage" class="text-gray-700 hover:text-yellow-600 transition-colors duration-300 flex items-center space-x-1">
+                    <i class="fas fa-heart text-sm"></i>
+                    <span>마이페이지</span>
+                </a>
+                <a href="/cart" class="text-gray-700 hover:text-yellow-600 transition-colors duration-300 flex items-center space-x-1">
+                    <i class="fas fa-shopping-cart text-sm"></i>
+                    <span>장바구니</span>
+                </a>
+            </nav>
         </div>
-
-        <!-- 카테고리 -->
-        <nav class="flex justify-center gap-10 mt-10">
-            <a href="/category?type=goldbar" class="text-gray-700 font-semibold hover:text-yellow-600">골드바</a>
-            <a href="/category?type=jewelry" class="text-gray-700 font-semibold hover:text-yellow-600">주얼리</a>
-            <a href="/category?type=gift" class="text-gray-700 font-semibold hover:text-yellow-600">기념품</a>
-        </nav>
-
-        <!-- 로그인 메뉴 -->
-        <nav class="absolute top-4 right-6 flex gap-4 text-sm">
-            <a href="/login" class="text-gray-700 hover:text-yellow-600">로그인</a>
-            <a href="/signup" class="text-gray-700 hover:text-yellow-600">회원가입</a>
-            <a href="/mypage" class="text-gray-700 hover:text-yellow-600">마이페이지</a>
-            <a href="/cart" class="text-gray-700 hover:text-yellow-600">장바구니</a>
-        </nav>
     </div>
 </header>
 
 <!-- 본문 -->
-<main class="max-w-6xl mx-auto px-4 py-12 grid md:grid-cols-2 gap-12">
-    <!-- 이미지 -->
-    <div class="flex justify-center">
-        <img th:src="${product.imageUrl}" alt="상품 이미지" class="max-w-[600px] w-full rounded-lg border"/>
+<main class="max-w-7xl mx-auto px-6 py-12">
+    <!-- 상품 상세 정보 (왼쪽 이미지, 오른쪽 정보) -->
+    <div class="grid lg:grid-cols-2 gap-16 mb-16">
+        <!-- 왼쪽 - 메인 이미지 -->
+        <div class="fade-in">
+            <div class="bg-white rounded-2xl shadow-xl p-8">
+                <div class="relative mb-6">
+                    <img th:src="${product.imageUrl}" alt="상품 이미지"
+                         class="w-full h-96 object-contain rounded-xl border border-gray-200" />
+                    <div class="absolute top-4 right-4 bg-gradient-to-r from-pink-500 to-rose-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+                        <i class="fas fa-star mr-1"></i>추천
+                    </div>
+                </div>
+
+                <!-- 썸네일 이미지들 -->
+                <div class="flex space-x-4 overflow-x-auto image-gallery">
+                    <img th:src="${product.imageUrl}" alt="상품 이미지"
+                         class="w-20 h-20 object-cover rounded-lg border-2 border-yellow-400 cursor-pointer hover:opacity-80 transition-opacity" />
+                    <img th:src="@{${product.imageUrl1}}" alt="상세 이미지1"
+                         class="w-20 h-20 object-cover rounded-lg border-2 border-gray-200 cursor-pointer hover:border-yellow-400 transition-colors" />
+                    <img th:src="@{${product.imageUrl2}}" alt="상세 이미지2"
+                         class="w-20 h-20 object-cover rounded-lg border-2 border-gray-200 cursor-pointer hover:border-yellow-400 transition-colors" />
+                    <img th:src="@{${product.imageUrl3}}" alt="상세 이미지3"
+                         class="w-20 h-20 object-cover rounded-lg border-2 border-gray-200 cursor-pointer hover:border-yellow-400 transition-colors" />
+                </div>
+            </div>
+        </div>
+
+        <!-- 오른쪽 - 상세 정보 -->
+        <div class="fade-in">
+            <div class="bg-white rounded-2xl shadow-xl p-8">
+                <div class="mb-8">
+                    <h1 class="text-4xl font-bold mb-4 text-gray-900" th:text="${product.productName}">상품명</h1>
+                    <p class="text-lg text-gray-700 leading-relaxed mb-6" th:text="${product.description}">상품 설명이 들어갑니다.</p>
+
+                    <!-- 가격 정보 -->
+                    <div class="bg-gradient-to-r from-yellow-50 to-amber-50 rounded-xl p-6 mb-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600 mb-1">최종 가격</p>
+                                <p id="price" class="text-3xl font-bold text-yellow-700"
+                                   th:text="'₩' + ${#numbers.formatInteger(product.finalPrice, 3, 'COMMA')}">가격</p>
+                            </div>
+                            <div class="text-right">
+                                <div class="w-16 h-16 gold-gradient rounded-full flex items-center justify-center">
+                                    <i class="fas fa-gem text-white text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 상품 정보 -->
+                <div class="mb-8">
+                    <h3 class="text-xl font-bold mb-4 text-gray-800 flex items-center">
+                        <i class="fas fa-info-circle text-yellow-500 mr-2"></i>
+                        상품 정보
+                    </h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <p class="text-sm text-gray-600 mb-1">제조사</p>
+                            <p class="font-semibold text-gray-800">AuGold</p>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <p class="text-sm text-gray-600 mb-1">원산지</p>
+                            <p class="font-semibold text-gray-800">KOREA</p>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <p class="text-sm text-gray-600 mb-1">소재</p>
+                            <p class="font-semibold text-gray-800" th:text="${product.karatCode}">K24 GOLD</p>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <p class="text-sm text-gray-600 mb-1">중량</p>
+                            <p class="font-semibold text-gray-800">정보 없음</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 골드바 가격 정보 (금시세 기반) -->
+                <div class="mb-8" th:if="${product.subCtgr == '골드바'}">
+                    <h3 class="text-xl font-bold mb-4 text-gray-800 flex items-center">
+                        <i class="fas fa-chart-line text-yellow-500 mr-2"></i>
+                        실시간 금시세 기반 가격
+                    </h3>
+                    <div class="bg-gradient-to-r from-yellow-50 to-amber-50 rounded-xl p-4" data-gold-price="85000">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm text-gray-600">현재 금시세</span>
+                            <span class="font-semibold text-yellow-700" th:text="'₩' + ${#numbers.formatInteger(goldPrice, 3, 'COMMA')} + '/g'">₩85,000/g</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-600">판매가 (시세 + 10%)</span>
+                            <span class="font-semibold text-yellow-700" th:text="'₩' + ${#numbers.formatInteger(goldPrice * 1.1, 3, 'COMMA')} + '/g'">₩93,500/g</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 주얼리 옵션 선택 (귀걸이, 목걸이, 반지) -->
+                <div class="mb-8" th:if="${product.subCtgr == '귀걸이' or product.subCtgr == '목걸이' or product.subCtgr == '반지'}">
+                    <h3 class="text-xl font-bold mb-4 text-gray-800 flex items-center">
+                        <i class="fas fa-gem text-yellow-500 mr-2"></i>
+                        순도 선택
+                    </h3>
+                    <select id="karatSelect" class="w-full border-2 border-gray-200 rounded-xl p-4 focus:border-yellow-500 focus:outline-none transition-colors">
+                        <option value="">순도를 선택해 주세요</option>
+                        <option value="14K" data-price="50000">14K (₩50,000/g)</option>
+                        <option value="18K" data-price="65000">18K (₩65,000/g)</option>
+                        <option value="24K" data-price="85000">24K (₩85,000/g)</option>
+                    </select>
+                </div>
+
+                <!-- 기념품 옵션 선택 (감사패, 돌반지, 카네이션기념품) -->
+                <div class="mb-8" th:if="${product.subCtgr == '감사패' or product.subCtgr == '돌반지' or product.subCtgr == '카네이션기념품'}">
+                    <h3 class="text-xl font-bold mb-4 text-gray-800 flex items-center">
+                        <i class="fas fa-gift text-yellow-500 mr-2"></i>
+                        중량 선택
+                    </h3>
+                    <select id="weightSelect" class="w-full border-2 border-gray-200 rounded-xl p-4 focus:border-yellow-500 focus:outline-none transition-colors">
+                        <option value="">중량을 선택해 주세요</option>
+                        <option value="1.875" data-price="159375">1.875g (₩159,375)</option>
+                        <option value="3.75" data-price="318750">3.75g (₩318,750)</option>
+                    </select>
+                </div>
+
+                <!-- 수량 선택 -->
+                <div class="mb-8">
+                    <h3 class="text-xl font-bold mb-4 text-gray-800 flex items-center">
+                        <i class="fas fa-sort-numeric-up text-yellow-500 mr-2"></i>
+                        수량 선택
+                    </h3>
+                    <div class="flex items-center space-x-4">
+                        <button class="w-12 h-12 border-2 border-gray-200 rounded-lg flex items-center justify-center hover:border-yellow-500 transition-colors">
+                            <i class="fas fa-minus text-gray-600"></i>
+                        </button>
+                        <input id="quantityInput" type="number" value="1" min="1"
+                               class="w-20 h-12 border-2 border-gray-200 rounded-lg text-center focus:border-yellow-500 focus:outline-none transition-colors" />
+                        <button class="w-12 h-12 border-2 border-gray-200 rounded-lg flex items-center justify-center hover:border-yellow-500 transition-colors">
+                            <i class="fas fa-plus text-gray-600"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 구매 버튼 -->
+                <div class="space-y-4">
+                    <button class="w-full bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 text-white font-bold py-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center space-x-2">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span>장바구니 담기</span>
+                    </button>
+                    <button class="w-full border-2 border-yellow-500 text-yellow-700 hover:bg-yellow-50 font-bold py-4 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2">
+                        <i class="fas fa-credit-card"></i>
+                        <span>바로 구매하기</span>
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- 상세 정보 -->
-    <div class="flex flex-col justify-center">
-        <h2 class="text-3xl font-bold mb-3" th:text="${product.productName}">상품명</h2>
-        <p class="text-gray-700 mb-6 leading-relaxed" th:text="${product.description}">상품 설명이 들어갑니다.</p>
-        <p class="text-sm text-gray-500 mb-4">중량 및 옵션 정보</p>
-        <p class="text-2xl font-semibold text-yellow-700 mb-4"
-           th:text="'₩' + ${#numbers.formatInteger(product.finalPrice, 3, 'COMMA')}">가격</p>
-
-        <ul class="text-sm text-gray-600 mb-6 space-y-1">
-            <li><strong>제조사:</strong> AuGold</li>
-            <li><strong>원산지:</strong> KOREA</li>
-            <li><strong>소재:</strong> K24 GOLD</li>
-        </ul>
-
-        <div class="mb-4">
-            <label class="block mb-1 font-medium">중량 선택</label>
-            <select class="w-full border rounded p-2">
-                <option>옵션을 선택해 주세요</option>
-                <option>1g</option>
-                <option>1.875g (반돈)</option>
-                <option>3.75g (한돈)</option>
-            </select>
+    <!-- 상세 이미지 영역 (3개 세로 정렬) -->
+    <section class="mb-16">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">상품 상세 정보</h2>
+            <p class="text-gray-600">더 자세한 상품 정보를 확인하세요</p>
         </div>
 
-        <div class="mb-6">
-            <label class="block mb-1 font-medium">수량</label>
-            <input type="number" value="1" min="1" class="w-24 border rounded p-2"/>
+        <div class="space-y-8">
+            <div class="bg-white rounded-2xl shadow-xl p-8">
+                <img th:src="@{${product.imageUrl1}}" alt="상세 이미지1" class="w-full max-w-4xl mx-auto object-contain rounded-xl" />
+            </div>
+            <div class="bg-white rounded-2xl shadow-xl p-8">
+                <img th:src="@{${product.imageUrl2}}" alt="상세 이미지2" class="w-full max-w-4xl mx-auto object-contain rounded-xl" />
+            </div>
+            <div class="bg-white rounded-2xl shadow-xl p-8">
+                <img th:src="@{${product.imageUrl3}}" alt="상세 이미지3" class="w-full max-w-4xl mx-auto object-contain rounded-xl" />
+            </div>
+        </div>
+    </section>
+
+    <!-- 환불 규정 -->
+    <section class="mb-16">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">환불 및 교환 규정</h2>
+            <p class="text-gray-600">고객님의 권리를 보호하는 정책입니다</p>
         </div>
 
-        <div class="flex space-x-4">
-            <button class="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-3 rounded">장바구니 담기</button>
-            <button class="flex-1 border border-yellow-500 text-yellow-700 hover:bg-yellow-50 font-semibold py-3 rounded">구매하기</button>
+        <div class="bg-white rounded-2xl shadow-xl p-8">
+            <div class="max-w-2xl mx-auto space-y-8 text-center">
+                <!-- A/S 서비스 -->
+                <div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-6 flex items-center justify-center">
+                        <i class="fas fa-tools text-yellow-500 mr-3"></i>
+                        A/S 서비스
+                    </h3>
+                    <ul class="space-y-3 text-gray-700">
+                        <li>보증기간은 6개월이며, 무상 A/S 처리됩니다.</li>
+                        <li>고객 부주의로 인한 손상은 비용 발생 가능.</li>
+                        <li>A/S 상품 수령 시 직원과 상태 확인 필수.</li>
+                    </ul>
+                </div>
+
+                <!-- 교환 및 반품 안내 -->
+                <div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-6 flex items-center justify-center">
+                        <i class="fas fa-exchange-alt text-yellow-500 mr-3"></i>
+                        교환 및 반품 안내
+                    </h3>
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="font-semibold text-green-600 mb-2">교환/반품 가능</h4>
+                            <ul class="space-y-1 text-gray-700 text-sm">
+                                <li>• 상품 수령 후 7일 이내</li>
+                                <li>• 불량 또는 오배송 시 3개월 이내</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-red-600 mb-2">교환/반품 불가</h4>
+                            <ul class="space-y-1 text-gray-700 text-sm">
+                                <li>• 상품 훼손, 사용한 경우</li>
+                                <li>• 시간 경과로 재판매가 어려운 경우</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-4">※ 단순 변심 시 왕복 배송비는 고객 부담입니다.</p>
+                </div>
+            </div>
         </div>
-    </div>
+    </section>
 </main>
 
-<!-- 상세 이미지 영역 -->
-<section style="max-width: 1200px; margin: 0 auto; padding: 20px;">
-    <img th:src="@{${product.imageUrl1}}" alt="상세 이미지1">
-    <img th:src="@{${product.imageUrl2}}" alt="상세 이미지2">
-    <img th:src="@{${product.imageUrl3}}" alt="상세 이미지3">
-</section>
+<!-- 가격 동적 업데이트 JS -->
+<script>
+    const priceText = document.getElementById('price');
+    const quantityInput = document.getElementById('quantityInput');
+    const minusBtn = quantityInput.previousElementSibling;
+    const plusBtn = quantityInput.nextElementSibling;
 
+    // 기본 가격 (상품 카테고리에 따라 다름)
+    let basePrice = 0;
+    let currentPrice = 0;
 
-<p th:text="${product.imageUrl1}"></p>
-<p th:text="${product.imageUrl2}"></p>
-<p th:text="${product.imageUrl3}"></p>
+    // 골드바: 금시세 기반 가격
+    const goldPriceElement = document.querySelector('[data-gold-price]');
+    if (goldPriceElement) {
+        basePrice = parseInt(goldPriceElement.dataset.goldPrice) * 1.1; // 시세 + 10%
+        currentPrice = basePrice;
+        updatePrice();
+    }
 
-<!-- A/S 및 반품 안내 (정적 콘텐츠) -->
-<section class="max-w-3xl mx-auto px-4 py-12 text-sm leading-relaxed text-gray-700">
-    <h2 class="text-xl font-bold border-b pb-2 mb-4">A/S 서비스</h2>
-    <ul class="list-disc pl-5 mb-6 space-y-2">
-        <li>보증기간은 6개월이며, 무상 A/S 처리됩니다.</li>
-        <li>고객 부주의로 인한 손상은 비용 발생 가능.</li>
-        <li>A/S 상품 수령 시 직원과 상태 확인 필수.</li>
-    </ul>
+    // 주얼리: 순도 선택에 따른 가격
+    const karatSelect = document.getElementById('karatSelect');
+    if (karatSelect) {
+        karatSelect.addEventListener('change', function () {
+            const selected = this.selectedOptions[0];
+            if (selected && selected.dataset.price) {
+                basePrice = parseInt(selected.dataset.price);
+                currentPrice = basePrice;
+                updatePrice();
+            }
+        });
+    }
 
-    <h2 class="text-xl font-bold border-b pb-2 mb-4">교환 및 반품 안내</h2>
-    <p class="mb-2 font-medium">교환/반품 가능</p>
-    <ul class="list-disc pl-5 mb-4">
-        <li>상품 수령 후 7일 이내</li>
-        <li>불량 또는 오배송 시 3개월 이내</li>
-    </ul>
+    // 기념품: 중량 선택에 따른 가격
+    const weightSelect = document.getElementById('weightSelect');
+    if (weightSelect) {
+        weightSelect.addEventListener('change', function () {
+            const selected = this.selectedOptions[0];
+            if (selected && selected.dataset.price) {
+                basePrice = parseInt(selected.dataset.price);
+                currentPrice = basePrice;
+                updatePrice();
+            }
+        });
+    }
 
-    <p class="mb-2 font-medium">교환/반품 불가</p>
-    <ul class="list-disc pl-5 mb-6">
-        <li>상품 훼손, 사용한 경우</li>
-        <li>시간 경과로 재판매가 어려운 경우</li>
-    </ul>
+    // 수량 조절 버튼
+    minusBtn.addEventListener('click', () => {
+        if (quantityInput.value > 1) {
+            quantityInput.value = parseInt(quantityInput.value) - 1;
+            updatePrice();
+        }
+    });
 
-    <p class="text-gray-500">※ 단순 변심 시 왕복 배송비는 고객 부담입니다.</p>
-</section>
+    plusBtn.addEventListener('click', () => {
+        quantityInput.value = parseInt(quantityInput.value) + 1;
+        updatePrice();
+    });
+
+    // 수량 입력 시 가격 업데이트
+    quantityInput.addEventListener('input', updatePrice);
+
+    // 가격 업데이트 함수
+    function updatePrice() {
+        const quantity = parseInt(quantityInput.value) || 1;
+        const totalPrice = currentPrice * quantity;
+        const formatted = new Intl.NumberFormat().format(totalPrice);
+        priceText.textContent = `₩${formatted}`;
+    }
+
+    // 페이지 로드 시 초기 가격 설정
+    document.addEventListener('DOMContentLoaded', function() {
+        // 골드바가 아닌 경우 기본 가격 설정
+        if (!goldPriceElement) {
+            // 주얼리나 기념품의 경우 첫 번째 옵션을 기본값으로 설정
+            const firstOption = karatSelect ? karatSelect.options[1] :
+                               weightSelect ? weightSelect.options[1] : null;
+
+            if (firstOption && firstOption.dataset.price) {
+                basePrice = parseInt(firstOption.dataset.price);
+                currentPrice = basePrice;
+                updatePrice();
+            }
+        }
+    });
+</script>
 
 <!-- Footer -->
-<footer class="bg-gray-800 text-gray-400 py-8 mt-12">
-    <div class="container mx-auto px-4 grid md:grid-cols-3 gap-8">
+<footer class="luxury-gradient text-white py-16">
+    <div class="container mx-auto px-6 grid md:grid-cols-4 gap-8">
         <div>
-            <h3 class="text-white font-bold mb-2">AuGold</h3>
-            <p>믿을 수 있는 프리미엄 금 전문 플랫폼</p>
+            <div class="flex items-center space-x-3 mb-4">
+                <div class="w-10 h-10 gold-gradient rounded-full flex items-center justify-center">
+                    <span class="text-white font-bold">A</span>
+                </div>
+                <h3 class="text-2xl font-bold">AuGold</h3>
+            </div>
+            <p class="text-gray-300 text-sm leading-relaxed">믿을 수 있는 프리미엄 금 전문 플랫폼</p>
         </div>
         <div>
-            <h4 class="text-white font-semibold mb-2">고객센터</h4>
-            <p>1588-0000</p>
-            <p>help@augold.co.kr</p>
-            <p>평일 09:00~18:00</p>
+            <h4 class="font-semibold mb-6 text-lg">고객서비스</h4>
+            <ul class="space-y-3 text-gray-300 text-sm">
+                <li><a href="#" class="hover:text-yellow-400 transition-colors flex items-center"><i class="fas fa-truck mr-2"></i>주문/배송 조회</a></li>
+                <li><a href="#" class="hover:text-yellow-400 transition-colors flex items-center"><i class="fas fa-exchange-alt mr-2"></i>반품/교환</a></li>
+                <li><a href="#" class="hover:text-yellow-400 transition-colors flex items-center"><i class="fas fa-question-circle mr-2"></i>FAQ</a></li>
+                <li><a href="#" class="hover:text-yellow-400 transition-colors flex items-center"><i class="fas fa-comments mr-2"></i>1:1 문의</a></li>
+            </ul>
         </div>
         <div>
-            <h4 class="text-white font-semibold mb-2">정보</h4>
-            <p>회사소개 | 이용약관 | 개인정보처리방침</p>
+            <h4 class="font-semibold mb-6 text-lg">회사정보</h4>
+            <ul class="space-y-3 text-gray-300 text-sm">
+                <li><a href="#" class="hover:text-yellow-400 transition-colors flex items-center"><i class="fas fa-building mr-2"></i>회사소개</a></li>
+                <li><a href="#" class="hover:text-yellow-400 transition-colors flex items-center"><i class="fas fa-file-contract mr-2"></i>이용약관</a></li>
+                <li><a href="#" class="hover:text-yellow-400 transition-colors flex items-center"><i class="fas fa-shield-alt mr-2"></i>개인정보처리방침</a></li>
+                <li><a href="#" class="hover:text-yellow-400 transition-colors flex items-center"><i class="fas fa-info-circle mr-2"></i>사업자정보</a></li>
+            </ul>
+        </div>
+        <div>
+            <h4 class="font-semibold mb-6 text-lg">연락처</h4>
+            <div class="space-y-3 text-gray-300 text-sm">
+                <p class="flex items-center"><i class="fas fa-phone mr-2 text-yellow-400"></i>1588-1234</p>
+                <p class="flex items-center"><i class="fas fa-envelope mr-2 text-yellow-400"></i>help@augold.co.kr</p>
+                <p class="flex items-center"><i class="fas fa-clock mr-2 text-yellow-400"></i>평일 09:00-18:00</p>
+                <p class="flex items-center"><i class="fas fa-calendar mr-2 text-yellow-400"></i>주말/공휴일 휴무</p>
+            </div>
         </div>
     </div>
-    <div class="text-center text-gray-500 mt-6 text-sm">
+    <div class="border-t border-gray-700 mt-12 pt-8 text-center text-gray-400 text-sm">
         &copy; 2025 AuGold. All rights reserved.
     </div>
 </footer>
+
 </body>
 </html>

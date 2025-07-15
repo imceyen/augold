@@ -10,10 +10,15 @@ import lombok.Setter;
 public class DetailPageDTO {
     private String productId;
     private String productName;
-    private double finalPrice;
+    private Double finalPrice;
     private String imageUrl;
     private String description;
     private String imageUrl1;
     private String imageUrl2;
     private String imageUrl3;
+    private String productGroup;
+    private String karatCode;
+    private Double goldWeight;
+    private String subCtgr;
+    private String categoryId;
 }
