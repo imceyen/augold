@@ -1,4 +1,4 @@
-package com.global.augold.member.entity;
+package com.global.augold.admin.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -10,34 +10,36 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CSInquiry {
+@Builder
+public class AdminCSInquiry {
 
     @Id
     @Column(name = "INQ_NUMBER", length = 20)
-    private String inqNumber; // 문의번호 (INQ-00001)
+    private String inqNumber;
 
     @Column(name = "CSTM_NUMBER", length = 20, nullable = false)
-    private String cstmNumber; // 회원번호
+    private String cstmNumber;
 
     @Column(name = "INQ_CATEGORY", length = 20, nullable = false)
-    private String inqCategory; // 문의유형
+    private String inqCategory;
 
     @Column(name = "INQ_TITLE", length = 100, nullable = false)
-    private String inqTitle; // 문의제목
+    private String inqTitle;
 
     @Column(name = "INQ_CONTENT", columnDefinition = "TEXT", nullable = false)
-    private String inqContent; // 문의내용
+    private String inqContent;
 
     @Column(name = "INQ_STATUS", length = 20, nullable = false)
-    private String inqStatus; // 처리상태
+    private String inqStatus;
 
+    @Builder.Default
     @Column(name = "INQ_DATE", nullable = false, updatable = false)
-    private LocalDateTime inqDate = LocalDateTime.now(); // 문의일시
+    private LocalDateTime inqDate = LocalDateTime.now();
 
     @Column(name = "REPLY_DATE")
-    private LocalDateTime replyDate; // 답변일시
+    private LocalDateTime replyDate;
 
     @Column(name = "ANSWER_CONTENT", columnDefinition = "TEXT")
-    private String inqAnswer;  // 답변 내용
-
+    private String answerContent;
 }
+

@@ -22,12 +22,13 @@ public class MainPageController {
         List<MainPageInfoDTO> products = mainPageService.getMainPageProducts();
         model.addAttribute("products", products);
 
-        Customer loginCustomer = (Customer) session.getAttribute("loginUser");
-        if (loginCustomer != null) {
+        Object loginUserObj = session.getAttribute("loginUser");
+        if (loginUserObj instanceof Customer) {
+            Customer loginCustomer = (Customer) loginUserObj;
             model.addAttribute("loginName", loginCustomer.getCstmName());
         }
+        // 관리자 로그인 시 loginUser가 String "admin"이거나 다른 타입일 경우 무시하고 이름 출력 안함
 
-        // templates/main.html 경로에 맞게 뷰 이름은 "main"
         return "main";
     }
 }
