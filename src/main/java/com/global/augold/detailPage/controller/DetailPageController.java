@@ -9,6 +9,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import java.util.ArrayList;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.ArrayList;
 
 import java.util.Comparator;
 import java.util.List;
@@ -36,24 +40,25 @@ public class DetailPageController {
         }
 
         // 2. 옵션 조회 분기 처리
-        List<Product> productOptions;
+        // 2. 옵션 조회 분기 처리
+        List<Product> productOptions = new ArrayList<>();
 
-        if ("돌반지".equals(dto.getSubCtgr())) {
-            // 돌반지는 중량 옵션 존재
+        if ("감사패".equals(dto.getSubCtgr()) || "카네이션기념품".equals(dto.getSubCtgr())) {
+            // 옵션 없음 (select 박스 숨김용)
+            productOptions = List.of();
+
+        } else if ("돌반지".equals(dto.getSubCtgr())) {
+            // 중량 옵션 존재
             productOptions = productRepository.findAll().stream()
                     .filter(p -> "돌반지".equals(p.getSubCtgr()))
                     .collect(Collectors.toList());
 
-        } else if ("감사패".equals(dto.getSubCtgr()) || "카네이션기념품".equals(dto.getSubCtgr())) {
-            // 감사패와 카네이션은 단일 상품 (옵션 없음)
-            productOptions = List.of(); // 비워두고 옵션 select 렌더링 X
-
         } else if (dto.getProductGroup() != null && !dto.getProductGroup().isEmpty()) {
-            // productGroup이 있는 일반 쥬얼리 등
+            // productGroup이 있는 경우
             productOptions = productRepository.findByProductGroup(dto.getProductGroup());
 
         } else {
-            // fallback: 이름 유사성 기반 필터
+            // fallback: 이름 유사성 기반 옵션 구성
             productOptions = productRepository.findAll().stream()
                     .filter(p -> p.getCtgrId().equals(dto.getCategoryId()))
                     .filter(p -> p.getProductName() != null && dto.getProductName() != null)
@@ -66,6 +71,7 @@ public class DetailPageController {
                     })
                     .collect(Collectors.toList());
         }
+
 
         // 3. 옵션 DTO로 변환
         List<DetailPageDTO> options = productOptions.stream()
@@ -90,18 +96,30 @@ public class DetailPageController {
                 .collect(Collectors.toList());
 
         // 4. 옵션 정렬 (순도)
+        // 4. 옵션 정렬 후 추가
         options.sort(Comparator.comparingInt(opt -> {
             switch (opt.getKaratCode()) {
-                case "14K":
-                    return 1;
-                case "18K":
-                    return 2;
-                case "24K":
-                    return 3;
-                default:
-                    return 99;
+                case "14K": return 1;
+                case "18K": return 2;
+                case "24K": return 3;
+                default: return 99;
             }
         }));
+
+        // ✅ 완전히 동일한 goldWeight + karatCode 조합만 제거
+        Set<String> seen = new HashSet<>();
+        List<DetailPageDTO> deduplicatedOptions = new ArrayList<>();
+
+        for (DetailPageDTO opt : options) {
+            String key = opt.getKaratCode() + "-" + opt.getGoldWeight(); // 예: "14K-1.875"
+            if (!seen.contains(key)) {
+                seen.add(key);
+                deduplicatedOptions.add(opt);
+            }
+        }
+
+        options = deduplicatedOptions;
+
 
         // 5. 옵션 중 기본값 적용 (기본: 14K → 없으면 첫 번째)
         DetailPageDTO baseOption = options.stream()

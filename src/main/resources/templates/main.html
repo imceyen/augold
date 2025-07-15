@@ -126,8 +126,10 @@
             믿을 수 있는 금 전문 플랫폼에서 만나보세요
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <button class="bg-yellow-500 text-white px-6 py-3 rounded font-semibold hover:opacity-90">골드바 둘러보기</button>
-            <button class="border border-yellow-500 text-yellow-700 px-6 py-3 rounded font-semibold hover:bg-yellow-50">투자 가이드 보기</button>
+            <a href="/category#goldbar" class="bg-yellow-500 text-white px-6 py-3 rounded font-semibold hover:opacity-90 inline-block">
+                골드바 둘러보기
+            </a>
+<!--            <button class="border border-yellow-500 text-yellow-700 px-6 py-3 rounded font-semibold hover:bg-yellow-50">투자 가이드 보기</button>-->
         </div>
     </div>
 </section>
@@ -250,7 +252,7 @@
 
             <!-- 골드바 카드 -->
             <a href="/category#goldbar" class="block relative group overflow-hidden rounded-2xl shadow hover:shadow-lg transition-transform">
-                <img src="https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=400" alt="골드바" class="w-full h-60 object-cover group-hover:scale-105 transition-transform duration-300" />
+                <img src="/images/main/GoldBar_main/3.75g_1.jpg" alt="골드바" class="w-full h-60 object-cover group-hover:scale-105 transition-transform duration-300" />
                 <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent p-4 flex flex-col justify-end">
                     <h3 class="text-xl font-bold text-white">골드바</h3>
                     <p class="text-sm text-gray-200">순도 99.99% 투자용 금괴</p>
@@ -259,7 +261,7 @@
 
             <!-- 주얼리 카드 -->
             <a href="/category#jewelry" class="block relative group overflow-hidden rounded-2xl shadow hover:shadow-lg transition-transform">
-                <img src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400" alt="주얼리" class="w-full h-60 object-cover group-hover:scale-105 transition-transform duration-300" />
+                <img src="/images/main/jewelry_main/necklace_main/wave1.jpg" alt="주얼리" class="w-full h-60 object-cover group-hover:scale-105 transition-transform duration-300" />
                 <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent p-4 flex flex-col justify-end">
                     <h3 class="text-xl font-bold text-white">주얼리</h3>
                     <p class="text-sm text-gray-200">럭셔리 골드 액세서리</p>
@@ -268,7 +270,7 @@
 
             <!-- 기념품 카드 -->
             <a href="/category#gift" class="block relative group overflow-hidden rounded-2xl shadow hover:shadow-lg transition-transform">
-                <img src="https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=400" alt="기념품" class="w-full h-60 object-cover group-hover:scale-105 transition-transform duration-300" />
+                <img src="/images/main/gift_main/canation1.jpg" alt="기념품" class="w-full h-60 object-cover group-hover:scale-105 transition-transform duration-300" />
                 <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent p-4 flex flex-col justify-end">
                     <h3 class="text-xl font-bold text-white">기념품</h3>
                     <p class="text-sm text-gray-200">특별한 순간을 위한 선물</p>
@@ -297,7 +299,10 @@
                     </div>
                 </a>
                 <div class="p-4 flex flex-col flex-1">
-                    <h3 class="font-semibold text-gray-800 mb-2" th:text="${product.productName}">상품명</h3>
+                    <h3 class="font-semibold text-gray-800 mb-2"
+                        th:text="${product.karatCode != null ? '[' + product.karatCode + '] ' + product.productName : product.productName}">
+                        상품명
+                    </h3>
                     <div class="mb-4">
                         <div class="text-xl font-bold text-gray-900"
                              th:text="'₩' + ${#numbers.formatInteger(product.finalPrice, 3, 'COMMA')}">가격</div>

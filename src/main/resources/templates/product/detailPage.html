@@ -208,7 +208,7 @@
                         </div>
                         <div class="flex items-center justify-between">
                             <span class="text-sm text-gray-600">판매가 (시세 + 10%)</span>
-                            <span class="font-semibold text-yellow-700" th:text="'₩' + ${#numbers.formatInteger(goldPrice * 1.1, 3, 'COMMA')} + '/g'">₩93,500/g</span>
+                            <span th:text="'₩' + ${#numbers.formatDecimal(goldPrice * 1.1, 0, 'COMMA')}">가격</span>
                         </div>
                     </div>
                 </div>
