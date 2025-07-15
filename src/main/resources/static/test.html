@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>제품 상세페이지 | AuGold</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+<header class="border-b border-gray-200 bg-white">
+  <div class="max-w-7xl mx-auto px-6 py-14 relative">
+
+    <!-- 로고 (가운데) -->
+    <div class="flex flex-col items-center">
+      <div class="flex items-center gap-3">
+        <!-- 아이콘 크기 업 -->
+        <div class="w-14 h-14 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-full flex items-center justify-center font-bold text-white text-2xl">
+          A
+        </div>
+        <div>
+          <div class="text-2xl font-bold text-yellow-800">AuGold</div>
+          <div class="text-sm text-gray-500">프리미엄 금 전문몰</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 카테고리 메뉴 (로고 아래) -->
+    <nav class="flex justify-center gap-10 mt-10">
+      <a href="/goldbar.html" class="text-gray-700 font-semibold hover:text-yellow-600">골드바</a>
+      <a href="/jewelry.html" class="text-gray-700 font-semibold hover:text-yellow-600">주얼리</a>
+      <a href="/gift.html" class="text-gray-700 font-semibold hover:text-yellow-600">기념품</a>
+    </nav>
+  </div>
+
+  <!-- 로그인 메뉴 (오른쪽 상단) -->
+  <nav class="absolute top-4 right-6 flex gap-4 text-sm">
+    <a href="/login.html" class="text-gray-700 hover:text-yellow-600">로그인</a>
+    <a href="/signup.html" class="text-gray-700 hover:text-yellow-600">회원가입</a>
+    <a href="/mypage.html" class="text-gray-700 hover:text-yellow-600">마이페이지</a>
+    <a href="/cart.html" class="text-gray-700 hover:text-yellow-600">장바구니</a>
+  </nav>
+  </div>
+</header>
+
+
+
+
+
+
+
+
+<!-- 본문 -->
+<main class="max-w-6xl mx-auto px-4 py-12 grid md:grid-cols-2 gap-12">
+
+  <!-- 이미지 -->
+  <div class="flex justify-center">
+    <img
+            src="https://por-ti.co.kr/web/product/big/202306/c1ea8c5031ca151b07d80d838cf9ea5f.jpg"
+            alt="리본 순금 돌반지"
+            class="max-w-[600px] w-full rounded-lg border"
+    />
+  </div>
+
+  <!-- 상세 정보 -->
+  <div class="flex flex-col justify-center">
+    <h2 class="text-3xl font-bold mb-3">리본 순금 돌반지</h2>
+    <p class="text-sm text-gray-500 mb-4">1g / 1.875g(반돈) / 3.75g(한돈)</p>
+    <p class="text-2xl font-semibold text-yellow-700 mb-4">₩207,000</p>
+
+    <ul class="text-sm text-gray-600 mb-6 space-y-1">
+      <li><strong>제조사:</strong> 뽀르띠</li>
+      <li><strong>원산지:</strong> KOREA</li>
+      <li><strong>소재:</strong> K24 GOLD</li>
+    </ul>
+
+    <div class="mb-4">
+      <label class="block mb-1 font-medium">중량 선택</label>
+      <select class="w-full border rounded p-2">
+        <option>옵션을 선택해 주세요</option>
+        <option>1g</option>
+        <option>1.875g (반돈)</option>
+        <option>3.75g (한돈)</option>
+      </select>
+    </div>
+
+    <div class="mb-6">
+      <label class="block mb-1 font-medium">수량</label>
+      <input type="number" value="1" min="1" class="w-24 border rounded p-2"/>
+    </div>
+
+    <div class="flex space-x-4">
+      <button class="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-3 rounded">장바구니 담기</button>
+      <button class="flex-1 border border-yellow-500 text-yellow-700 hover:bg-yellow-50 font-semibold py-3 rounded">구매하기</button>
+    </div>
+  </div>
+</main>
+
+<hr style="margin: 60px auto; max-width: 1400px; border: none; border-top: 5px solid #ddd;" />
+
+
+<!-- 상세 설명 이미지 -->
+<section style="max-width: 1200px; margin: 0 auto; padding: 20px;">
+  <img
+          src="images/first-birthdayRing_1.jpg"
+          alt="상품 상세 이미지"
+          style="display: block; margin: 0 auto; width: 100%; height: auto;"
+  />
+</section>
+
+<section style="max-width: 1200px; margin: 0 auto; padding: 20px;">
+  <img
+          src="images/first-birthdayRing_2.jpg"
+          alt="상품 상세 이미지"
+          style="display: block; margin: 0 auto; width: 100%; height: auto;"
+  />
+</section>
+
+<section style="max-width: 1200px; margin: 0 auto; padding: 20px;">
+  <img
+          src="images/first-birthdayRing_3.jpg"
+          alt="상품 상세 이미지"
+          style="display: block; margin: 0 auto; width: 100%; height: auto;"
+  />
+</section>
+
+
+
+<section style="max-width: 800px; margin: 60px auto; padding: 0 20px;">
+  <h2 style="font-size: 24px; font-weight: bold; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px;">
+    A/S 서비스
+  </h2>
+  <ul style="margin-bottom: 40px; line-height: 1.6; color: #333;">
+    <li>상품 품질 보증기간은 6개월 입니다. 품질 보증 기간 내에 발생하는 A/S는 무상으로 처리해드립니다.</li>
+    <li>고객 부주의에 의한 상품 분실, 손상 등의 경우 상품 상태에 따라 비용이 발생될 수 있습니다.</li>
+    <li>A/S 받으신 상품을 수령하실 때, 반드시 직원과 상품의 이상 유무를 확인하시기 바랍니다.</li>
+    <li>A/S 완료 제품의 본사 보관 의무는 고객 양도 약속일로부터 3개월 까지이며, 이후 발생하는 보관상의 문제에 대해서는 책임지지 않습니다.</li>
+  </ul>
+
+  <h2 style="font-size: 24px; font-weight: bold; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px;">
+    교환 및 반품 안내
+  </h2>
+  <h3 style="font-weight: bold; margin: 20px 0 10px;">교환 및 반품이 가능한 경우</h3>
+  <ul style="line-height: 1.6; color: #333; margin-bottom: 20px;">
+    <li>상품을 공급 받으신 날로부터 7일 이내 (단, 포장을 개봉하거나 훼손되어 상품 가치가 상실된 경우에는 불가)</li>
+    <li>공급받으신 상품 및 용역의 내용이 표시/광고 내용과 다르거나 다르게 이행된 경우에는 공급받은 날로부터 3개월 이내, 그 사실을 알게 된 날로부터 30일 이내</li>
+  </ul>
+
+  <h3 style="font-weight: bold; margin: 20px 0 10px;">교환 및 반품이 불가능한 경우</h3>
+  <ul style="line-height: 1.6; color: #333; margin-bottom: 20px;">
+    <li>고객님의 책임 있는 사유로 상품이 멸실 또는 훼손된 경우 (단, 내용 확인을 위한 포장 훼손은 제외)</li>
+    <li>포장을 개봉하거나 훼손하여 상품 가치가 상실된 경우</li>
+    <li>고객님의 사용 또는 일부 소비로 상품 가치가 현저히 감소한 경우</li>
+    <li>시간 경과에 따라 재판매가 곤란할 정도로 가치가 현저히 감소한 경우</li>
+    <li>복제가 가능한 상품의 포장을 훼손한 경우</li>
+  </ul>
+  <p style="color: #555; margin-bottom: 40px;">
+    ※ 고객님의 단순 변심에 의한 교환/반품 시, 반송 비용은 고객님 부담입니다. (제품 교환, 사이즈 교환 등 포함)
+  </p>
+
+  <h2 style="font-size: 24px; font-weight: bold; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px;">
+    교환 안내
+  </h2>
+  <ul style="line-height: 1.6; color: #333; margin-bottom: 40px;">
+    <li>교환은 AuGold CS센터(070-0000-1111)에서 접수 후 진행됩니다.</li>
+    <li>AuGold 제휴 택배사(CJ 대한통운)를 이용해 보내주세요.</li>
+    <li>상품 수령 후 1주일 이상 경과한 경우 교환이 불가합니다.</li>
+  </ul>
+
+  <h2 style="font-size: 24px; font-weight: bold; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px;">
+    반품 안내
+  </h2>
+  <ul style="line-height: 1.6; color: #333; margin-bottom: 40px;">
+    <li>상품 불량의 경우 배송비 포함 전액 환불됩니다.</li>
+    <li>제품 하자, 배송 오류 시 수령 후 3일 이내에 연락 주시면 절차를 안내드립니다.</li>
+    <li>반품은 AuGold CS센터(070-0000-1111) 접수 후 제휴 택배사(CJ 대한통운)를 이용해 보내주세요.</li>
+  </ul>
+
+  <h2 style="font-size: 24px; font-weight: bold; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px;">
+    환불 안내
+  </h2>
+  <ul style="line-height: 1.6; color: #333;">
+    <li>상품 배송 전 환불 시, 무통장 입금은 3일 이내 전액 환불됩니다.</li>
+    <li>카드 결제는 신용카드 정책에 따라 카드 승인을 취소하여 결제 대금이 청구되지 않습니다.</li>
+  </ul>
+</section>
+
+
+
+<!-- Footer -->
+<footer class="bg-gray-800 text-gray-400 py-8 mt-12">
+  <div class="container mx-auto px-4 grid md:grid-cols-3 gap-8">
+    <div>
+      <h3 class="text-white font-bold mb-2">AuGold</h3>
+      <p>믿을 수 있는 프리미엄 금 전문 플랫폼</p>
+    </div>
+    <div>
+      <h4 class="text-white font-semibold mb-2">고객센터</h4>
+      <p>1588-0000</p>
+      <p>help@augold.co.kr</p>
+      <p>평일 09:00~18:00</p>
+    </div>
+    <div>
+      <h4 class="text-white font-semibold mb-2">정보</h4>
+      <p>회사소개 | 이용약관 | 개인정보처리방침</p>
+    </div>
+  </div>
+  <div class="text-center text-gray-500 mt-6 text-sm">
+    &copy; 2025 AuGold. All rights reserved.
+  </div>
+</footer>
+</body>
+</html>

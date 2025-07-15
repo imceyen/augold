@@ -6,7 +6,8 @@ import lombok.Data;
 public class MainPageInfoDTO {
     private String productId;
     private String karatCode;
-    private String categoryId;
+    private Double goldWeight;
+    private String ctgrId;
     private String productName;
     private String productType;
     private double finalPrice;
