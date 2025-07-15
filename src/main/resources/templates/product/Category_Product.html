@@ -73,23 +73,23 @@
         </a>
 
         <nav class="hidden md:flex space-x-8">
-            <a href="/" class="text-gray-700 hover:text-yellow-600 font-medium transition-colors duration-300 flex items-center space-x-1">
-                <i class="fas fa-home text-sm"></i>
-                <span>홈</span>
-            </a>
-            <a href="/login" class="text-gray-700 hover:text-yellow-600 font-medium transition-colors duration-300 flex items-center space-x-1">
-                <i class="fas fa-user text-sm"></i>
-                <span>로그인</span>
-            </a>
-            <a href="/signup" class="text-gray-700 hover:text-yellow-600 font-medium transition-colors duration-300 flex items-center space-x-1">
-                <i class="fas fa-user-plus text-sm"></i>
-                <span>회원가입</span>
-            </a>
-            <a href="/cart" class="text-gray-700 hover:text-yellow-600 font-medium transition-colors duration-300 flex items-center space-x-1">
-                <i class="fas fa-shopping-cart text-sm"></i>
-                <span>장바구니</span>
-            </a>
+            <a href="/" class="…">홈</a>
+
+            <!-- 로그인 X -->
+            <th:block th:if="${#strings.isEmpty(loginName)}">
+                <a href="/login" class="…">로그인</a>
+                <a href="/signup" class="…">회원가입</a>
+            </th:block>
+
+            <!-- 로그인 O -->
+            <th:block th:if="${!#strings.isEmpty(loginName)}">
+                <span th:text="${loginName + '님 환영합니다'}" class="…">홍길동님 환영합니다</span>
+                <a href="/mypage" class="…">마이페이지</a>
+                <a href="/cart" class="…">장바구니</a>
+                <a href="/logout" class="…">로그아웃</a>
+            </th:block>
         </nav>
+
         <!-- Mobile menu button -->
         <button class="md:hidden text-gray-700 hover:text-yellow-600">
             <i class="fas fa-bars text-xl"></i>
