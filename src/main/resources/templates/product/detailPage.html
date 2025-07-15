@@ -67,15 +67,15 @@
 
             <!-- 네비게이션 -->
             <nav class="hidden md:flex space-x-8">
-                <a href="/category?type=goldbar" class="text-gray-700 font-semibold hover:text-yellow-600 transition-colors duration-300 flex items-center space-x-1">
+                <a href="/category?type=goldbar#goldbar" class="text-gray-700 font-semibold hover:text-yellow-600 transition-colors duration-300 flex items-center space-x-1">
                     <i class="fas fa-gem text-sm"></i>
                     <span>골드바</span>
                 </a>
-                <a href="/category?type=jewelry" class="text-gray-700 font-semibold hover:text-yellow-600 transition-colors duration-300 flex items-center space-x-1">
+                <a href="/category?type=jewelry#jewelry" class="text-gray-700 font-semibold hover:text-yellow-600 transition-colors duration-300 flex items-center space-x-1">
                     <i class="fas fa-ring text-sm"></i>
                     <span>주얼리</span>
                 </a>
-                <a href="/category?type=gift" class="text-gray-700 font-semibold hover:text-yellow-600 transition-colors duration-300 flex items-center space-x-1">
+                <a href="/category?type=gift#gift" class="text-gray-700 font-semibold hover:text-yellow-600 transition-colors duration-300 flex items-center space-x-1">
                     <i class="fas fa-gift text-sm"></i>
                     <span>기념품</span>
                 </a>
@@ -112,7 +112,7 @@
         <div class="fade-in">
             <div class="bg-white rounded-2xl shadow-xl p-8">
                 <div class="relative mb-6">
-                    <img th:src="${product.imageUrl}" alt="상품 이미지"
+                    <img th:src="${product.imageUrl}" id="mainImage" alt="상품 이미지"
                          class="w-full h-96 object-contain rounded-xl border border-gray-200" />
                     <div class="absolute top-4 right-4 bg-gradient-to-r from-pink-500 to-rose-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
                         <i class="fas fa-star mr-1"></i>추천
@@ -122,14 +122,18 @@
                 <!-- 썸네일 이미지들 -->
                 <div class="flex space-x-4 overflow-x-auto image-gallery">
                     <img th:src="${product.imageUrl}" alt="상품 이미지"
-                         class="w-20 h-20 object-cover rounded-lg border-2 border-yellow-400 cursor-pointer hover:opacity-80 transition-opacity" />
+                         class="thumbnail w-20 h-20 object-cover rounded-lg border-2 border-yellow-400 cursor-pointer hover:opacity-80 transition-opacity" />
+
                     <img th:src="@{${product.imageUrl1}}" alt="상세 이미지1"
-                         class="w-20 h-20 object-cover rounded-lg border-2 border-gray-200 cursor-pointer hover:border-yellow-400 transition-colors" />
+                         class="thumbnail w-20 h-20 object-cover rounded-lg border-2 border-gray-200 cursor-pointer hover:border-yellow-400 transition-colors" />
+
                     <img th:src="@{${product.imageUrl2}}" alt="상세 이미지2"
-                         class="w-20 h-20 object-cover rounded-lg border-2 border-gray-200 cursor-pointer hover:border-yellow-400 transition-colors" />
+                         class="thumbnail w-20 h-20 object-cover rounded-lg border-2 border-gray-200 cursor-pointer hover:border-yellow-400 transition-colors" />
+
                     <img th:src="@{${product.imageUrl3}}" alt="상세 이미지3"
-                         class="w-20 h-20 object-cover rounded-lg border-2 border-gray-200 cursor-pointer hover:border-yellow-400 transition-colors" />
+                         class="thumbnail w-20 h-20 object-cover rounded-lg border-2 border-gray-200 cursor-pointer hover:border-yellow-400 transition-colors" />
                 </div>
+
             </div>
         </div>
 
@@ -145,8 +149,12 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm text-gray-600 mb-1">최종 가격</p>
-                                <p id="price" class="text-3xl font-bold text-yellow-700"
-                                   th:text="'₩' + ${#numbers.formatInteger(product.finalPrice, 3, 'COMMA')}">가격</p>
+                                <p id="price"
+                                   class="text-3xl font-bold text-yellow-700"
+                                   th:attr="data-price=${product.finalPrice}"
+                                   th:text="'₩' + ${#numbers.formatInteger(product.finalPrice, 3, 'COMMA')}">
+                                </p>
+
                             </div>
                             <div class="text-right">
                                 <div class="w-16 h-16 gold-gradient rounded-full flex items-center justify-center">
@@ -174,11 +182,15 @@
                         </div>
                         <div class="bg-gray-50 rounded-lg p-4">
                             <p class="text-sm text-gray-600 mb-1">소재</p>
-                            <p class="font-semibold text-gray-800" th:text="${product.karatCode}">K24 GOLD</p>
+                            <p class="font-semibold text-gray-800" id="materialValue" th:text="${product.karatCode}">14K</p>
                         </div>
+
                         <div class="bg-gray-50 rounded-lg p-4">
                             <p class="text-sm text-gray-600 mb-1">중량</p>
-                            <p class="font-semibold text-gray-800">정보 없음</p>
+                            <p class="font-semibold text-gray-800"
+                               th:text="${product.goldWeight != null ? product.goldWeight + 'g' : '정보 없음'}">
+                                1.875g
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -196,7 +208,7 @@
                         </div>
                         <div class="flex items-center justify-between">
                             <span class="text-sm text-gray-600">판매가 (시세 + 10%)</span>
-                            <span class="font-semibold text-yellow-700" th:text="'₩' + ${#numbers.formatInteger(goldPrice * 1.1, 3, 'COMMA')} + '/g'">₩93,500/g</span>
+                            <span th:text="'₩' + ${#numbers.formatDecimal(goldPrice * 1.1, 0, 'COMMA')}">가격</span>
                         </div>
                     </div>
                 </div>
@@ -209,24 +221,30 @@
                     </h3>
                     <select id="karatSelect" class="w-full border-2 border-gray-200 rounded-xl p-4 focus:border-yellow-500 focus:outline-none transition-colors">
                         <option value="">순도를 선택해 주세요</option>
-                        <option value="14K" data-price="50000">14K (₩50,000/g)</option>
-                        <option value="18K" data-price="65000">18K (₩65,000/g)</option>
-                        <option value="24K" data-price="85000">24K (₩85,000/g)</option>
+                        <option th:each="opt : ${options}"
+                                th:value="${opt.karatCode}"
+                                th:data-price="${opt.finalPrice}"
+                                th:selected="${opt.karatCode == product.karatCode}"
+                                th:text="${opt.karatCode}">
+                        </option>
                     </select>
                 </div>
 
                 <!-- 기념품 옵션 선택 (감사패, 돌반지, 카네이션기념품) -->
-                <div class="mb-8" th:if="${product.subCtgr == '감사패' or product.subCtgr == '돌반지' or product.subCtgr == '카네이션기념품'}">
-                    <h3 class="text-xl font-bold mb-4 text-gray-800 flex items-center">
-                        <i class="fas fa-gift text-yellow-500 mr-2"></i>
-                        중량 선택
-                    </h3>
-                    <select id="weightSelect" class="w-full border-2 border-gray-200 rounded-xl p-4 focus:border-yellow-500 focus:outline-none transition-colors">
+                <!-- 중량 옵션: 기념품일 때만 보여줌 -->
+                <!-- 중량 선택 (감사패, 돌반지, 카네이션기념품)일 때만 출력) -->
+                <div class="mb-8" th:if="${product.subCtgr == '돌반지'}">
+                    <h3 class="text-xl font-bold mb-4">중량 선택</h3>
+                    <select id="weightSelect" class="...">
                         <option value="">중량을 선택해 주세요</option>
-                        <option value="1.875" data-price="159375">1.875g (₩159,375)</option>
-                        <option value="3.75" data-price="318750">3.75g (₩318,750)</option>
+                        <option th:each="opt : ${options}"
+                                th:value="${opt.goldWeight}"
+                                th:data-price="${opt.finalPrice}"
+                                th:text="${opt.goldWeight} + 'g (₩' + ${#numbers.formatInteger(opt.finalPrice, 0)} + ')'">
+                        </option>
                     </select>
                 </div>
+
 
                 <!-- 수량 선택 -->
                 <div class="mb-8">
@@ -334,89 +352,123 @@
 
 <!-- 가격 동적 업데이트 JS -->
 <script>
-    const priceText = document.getElementById('price');
-    const quantityInput = document.getElementById('quantityInput');
-    const minusBtn = quantityInput.previousElementSibling;
-    const plusBtn = quantityInput.nextElementSibling;
+    document.addEventListener('DOMContentLoaded', function () {
+        const priceText = document.getElementById('price');
+        const quantityInput = document.getElementById('quantityInput');
+        const minusBtn = quantityInput?.previousElementSibling;
+        const plusBtn = quantityInput?.nextElementSibling;
+        const karatSelect = document.getElementById('karatSelect');
+        const materialValue = document.getElementById('materialValue');
+        const weightSelect = document.getElementById('weightSelect');
+        const mainImage = document.getElementById('mainImage');
+        const thumbnails = document.querySelectorAll('.thumbnail');
 
-    // 기본 가격 (상품 카테고리에 따라 다름)
-    let basePrice = 0;
-    let currentPrice = 0;
+        let unitPrice = parseInt(priceText?.dataset.price) || 0;
 
-    // 골드바: 금시세 기반 가격
-    const goldPriceElement = document.querySelector('[data-gold-price]');
-    if (goldPriceElement) {
-        basePrice = parseInt(goldPriceElement.dataset.goldPrice) * 1.1; // 시세 + 10%
-        currentPrice = basePrice;
-        updatePrice();
-    }
+        // ✅ 순도/중량 선택에 따라 가격 계산
+        function getSelectedPrice() {
+            let selectedPrice = unitPrice;
 
-    // 주얼리: 순도 선택에 따른 가격
-    const karatSelect = document.getElementById('karatSelect');
-    if (karatSelect) {
-        karatSelect.addEventListener('change', function () {
-            const selected = this.selectedOptions[0];
-            if (selected && selected.dataset.price) {
-                basePrice = parseInt(selected.dataset.price);
-                currentPrice = basePrice;
+            if (karatSelect && karatSelect.selectedOptions.length > 0) {
+                const karatPrice = parseInt(karatSelect.selectedOptions[0].dataset.price);
+                if (!isNaN(karatPrice)) selectedPrice = karatPrice;
+            }
+
+            if (weightSelect && weightSelect.selectedOptions.length > 0) {
+                const weightPrice = parseInt(weightSelect.selectedOptions[0].dataset.price);
+                if (!isNaN(weightPrice)) selectedPrice = weightPrice;
+            }
+
+            return selectedPrice;
+        }
+
+        function updatePrice() {
+            const qty = parseInt(quantityInput?.value) || 1;
+            const currentUnitPrice = getSelectedPrice();
+            const total = currentUnitPrice * qty;
+            if (priceText) {
+                priceText.textContent = '₩' + total.toLocaleString();
+            }
+        }
+
+        // ✅ 수량 증감 버튼
+        minusBtn?.addEventListener('click', () => {
+            const qty = parseInt(quantityInput.value);
+            if (qty > 1) {
+                quantityInput.value = qty - 1;
                 updatePrice();
             }
         });
-    }
 
-    // 기념품: 중량 선택에 따른 가격
-    const weightSelect = document.getElementById('weightSelect');
-    if (weightSelect) {
-        weightSelect.addEventListener('change', function () {
-            const selected = this.selectedOptions[0];
-            if (selected && selected.dataset.price) {
-                basePrice = parseInt(selected.dataset.price);
-                currentPrice = basePrice;
-                updatePrice();
-            }
-        });
-    }
-
-    // 수량 조절 버튼
-    minusBtn.addEventListener('click', () => {
-        if (quantityInput.value > 1) {
-            quantityInput.value = parseInt(quantityInput.value) - 1;
+        plusBtn?.addEventListener('click', () => {
+            const qty = parseInt(quantityInput.value);
+            quantityInput.value = qty + 1;
             updatePrice();
-        }
-    });
+        });
 
-    plusBtn.addEventListener('click', () => {
-        quantityInput.value = parseInt(quantityInput.value) + 1;
-        updatePrice();
-    });
+        quantityInput?.addEventListener('input', updatePrice);
 
-    // 수량 입력 시 가격 업데이트
-    quantityInput.addEventListener('input', updatePrice);
+        // ✅ 순도 변경 시 가격/소재 갱신
+        if (karatSelect) {
+            karatSelect.addEventListener('change', function () {
+                const selected = this.selectedOptions[0];
+                if (selected && selected.dataset.price) {
+                    if (materialValue) {
+                        materialValue.textContent = selected.value;
+                    }
+                    updatePrice();
+                }
+            });
 
-    // 가격 업데이트 함수
-    function updatePrice() {
-        const quantity = parseInt(quantityInput.value) || 1;
-        const totalPrice = currentPrice * quantity;
-        const formatted = new Intl.NumberFormat().format(totalPrice);
-        priceText.textContent = `₩${formatted}`;
-    }
-
-    // 페이지 로드 시 초기 가격 설정
-    document.addEventListener('DOMContentLoaded', function() {
-        // 골드바가 아닌 경우 기본 가격 설정
-        if (!goldPriceElement) {
-            // 주얼리나 기념품의 경우 첫 번째 옵션을 기본값으로 설정
-            const firstOption = karatSelect ? karatSelect.options[1] :
-                               weightSelect ? weightSelect.options[1] : null;
-
-            if (firstOption && firstOption.dataset.price) {
-                basePrice = parseInt(firstOption.dataset.price);
-                currentPrice = basePrice;
-                updatePrice();
+            if (karatSelect.options.length > 1) {
+                karatSelect.selectedIndex = 1;
+                karatSelect.dispatchEvent(new Event('change'));
             }
         }
+
+        // ✅ 중량 변경 시 가격 갱신
+        if (weightSelect) {
+            weightSelect.addEventListener('change', function () {
+                const selected = this.selectedOptions[0];
+                if (selected && selected.dataset.price) {
+                    updatePrice();
+                }
+            });
+        }
+
+        // ✅ 썸네일 클릭 시 메인 이미지 변경
+        thumbnails.forEach(thumbnail => {
+            thumbnail.addEventListener('click', function () {
+                if (mainImage && thumbnail.src) {
+                    mainImage.src = thumbnail.src;
+
+                    thumbnails.forEach(t => {
+                        t.classList.remove('border-yellow-400');
+                        t.classList.add('border-gray-200');
+                    });
+
+                    thumbnail.classList.remove('border-gray-200');
+                    thumbnail.classList.add('border-yellow-400');
+                }
+            });
+        });
+
+        // ✅ 초기 가격 적용
+        updatePrice();
     });
 </script>
+
+
+
+
+
+<!--    // 골드바: 금시세 기반 가격-->
+<!--    const goldPriceElement = document.querySelector('[data-gold-price]');-->
+<!--    if (goldPriceElement) {-->
+<!--        basePrice = parseInt(goldPriceElement.dataset.goldPrice) * 1.1; // 시세 + 10%-->
+<!--        currentPrice = basePrice;-->
+<!--        updatePrice();-->
+
 
 <!-- Footer -->
 <footer class="luxury-gradient text-white py-16">
