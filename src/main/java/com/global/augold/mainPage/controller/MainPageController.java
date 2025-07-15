@@ -47,11 +47,13 @@ public class MainPageController {
         double price18k = basePrice * 0.75 * 0.83;
         double price14k = basePrice * 0.585 * 0.83;
 
-        Customer loginCustomer = (Customer) session.getAttribute("loginUser");
-        if (loginCustomer != null) {
+        Object loginUserObj = session.getAttribute("loginUser");
+        if (loginUserObj instanceof Customer) {
+            Customer loginCustomer = (Customer) loginUserObj;
             model.addAttribute("loginName", loginCustomer.getCstmName());
         }
 
+        // 관리자 로그인 시 loginUser가 String "admin"이거나 다른 타입일 경우 무시하고 이름 출력 안함
         model.addAttribute("products", products);
         model.addAttribute("todayPrice", todayPrice);
         model.addAttribute("chartLabels", chartLabels);

@@ -85,6 +85,7 @@
   <button class="tab-btn active" onclick="showTab('productTab')">상품 관리</button>
   <button class="tab-btn" onclick="showTab('statsTab')">통계</button>
   <button class="tab-btn" onclick="showTab('receiptTab')">영수증 등록</button>
+  <button class="tab-btn" onclick="showTab('inquiryTab')">문의 답변</button>
 </div>
 
 <div class="content">
@@ -176,6 +177,69 @@
 
     <div id="ocrResult" style="margin-top: 20px;"></div>
   </div>
+
+  <div id="inquiryTab" class="tab-content">
+    <h3>문의 답변</h3>
+
+    <table id="inquiryTable">
+      <thead>
+      <tr>
+        <th>#</th>
+        <th>회원번호</th>
+        <th>제목</th>
+        <th>처리상태</th>
+        <th>문의일시</th>
+      </tr>
+      </thead>
+      <tbody>
+      <!-- JS가 이 영역을 채웁니다 -->
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      fetchInquiries();
+    });
+
+    /**
+     * 문의 목록을 서버에서 가져와 표에 채운다
+     */
+    function fetchInquiries() {
+      fetch('/api/inquiries')
+        .then(res => {
+          if (!res.ok) throw new Error("문의 목록을 불러오지 못했습니다.");
+          return res.json();
+        })
+        .then(data => {
+          const tbody = document.querySelector("#inquiryTable tbody");
+          tbody.innerHTML = "";  // 기존 내용 초기화
+
+          data.forEach((inq, index) => {
+            const row = `
+              <tr>
+                <td>${index + 1}</td>
+                <td>${inq.cstmNumber}</td>
+                <td>
+                 <a href="/admin/inquiry/${inq.inqNumber}">${inq.inqTitle}</a>
+
+                  </a>
+                </td>
+                <td>${inq.inqStatus}</td>
+                <td>${new Date(inq.inqDate).toLocaleString()}</td>
+              </tr>
+            `;
+            tbody.insertAdjacentHTML("beforeend", row);
+          });
+        })
+        .catch(err => {
+          console.error(err);
+          alert(err.message);
+        });
+    }
+  </script>
+
+
 </div>
 
 <script>

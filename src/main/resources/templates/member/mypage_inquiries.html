@@ -113,6 +113,7 @@
         <tr>
             <th>번호</th>
             <th>제목</th>
+            <th>처리상태</th>
             <th>작성일</th>
         </tr>
         </thead>
@@ -122,6 +123,7 @@
             <td>
                 <a th:href="@{/mypage/inquiries/{id}(id=${inquiry.inqNumber})}" th:text="${inquiry.inqTitle}">제목</a>
             </td>
+            <td th:text="${inquiry.inqStatus}">처리상태</td>
             <td th:text="${#temporals.format(inquiry.inqDate, 'yyyy-MM-dd')}">2025-07-14</td>
         </tr>
         </tbody>

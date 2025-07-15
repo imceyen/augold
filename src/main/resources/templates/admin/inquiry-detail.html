@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>문의 상세 및 답변 수정</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      padding: 30px;
+      max-width: 800px;
+      margin: auto;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 10px;
+      font-size: 16px;
+      margin-top: 5px;
+    }
+    input[readonly], input {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      font-size: 16px;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 25px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      color: white;
+    }
+    .btn-save {
+      background-color: goldenrod;
+    }
+    .btn-delete {
+      background-color: #dc3545;
+      margin-left: 10px;
+    }
+    .btn-cancel {
+      background-color: #6c757d;
+      margin-left: 10px;
+    }
+  </style>
+</head>
+<body>
+<h2>문의 상세 및 답변 수정</h2>
+
+<form id="answerForm">
+  <label>문의 번호</label>
+  <input type="text" id="inqNumber" name="inqNumber" readonly />
+
+  <label>회원 번호</label>
+  <input type="text" id="cstmNumber" readonly />
+
+  <label>문의 제목</label>
+  <input type="text" id="inqTitle" readonly />
+
+  <label>문의 내용</label>
+  <textarea id="inqContent" readonly></textarea>
+
+  <label>답변 내용</label>
+  <textarea id="answerContent" name="answerContent" required></textarea>
+
+  <div>
+    <button type="submit" class="btn-save">저장</button>
+    <button type="button" class="btn-delete" id="btnDelete">삭제</button>
+    <button type="button" class="btn-cancel" id="btnCancel">취소</button>
+  </div>
+</form>
+
+<script>
+  const inqNumber = window.location.pathname.split('/').pop();
+
+  async function fetchInquiry() {
+    const res = await fetch(`/api/inquiries/${inqNumber}`);
+    if (!res.ok) {
+      alert('문의 정보를 불러오는데 실패했습니다.');
+      return;
+    }
+    const data = await res.json();
+    document.getElementById('inqNumber').value = data.inqNumber;
+    document.getElementById('cstmNumber').value = data.cstmNumber;
+    document.getElementById('inqTitle').value = data.inqTitle;
+    document.getElementById('inqContent').value = data.inqContent;
+    document.getElementById('answerContent').value = data.answerContent || '';
+  }
+
+  async function saveAnswer(event) {
+    event.preventDefault();
+    const answerContent = document.getElementById('answerContent').value.trim();
+    if (!answerContent) {
+      alert('답변 내용을 입력해주세요.');
+      return;
+    }
+    const res = await fetch(`/api/inquiries/${inqNumber}/answer`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ answerContent }),
+    });
+    if (res.ok) {
+      alert('답변이 저장되었습니다.');
+      window.location.href = '/admin'; // 목록 페이지로 이동
+    } else {
+      alert('답변 저장에 실패했습니다.');
+    }
+  }
+
+  async function deleteAnswer() {
+    if (!confirm('답변을 삭제하시겠습니까?')) return;
+    const res = await fetch(`/api/inquiries/${inqNumber}/answer`, {
+      method: 'DELETE',
+    });
+    if (res.ok) {
+      alert('답변이 삭제되었습니다.');
+      window.location.href = '/admin'; // 목록 페이지로 이동
+    } else {
+      alert('답변 삭제에 실패했습니다.');
+    }
+  }
+
+  document.getElementById('answerForm').addEventListener('submit', saveAnswer);
+  document.getElementById('btnDelete').addEventListener('click', deleteAnswer);
+  document.getElementById('btnCancel').addEventListener('click', () => {
+    window.location.href = '/admin'; // 목록 페이지로 이동
+  });
+
+  fetchInquiry();
+</script>
+</body>
+</html>
