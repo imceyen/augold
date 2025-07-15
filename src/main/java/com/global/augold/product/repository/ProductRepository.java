@@ -11,7 +11,7 @@ import java.util.List;
 public interface ProductRepository extends JpaRepository<Product, String> {
 
     // 카테고리별 상품 조회 (예: 골드바, 주얼리 등)
-    List<Product> findByCategoryId(String categoryId);
+    List<Product> findByCtgrId(String ctgrId);
 
     List<Product> findByProductIdStartingWith(String prefix);
 

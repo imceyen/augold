@@ -55,7 +55,7 @@ public class MainPageService {
         dto.setProductId(p.getProductId());
         dto.setKaratCode(p.getKaratCode());
         dto.setGoldWeight(p.getGoldWeight());
-        dto.setCategoryId(p.getCtgrId());
+        dto.setCtgrId(p.getCtgrId());
         dto.setProductName(p.getProductName());
         dto.setFinalPrice(p.getFinalPrice());
         dto.setImageUrl(p.getImageUrl());

@@ -7,7 +7,7 @@ public class MainPageInfoDTO {
     private String productId;
     private String karatCode;
     private Double goldWeight;
-    private String categoryId;
+    private String ctgrId;
     private String productName;
     private String productType;
     private double finalPrice;
