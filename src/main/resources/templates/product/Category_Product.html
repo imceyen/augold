@@ -335,8 +335,13 @@
                     <div class="flex items-center justify-between mb-4">
                         <p class="text-2xl font-bold text-yellow-700"
                            th:text="'₩' + ${#numbers.formatInteger(product.finalPrice, 3, 'COMMA')}">가격</p>
-                        <!-- 기념품: 기본 옵션 표시 (1.875g) -->
-                        <p class="text-sm text-gray-500">1.875g 기준</p>
+
+                        <p class="text-sm text-gray-500"
+                           th:text="${product.goldWeight != null} ?
+                   (${product.goldWeight == 1.0} ? '1.0g 기준' : ${product.goldWeight + 'g 기준'}) :
+                   '중량 정보 없음'">
+                            중량 정보 없음
+                        </p>
                     </div>
                     <a th:href="@{/product/{id}(id=${product.productId})}"
                        class="block w-full text-center bg-gradient-to-r from-yellow-500 to-amber-600 text-white py-3 rounded-xl hover:shadow-lg transition-all duration-300 font-semibold group-hover:scale-105">
