@@ -162,9 +162,20 @@
     </table>
   </div>
 
+  <!-- 통계 부분 테스트 -->
   <div id="statsTab" class="tab-content">
-    <h3>통계</h3>
-    <p>여기에 매출 통계, 월별 판매 그래프 등을 넣자.</p>
+    <h3>금 시세 예측 통계</h3>
+
+    <!-- Plotly.js CDN 추가 -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+    <!-- 그래프가 그려질 영역들 -->
+    <div id="loadingMessage" style="text-align: center; padding: 50px; font-size: 1.2em;">
+      데이터를 불러오는 중입니다...
+    </div>
+    <div id="forecastPlot" class="plot-container" style="width: 90%; max-width: 900px; margin: 20px auto; display: none;"></div>
+    <div id="trendPlot" class="plot-container" style="width: 90%; max-width: 900px; margin: 20px auto; display: none;"></div>
+    <div id="weeklyPlot" class="plot-container" style="width: 90%; max-width: 900px; margin: 20px auto; display: none;"></div>
   </div>
 
   <div id="receiptTab" class="tab-content">
@@ -246,14 +257,7 @@
   let editing = false;
   let editProductId = null;
 
-  function showTab(tabId) {
-      const tabs = document.querySelectorAll('.tab-content');
-      const buttons = document.querySelectorAll('.tab-btn');
-      tabs.forEach(tab => tab.classList.remove('active'));
-      buttons.forEach(btn => btn.classList.remove('active'));
-      document.getElementById(tabId).classList.add('active');
-      event.target.classList.add('active');
-  }
+
 
   function toggleForm(show = null) {
       const form = document.getElementById('productForm');
@@ -392,6 +396,92 @@
           console.error(err);
       });
   }
+</script>
+
+<script>
+  /**
+ * 탭을 보여주는 함수를 수정하여, 통계 탭이 처음 열릴 때 데이터를 로드하도록 함.
+ */
+let statsLoaded = false; // 통계 데이터가 이미 로드되었는지 확인하는 플래그
+
+function showTab(tabId) {
+    const tabs = document.querySelectorAll('.tab-content');
+    const buttons = document.querySelectorAll('.tab-btn');
+    tabs.forEach(tab => tab.classList.remove('active'));
+    buttons.forEach(btn => btn.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    event.target.classList.add('active');
+
+    // 통계 탭을 처음 클릭했을 때만 데이터를 불러옴
+    if (tabId === 'statsTab' && !statsLoaded) {
+        loadGoldPriceForecast();
+        statsLoaded = true; // 로드되었음을 표시
+    }
+}
+
+
+/**
+ * 금 시세 예측 데이터를 서버에서 비동기적으로 가져와 그래프를 그리는 함수
+ */
+function loadGoldPriceForecast() {
+    const loadingMsg = document.getElementById('loadingMessage');
+    const forecastPlotDiv = document.getElementById('forecastPlot');
+    const trendPlotDiv = document.getElementById('trendPlot');
+    const weeklyPlotDiv = document.getElementById('weeklyPlot');
+
+    // 로딩 메시지 표시
+    loadingMsg.style.display = 'block';
+    forecastPlotDiv.style.display = 'none';
+    trendPlotDiv.style.display = 'none';
+    weeklyPlotDiv.style.display = 'none';
+
+    fetch('/api/statistics/gold-price-forecast')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('서버 응답 오류: ' + response.statusText);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.error) {
+                throw new Error(data.error);
+            }
+
+            loadingMsg.style.display = 'none'; // 로딩 메시지 숨기기
+
+            // 그래프 영역 보이기
+            forecastPlotDiv.style.display = 'block';
+            trendPlotDiv.style.display = 'block';
+            weeklyPlotDiv.style.display = 'block';
+
+            // 1. 메인 예측 그래프 그리기 (이전 답변의 JS 코드와 동일)
+            const forecast = data.forecast;
+            const traceActual = { x: forecast.ds, y: forecast.y, mode: 'markers', type: 'scatter', name: '실제 가격' };
+            const tracePredicted = { x: forecast.ds, y: forecast.yhat, mode: 'lines', type: 'scatter', name: '예측 가격', line: { color: 'blue' } };
+            const traceUpperBand = { x: forecast.ds, y: forecast.yhat_upper, mode: 'lines', line: { width: 0 }, showlegend: false };
+            const traceLowerBand = { x: forecast.ds, y: forecast.yhat_lower, mode: 'lines', line: { width: 0 }, fill: 'tonexty', fillcolor: 'rgba(0, 100, 255, 0.2)', showlegend: false };
+            const forecastLayout = { title: '향후 30일 금 시세 예측', xaxis: { title: '날짜' }, yaxis: { title: '가격 (원/g)' } };
+            Plotly.newPlot('forecastPlot', [traceUpperBand, traceLowerBand, traceActual, tracePredicted], forecastLayout);
+
+            // 2. 트렌드 그래프 그리기
+            const trend = data.trend;
+            const trendTrace = { x: trend.ds, y: trend.y, mode: 'lines', type: 'scatter', name: '트렌드' };
+            const trendLayout = { title: '시세 트렌드', xaxis: { title: '날짜' }, yaxis: { title: '트렌드 값' } };
+            Plotly.newPlot('trendPlot', [trendTrace], trendLayout);
+
+            // 3. 주간 계절성 그래프 그리기
+            const weekly = data.weekly;
+            const weeklyTrace = { x: weekly.x, y: weekly.y, mode: 'lines', type: 'scatter', name: '주간 계절성' };
+            const weeklyLayout = { title: '주간 계절성', xaxis: { title: '요일' }, yaxis: { title: '계절성 영향' } };
+            Plotly.newPlot('weeklyPlot', [weeklyTrace], weeklyLayout);
+        })
+        .catch(error => {
+            console.error('Error fetching forecast data:', error);
+            loadingMsg.innerText = '데이터를 불러오는 데 실패했습니다. 잠시 후 다시 시도해주세요. \n오류: ' + error.message;
+            loadingMsg.style.color = 'red';
+        });
+}
+
 </script>
 
 </body>
