@@ -9,15 +9,9 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import java.util.ArrayList;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.ArrayList;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Controller
@@ -27,19 +21,16 @@ public class DetailPageController {
     private final DetailPageService detailPageService;
     private final ProductRepository productRepository;
 
+    // 기존 GET 상세 조회 메서드 (변경 없음)
     @GetMapping("/product/{id}")
     public String showProductDetail(@PathVariable("id") String productId, Model model, HttpSession session) {
-
         Customer loginUser = (Customer) session.getAttribute("loginUser");
         if (loginUser != null) {
-            String loginName = loginUser.getCstmName();
-            model.addAttribute("loginName", loginName);
+            model.addAttribute("loginName", loginUser.getCstmName());
         }
 
-        // 1. 상품 정보 조회
         DetailPageDTO dto = detailPageService.getProductById(productId);
 
-        // 1-1. 골드바일 경우 실시간 시세 반영
         if ("0002".equals(dto.getCategoryId())) {
             double marketPrice = detailPageService.getLatestGoldPrice();
             double goldPricePerGram = marketPrice * 1.1;
@@ -48,26 +39,17 @@ public class DetailPageController {
             }
         }
 
-        // 2. 옵션 조회 분기 처리
-        // 2. 옵션 조회 분기 처리
         List<Product> productOptions = new ArrayList<>();
 
         if ("감사패".equals(dto.getSubCtgr()) || "카네이션기념품".equals(dto.getSubCtgr())) {
-            // 옵션 없음 (select 박스 숨김용)
             productOptions = List.of();
-
         } else if ("돌반지".equals(dto.getSubCtgr())) {
-            // 중량 옵션 존재
             productOptions = productRepository.findAll().stream()
                     .filter(p -> "돌반지".equals(p.getSubCtgr()))
                     .collect(Collectors.toList());
-
         } else if (dto.getProductGroup() != null && !dto.getProductGroup().isEmpty()) {
-            // productGroup이 있는 경우
             productOptions = productRepository.findByProductGroup(dto.getProductGroup());
-
         } else {
-            // fallback: 이름 유사성 기반 옵션 구성
             productOptions = productRepository.findAll().stream()
                     .filter(p -> p.getCtgrId().equals(dto.getCategoryId()))
                     .filter(p -> p.getProductName() != null && dto.getProductName() != null)
@@ -81,8 +63,6 @@ public class DetailPageController {
                     .collect(Collectors.toList());
         }
 
-
-        // 3. 옵션 DTO로 변환
         List<DetailPageDTO> options = productOptions.stream()
                 .map(p -> {
                     String cleanName = p.getProductName();
@@ -104,8 +84,6 @@ public class DetailPageController {
                 })
                 .collect(Collectors.toList());
 
-        // 4. 옵션 정렬 (순도)
-        // 4. 옵션 정렬 후 추가
         options.sort(Comparator.comparingInt(opt -> {
             switch (opt.getKaratCode()) {
                 case "14K": return 1;
@@ -115,22 +93,18 @@ public class DetailPageController {
             }
         }));
 
-        // ✅ 완전히 동일한 goldWeight + karatCode 조합만 제거
         Set<String> seen = new HashSet<>();
         List<DetailPageDTO> deduplicatedOptions = new ArrayList<>();
 
         for (DetailPageDTO opt : options) {
-            String key = opt.getKaratCode() + "-" + opt.getGoldWeight(); // 예: "14K-1.875"
+            String key = opt.getKaratCode() + "-" + opt.getGoldWeight();
             if (!seen.contains(key)) {
                 seen.add(key);
                 deduplicatedOptions.add(opt);
             }
         }
-
         options = deduplicatedOptions;
 
-
-        // 5. 옵션 중 기본값 적용 (기본: 14K → 없으면 첫 번째)
         DetailPageDTO baseOption = options.stream()
                 .filter(opt -> "14K".equals(opt.getKaratCode()))
                 .findFirst()
@@ -139,28 +113,62 @@ public class DetailPageController {
         dto.setFinalPrice(baseOption.getFinalPrice());
         dto.setKaratCode(baseOption.getKaratCode());
 
-        // 6. 모델에 전달
         model.addAttribute("product", dto);
         model.addAttribute("options", options);
 
-        // 7. 카테고리 기반 타입 설정
         String selectedType;
         switch (dto.getCategoryId()) {
-            case "CAT001":
-                selectedType = "goldbar";
-                break;
-            case "CAT002":
-                selectedType = "jewelry";
-                break;
-            case "CAT003":
-                selectedType = "gift";
-                break;
-            default:
-                selectedType = "goldbar";
-                break;
+            case "CAT001": selectedType = "goldbar"; break;
+            case "CAT002": selectedType = "jewelry"; break;
+            case "CAT003": selectedType = "gift"; break;
+            default: selectedType = "goldbar"; break;
         }
         model.addAttribute("selectedType", selectedType);
 
         return "product/detailPage";
+    }
+
+    // 신규: 상품 등록/수정 POST 메서드 (상세 이미지 포함 처리)
+    @PostMapping("/product/save")
+    public String saveProductDetail(@ModelAttribute DetailPageDTO dto, Model model) {
+
+        // 1. 상품 기본 정보 저장 (ProductRepository 이용)
+        Product product = productRepository.findById(dto.getProductId()).orElse(null);
+
+        if (product == null) {
+            // 새 상품 생성
+            product = Product.builder()
+                    .productId(dto.getProductId())
+                    .karatCode(dto.getKaratCode())
+                    .ctgrId(dto.getCategoryId())
+                    .productName(dto.getProductName())
+                    .basePrice(null) // 필요하면 폼에 추가해서 받으세요
+                    .goldWeight(dto.getGoldWeight())
+                    .finalPrice(dto.getFinalPrice())
+                    .imageUrl(dto.getImageUrl())
+                    .description(dto.getDescription())
+                    .subCtgr(dto.getSubCtgr())
+                    .productGroup(dto.getProductGroup())
+                    .build();
+        } else {
+            // 기존 상품 수정
+            product.setKaratCode(dto.getKaratCode());
+            product.setCtgrId(dto.getCategoryId());
+            product.setProductName(dto.getProductName());
+            product.setGoldWeight(dto.getGoldWeight());
+            product.setFinalPrice(dto.getFinalPrice());
+            product.setImageUrl(dto.getImageUrl());
+            product.setDescription(dto.getDescription());
+            product.setSubCtgr(dto.getSubCtgr());
+            product.setProductGroup(dto.getProductGroup());
+        }
+
+        productRepository.save(product);
+
+        // 2. 상세 이미지 저장 (DetailPageService 이용)
+        detailPageService.saveDetailImages(dto);
+
+        // 3. 저장 후 상세페이지로 리다이렉트
+        return "redirect:/product/" + dto.getProductId();
     }
 }

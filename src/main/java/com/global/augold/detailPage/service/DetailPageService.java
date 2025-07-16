@@ -1,4 +1,5 @@
 package com.global.augold.detailPage.service;
+
 import com.global.augold.detailPage.repository.DetailPageRepository;
 import com.global.augold.detailPage.entity.ProductDetailImage;
 import com.global.augold.detailPage.dto.DetailPageDTO;
@@ -6,11 +7,10 @@ import com.global.augold.product.entity.Product;
 import com.global.augold.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;  // 트랜잭션 추가
 import java.util.List;
 import com.global.augold.goldPrice.Service.GoldPriceService;
 import com.global.augold.goldPrice.dto.GoldPriceDTO;
-
-
 
 @Service
 @RequiredArgsConstructor
@@ -18,21 +18,19 @@ public class DetailPageService {
 
     private final ProductRepository productRepository;
     private final DetailPageRepository detailImageRepository;
-    private final GoldPriceService goldPriceService; // 👈 주입받기
+    private final GoldPriceService goldPriceService;
 
-    // 👇 여기에 메서드 추가
+    // 금 시세 가져오기 (기존 메서드)
     public double getLatestGoldPrice() {
-        GoldPriceDTO dto = goldPriceService.getTodayGoldPrice(); // 외부 API에서 금 시세 가져옴
-
+        GoldPriceDTO dto = goldPriceService.getTodayGoldPrice();
         if (dto != null) {
-            return dto.getPricePerGram(); // 여기서 시세(double)를 반환
+            return dto.getPricePerGram();
         } else {
             throw new IllegalStateException("금 시세를 불러오지 못했습니다.");
         }
     }
 
-
-
+    // 상품 상세 조회 (기존 메서드)
     public DetailPageDTO getProductById(String productId) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다: " + productId));
@@ -43,21 +41,20 @@ public class DetailPageService {
         String imageUrl2 = images.size() > 1 ? images.get(1).getImageUrl() : null;
         String imageUrl3 = images.size() > 2 ? images.get(2).getImageUrl() : null;
 
-        // 상품명에서 순도 정보 제거
         String cleanProductName = product.getProductName();
         if (cleanProductName != null) {
-            cleanProductName = cleanProductName.replaceAll("\\s*\\d+(\\.\\d+)?g", "") // 중량 제거
-                    .replaceAll("\\s*14K|\\s*18K|\\s*24K|\\s*순금", "") // 순도 제거
-                    .replaceAll("\\s+", " ") // 연속된 공백을 하나로
+            cleanProductName = cleanProductName.replaceAll("\\s*\\d+(\\.\\d+)?g", "")
+                    .replaceAll("\\s*14K|\\s*18K|\\s*24K|\\s*순금", "")
+                    .replaceAll("\\s+", " ")
                     .trim();
         }
 
-        DetailPageDTO dto = DetailPageDTO.builder()
+        return DetailPageDTO.builder()
                 .productId(product.getProductId())
                 .productName(cleanProductName)
                 .finalPrice(product.getFinalPrice())
                 .description(product.getDescription())
-                .imageUrl(product.getImageUrl())  // 메인 이미지
+                .imageUrl(product.getImageUrl())
                 .imageUrl1(imageUrl1)
                 .imageUrl2(imageUrl2)
                 .imageUrl3(imageUrl3)
@@ -67,11 +64,37 @@ public class DetailPageService {
                 .subCtgr(product.getSubCtgr())
                 .categoryId(product.getCtgrId())
                 .build();
-
-        System.out.println("imageUrl1 = " + imageUrl1);
-        return dto;
     }
 
+    // **추가**: 상세 이미지 저장/수정 메서드
+    @Transactional
+    public void saveDetailImages(DetailPageDTO dto) {
+        String productId = dto.getProductId();
 
+        // 1. 기존 이미지 모두 삭제
+        detailImageRepository.deleteByProductId(productId);
+
+        // 2. 이미지 3장까지 저장 (null/빈값은 저장 안 함)
+        if (dto.getImageUrl1() != null && !dto.getImageUrl1().isEmpty()) {
+            ProductDetailImage img1 = ProductDetailImage.builder()
+                    .productId(productId)
+                    .imageUrl(dto.getImageUrl1())
+                    .build();
+            detailImageRepository.save(img1);
+        }
+        if (dto.getImageUrl2() != null && !dto.getImageUrl2().isEmpty()) {
+            ProductDetailImage img2 = ProductDetailImage.builder()
+                    .productId(productId)
+                    .imageUrl(dto.getImageUrl2())
+                    .build();
+            detailImageRepository.save(img2);
+        }
+        if (dto.getImageUrl3() != null && !dto.getImageUrl3().isEmpty()) {
+            ProductDetailImage img3 = ProductDetailImage.builder()
+                    .productId(productId)
+                    .imageUrl(dto.getImageUrl3())
+                    .build();
+            detailImageRepository.save(img3);
+        }
+    }
 }
-

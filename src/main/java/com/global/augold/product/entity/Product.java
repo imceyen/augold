@@ -34,7 +34,7 @@ public class Product {
     private Double finalPrice;
 
     @Column(name = "image_url")
-    private String imageUrl;
+    private String imageUrl;  // 대표 이미지
 
     @Column(name = "description")
     private String description;
