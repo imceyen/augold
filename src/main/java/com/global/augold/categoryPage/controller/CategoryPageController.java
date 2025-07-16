@@ -26,11 +26,10 @@ public class CategoryPageController {
             Model model,
             HttpSession session) {
 
-        // 로그인 이름을 모델에 담아줌
+        // 로그인 이름을 항상 모델에 담아줌 (null 허용)
         Customer loginUser = (Customer) session.getAttribute("loginUser");
-        if (loginUser != null) {
-            model.addAttribute("loginName", loginUser.getCstmName());
-        }
+        String loginName = (loginUser != null) ? loginUser.getCstmName() : null;
+        model.addAttribute("loginName", loginName);
 
         List<MainPageInfoDTO> allProducts = mainPageService.getAllProducts();
 

@@ -2,8 +2,10 @@ package com.global.augold.detailPage.controller;
 
 import com.global.augold.detailPage.dto.DetailPageDTO;
 import com.global.augold.detailPage.service.DetailPageService;
+import com.global.augold.member.entity.Customer;
 import com.global.augold.product.entity.Product;
 import com.global.augold.product.repository.ProductRepository;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -26,7 +28,14 @@ public class DetailPageController {
     private final ProductRepository productRepository;
 
     @GetMapping("/product/{id}")
-    public String showProductDetail(@PathVariable("id") String productId, Model model) {
+    public String showProductDetail(@PathVariable("id") String productId, Model model, HttpSession session) {
+
+        Customer loginUser = (Customer) session.getAttribute("loginUser");
+        if (loginUser != null) {
+            String loginName = loginUser.getCstmName();
+            model.addAttribute("loginName", loginName);
+        }
+
         // 1. 상품 정보 조회
         DetailPageDTO dto = detailPageService.getProductById(productId);
 

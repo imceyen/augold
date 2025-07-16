@@ -97,23 +97,27 @@ public class ProductService {
             case "반지":   prefix = "R"; break;
             case "목걸이": prefix = "N"; break;
             case "골드바": prefix = "G"; break;
-            case "감사패", "돌반지", "카네이션기념품": prefix = "S"; break;
+            case "감사패":
+            case "돌반지":
+            case "카네이션기념품": prefix = "S"; break;
             default: prefix = "X"; break;
         }
 
-        // 해당 prefix로 시작하는 모든 상품 ID 조회
-        List<Product> products = productRepository.findByProductIdStartingWith(prefix);
+        String fullPrefix = "PROD_" + prefix;
+        List<Product> products = productRepository.findByProductIdStartingWith(fullPrefix);
 
-        // 숫자 부분 추출해서 max 찾기
         int maxNumber = products.stream()
-                .map(p -> p.getProductId().replace(prefix, ""))
+                .map(p -> p.getProductId().replace(fullPrefix, ""))
                 .filter(s -> s.matches("\\d+"))
                 .mapToInt(Integer::parseInt)
                 .max()
                 .orElse(0);
 
         int nextNumber = maxNumber + 1;
-        return String.format("%s%04d", prefix, nextNumber);
+
+        // 여기서 숫자 부분을 5자리로 포맷팅
+        return String.format("%s%05d", fullPrefix, nextNumber);
     }
+
 
 }

@@ -1,43 +1,45 @@
 package com.global.augold.member.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "CS_INQUIRY")
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
 public class CSInquiry {
 
     @Id
     @Column(name = "INQ_NUMBER", length = 20)
-    private String inqNumber; // 문의번호 (INQ-00001)
+    private String inqNumber;
 
     @Column(name = "CSTM_NUMBER", length = 20, nullable = false)
-    private String cstmNumber; // 회원번호
+    private String cstmNumber;
 
     @Column(name = "INQ_CATEGORY", length = 20, nullable = false)
-    private String inqCategory; // 문의유형
+    private String inqCategory;
 
     @Column(name = "INQ_TITLE", length = 100, nullable = false)
-    private String inqTitle; // 문의제목
+    private String inqTitle;
 
-    @Column(name = "INQ_CONTENT", columnDefinition = "TEXT", nullable = false)
-    private String inqContent; // 문의내용
+    @Column(name = "INQ_CONTENT", nullable = false, columnDefinition = "TEXT")
+    private String inqContent;
 
     @Column(name = "INQ_STATUS", length = 20, nullable = false)
-    private String inqStatus; // 처리상태
+    private String inqStatus;
 
     @Column(name = "INQ_DATE", nullable = false, updatable = false)
-    private LocalDateTime inqDate = LocalDateTime.now(); // 문의일시
+    private LocalDateTime inqDate;
 
     @Column(name = "REPLY_DATE")
-    private LocalDateTime replyDate; // 답변일시
+    private LocalDateTime replyDate;
 
-    @Column(name = "ANSWER_CONTENT", columnDefinition = "TEXT")
-    private String inqAnswer;  // 답변 내용
-
+    @PrePersist
+    public void prePersist() {
+        if (inqDate == null) {
+            inqDate = LocalDateTime.now();
+        }
+    }
 }
