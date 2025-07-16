@@ -32,8 +32,8 @@ public class AdminStatisticsController {
         try {
             // Python 실행 파일의 절대 경로 (사용자 환경에 맞게 수정)
 
-            //String pythonExecutable = "C:\\ncsGlobal\\FinalProject\\augold\\python\\.venv\\Scripts\\python.exe";
-            String pythonExecutable = "C:\\Users\\4Class_01\\AppData\\Local\\Programs\\Python\\Python312\\python.exe";
+            String pythonExecutable = "C:\\ncsGlobal\\FinalProject\\augold\\python\\.venv\\Scripts\\python.exe";
+            //String pythonExecutable = "C:\\Users\\4Class_01\\AppData\\Local\\Programs\\Python\\Python312\\python.exe";
 
             //String pythonExecutable = "C:\\ncsGlobal\\FinalProject\\augold\\python\\.venv\\Scripts\\python.exe";
             //String pythonExecutable = "C:\\Users\\4Class_06\\AppData\\Local\\Programs\\Python\\Python312\\python.exe";

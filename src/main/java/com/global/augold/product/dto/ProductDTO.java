@@ -18,7 +18,9 @@ public class ProductDTO {
     private Double basePrice;     // 기본 가격
     private Double goldWeight;    // 금 무게 (g)
     private Double finalPrice;    // 최종 가격
-    private String imageUrl;      // 이미지 URL
+    private String imageUrl;      // 대표 이미지 URL
     private String description;   // 상품 설명
     private String subCtgr;       // 서브 카테고리 (ex. 귀걸이, 반지 등)
+
+
 }

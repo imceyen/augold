@@ -141,10 +141,18 @@
         <label>상품 설명:
           <input type="text" name="description">
         </label><br><br>
-        <label>이미지 URL:
-          <input type="text" name="imageUrl">
+        <label>대표 이미지:
+          <input type="file" name="imageFile" accept="image/*" required>
         </label><br><br>
-
+        <label>상세 이미지1:
+          <input type="file" name="detailImageFile1" accept="image/*">
+        </label><br><br>
+        <label>상세 이미지2:
+          <input type="file" name="detailImageFile2" accept="image/*">
+        </label><br><br>
+        <label>상세 이미지3:
+          <input type="file" name="detailImageFile3" accept="image/*">
+        </label><br><br>
         <button type="submit">상품 저장</button>
         <button type="button" class="delete-btn" onclick="deleteProduct()" style="display: none;">상품 삭제</button>
       </form>
@@ -316,6 +324,9 @@
               form.finalPrice.value = p.finalPrice;
               form.description.value = p.description;
               form.imageUrl.value = p.imageUrl;
+              form.imageUrl1.value = p.imageUrl1 || "";
+              form.imageUrl2.value = p.imageUrl2 || "";
+              form.imageUrl3.value = p.imageUrl3 || "";
 
               editProductId = id;
               editing = true;
@@ -325,35 +336,39 @@
           });
   }
 
-  function submitProduct(event) {
-      event.preventDefault();
-      const form = event.target;
-      const formData = new FormData(form);
-      const json = {};
-      formData.forEach((v, k) => json[k] = v);
+function submitProduct(event) {
+    event.preventDefault();
+    const form = event.target;
 
-      const method = editing ? 'PUT' : 'POST';
-      const url = editing ? `/api/products/${editProductId}` : '/api/products';
+    // JSON 대신 FormData 사용 (파일 포함 가능)
+    const formData = new FormData(form);
 
-      fetch(url, {
-          method: method,
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(json)
-      }).then(res => {
-          if (res.ok) {
-              alert(editing ? "수정 완료!" : "상품이 등록되었습니다!");
-              form.reset();
-              toggleForm(false);
-              fetchProducts();
-              editing = false;
-              editProductId = null;
-              form.querySelector("button[type='submit']").innerText = "상품 저장";
-              form.querySelector(".delete-btn").style.display = "none";
-          } else {
-              alert("저장 실패");
-          }
-      });
-  }
+    // 상품 ID, 이름 등 텍스트 필드도 자동으로 포함됨
+
+    const method = editing ? 'PUT' : 'POST';
+    const url = editing ? `/api/products/${editProductId}` : '/api/products';
+
+    fetch(url, {
+        method: method,
+        body: formData,  // FormData 그대로 전달
+        // Content-Type 헤더는 fetch가 자동으로 설정함
+    }).then(res => {
+        if (res.ok) {
+            alert(editing ? "수정 완료!" : "상품이 등록되었습니다!");
+            form.reset();
+            toggleForm(false);
+            fetchProducts();
+            editing = false;
+            editProductId = null;
+            form.querySelector("button[type='submit']").innerText = "상품 저장";
+            form.querySelector(".delete-btn").style.display = "none";
+        } else {
+            alert("저장 실패");
+        }
+    });
+}
+
+
 
   function deleteProduct() {
       if (!editProductId) return;
