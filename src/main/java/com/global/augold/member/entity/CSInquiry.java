@@ -3,6 +3,7 @@ package com.global.augold.member.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -30,11 +31,14 @@ public class CSInquiry {
     @Column(name = "INQ_STATUS", length = 20, nullable = false)
     private String inqStatus;
 
-    @Column(name = "INQ_DATE", nullable = false, updatable = false)
+    @Column(name = "INQ_DATE", nullable = false)
     private LocalDateTime inqDate;
 
     @Column(name = "REPLY_DATE")
     private LocalDateTime replyDate;
+
+    @Column(name = "ANSWER_CONTENT", columnDefinition = "TEXT")
+    private String answerContent;
 
     @PrePersist
     public void prePersist() {

@@ -1,7 +1,3 @@
-// ===============================
-// OrderItem.java - 주문 상품 엔티티
-// ===============================
-
 package com.global.augold.order.entity;
 
 import jakarta.persistence.*;
@@ -19,7 +15,7 @@ public class OrderItem {
 
     @Id
     @Column(name = "ORDER_ITEM_ID") // 기존 컬럼명과 동일
-    private String orderItemId; // 주문상세ID (PK) - OIT-00001 형태
+    private String orderItemId; // 주문상세ID (PK)
 
     @Column(name = "ORDER_NUMBER", nullable = false)
     private String orderNumber; // 주문번호
@@ -36,52 +32,49 @@ public class OrderItem {
     @Column(name = "FINAL_AMOUNT", nullable = false, precision = 12, scale = 2)
     private BigDecimal finalAmount; // 최종금액 (단가 × 수량)
 
-    // ===============================
-    // 연관관계 설정
-    // ===============================
 
-    // OrderItem (N) : Order (1) 관계
-    @ManyToOne(fetch = FetchType.LAZY)
+
+    // OrderItem Order 다 대 일 관계
+    @ManyToOne(fetch = FetchType.LAZY) // 여러개의 OrderItem 이 한개의 Order에 속한다 라는 뜻.
+    // LAZY의 역할 :  Order 조회할 때는 OrderItem 안 가져옴 (1단계), order.getOrderItems() 호출할 때만 OrderItem 조회 (2단계)
     @JoinColumn(name = "ORDER_NUMBER", insertable = false, updatable = false)
-    private Order order;
+    private Order order; // 현재 테이블(ORDER_ITEM)의 ORDER_NUMBER 컬럼으로 Order 테이블과 조인한다
 
-    // ===============================
-    // 비즈니스 메서드
-    // ===============================
 
-    /**
-     * 엔티티 생성 시 기본값 설정
-     */
+
+
+    // 엔티티 생성 시 기본값 설정
+
     @PrePersist
     protected void onCreate() {
         // orderItemId는 DB 트리거에서 자동 생성됨
         if (quantity == null) {
-            quantity = 1;
+            quantity = 1; // 0개면 아예 안쓰니 상관없음
         }
         // 최종금액 자동 계산
         calculateFinalAmount();
     }
 
-    /**
-     * 엔티티 수정 시 최종금액 재계산
-     */
+
+    // 엔티티 수정 시 최종금액 재계산
+
     @PreUpdate
     protected void onUpdate() {
         calculateFinalAmount();
     }
 
-    /**
-     * 최종금액 계산 (단가 × 수량)
-     */
+
+    //  최종금액 계산 (단가 × 수량)
+
     public void calculateFinalAmount() {
         if (unitPrice != null && quantity != null) {
             this.finalAmount = unitPrice.multiply(BigDecimal.valueOf(quantity));
         }
     }
 
-    /**
-     * 생성자 - Cart에서 OrderItem으로 변환할 때 사용
-     */
+
+     // 생성자 - Cart에서 OrderItem으로 변환할 때 사용
+
     public OrderItem(String orderNumber, String productId, Integer quantity, BigDecimal unitPrice) {
         this.orderNumber = orderNumber;
         this.productId = productId;
@@ -91,9 +84,9 @@ public class OrderItem {
         calculateFinalAmount();
     }
 
-    /**
-     * 수량 변경 메서드
-     */
+
+    //  수량 변경 메서드
+
     public void updateQuantity(Integer newQuantity) {
         if (newQuantity != null && newQuantity > 0) {
             this.quantity = newQuantity;
@@ -101,9 +94,9 @@ public class OrderItem {
         }
     }
 
-    /**
-     * 단가 변경 메서드
-     */
+
+    // 단가 변경 메서드
+
     public void updateUnitPrice(BigDecimal newUnitPrice) {
         if (newUnitPrice != null && newUnitPrice.compareTo(BigDecimal.ZERO) > 0) {
             this.unitPrice = newUnitPrice;
@@ -111,16 +104,16 @@ public class OrderItem {
         }
     }
 
-    /**
-     * 상품 총 가격 반환 (finalAmount와 동일하지만 명시적)
-     */
+
+    //  상품 총 가격 반환 (finalAmount와 동일하지만 명시적)
+
     public BigDecimal getTotalPrice() {
         return finalAmount != null ? finalAmount : BigDecimal.ZERO;
     }
 
-    /**
-     * CartDTO에서 OrderItem으로 변환하는 정적 메서드
-     */
+
+    //  CartDTO에서 OrderItem으로 변환하는 정적 메서드
+
     public static OrderItem fromCart(String orderNumber, String productId, Integer quantity, BigDecimal unitPrice) {
         OrderItem orderItem = new OrderItem();
         orderItem.setOrderNumber(orderNumber);
@@ -132,9 +125,9 @@ public class OrderItem {
         return orderItem;
     }
 
-    /**
-     * 주문상품 정보 요약 문자열
-     */
+
+    // 주문상품 정보 요약 문자열
+
     @Override
     public String toString() {
         return String.format("OrderItem{orderItemId='%s', productId='%s', quantity=%d, unitPrice=%s, finalAmount=%s}",
