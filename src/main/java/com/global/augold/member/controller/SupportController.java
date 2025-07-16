@@ -1,6 +1,6 @@
 package com.global.augold.member.controller;
 
-import com.global.augold.member.entity.CSInquiry;
+import com.global.augold.member.entity .CSInquiry;
 import com.global.augold.member.entity.Customer;
 import com.global.augold.member.repository.CSInquiryRepository;
 import com.global.augold.member.repository.SequenceRepository;
