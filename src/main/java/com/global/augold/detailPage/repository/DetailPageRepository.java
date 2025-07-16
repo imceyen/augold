@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface DetailPageRepository extends JpaRepository<ProductDetailImage, Long> {
     List<ProductDetailImage> findByProductId(String productId);
+    void deleteByProductId(String productId);
+
 }
