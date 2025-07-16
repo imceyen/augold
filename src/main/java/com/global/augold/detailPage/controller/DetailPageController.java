@@ -39,6 +39,10 @@ public class DetailPageController {
         // 1. 상품 정보 조회
         DetailPageDTO dto = detailPageService.getProductById(productId);
 
+        System.out.println("📷 이미지1: " + dto.getImageUrl1());
+        System.out.println("📷 이미지2: " + dto.getImageUrl2());
+        System.out.println("📷 이미지3: " + dto.getImageUrl3());
+
         // 2. 옵션 조회 분기 처리
         List<Product> productOptions = new ArrayList<>();
 

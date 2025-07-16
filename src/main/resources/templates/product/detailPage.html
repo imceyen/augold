@@ -123,13 +123,13 @@
                     <img th:src="${product.imageUrl}" alt="상품 이미지"
                          class="thumbnail w-20 h-20 object-cover rounded-lg border-2 border-yellow-400 cursor-pointer hover:opacity-80 transition-opacity" />
 
-                    <img th:src="@{${product.imageUrl1}}" alt="상세 이미지1"
+                    <img th:src="${product.imageUrl1}" alt="상세 이미지1"
                          class="thumbnail w-20 h-20 object-cover rounded-lg border-2 border-gray-200 cursor-pointer hover:border-yellow-400 transition-colors" />
 
-                    <img th:src="@{${product.imageUrl2}}" alt="상세 이미지2"
+                    <img th:src="${product.imageUrl2}" alt="상세 이미지2"
                          class="thumbnail w-20 h-20 object-cover rounded-lg border-2 border-gray-200 cursor-pointer hover:border-yellow-400 transition-colors" />
 
-                    <img th:src="@{${product.imageUrl3}}" alt="상세 이미지3"
+                    <img th:src="${product.imageUrl3}" alt="상세 이미지3"
                          class="thumbnail w-20 h-20 object-cover rounded-lg border-2 border-gray-200 cursor-pointer hover:border-yellow-400 transition-colors" />
                 </div>
 
@@ -283,17 +283,7 @@
                         </div>
                     </div>
 
-                    <!-- 구매 버튼 -->
-                    <div class="space-y-4">
-                        <button class="w-full bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 text-white font-bold py-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center space-x-2">
-                            <i class="fas fa-shopping-cart"></i>
-                            <span>장바구니 담기</span>
-                        </button>
-                        <button class="w-full border-2 border-yellow-500 text-yellow-700 hover:bg-yellow-50 font-bold py-4 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2">
-                            <i class="fas fa-credit-card"></i>
-                            <span>바로 구매하기</span>
-                        </button>
-                    </div>
+
                 </div>
                 <!-- 구매 버튼 -->
                 <div class="space-y-4">
@@ -320,13 +310,13 @@
 
         <div class="space-y-8">
             <div class="bg-white rounded-2xl shadow-xl p-8">
-                <img th:src="@{${product.imageUrl1}}" alt="상세 이미지1" class="w-full max-w-4xl mx-auto object-contain rounded-xl" />
+                <img th:src="${product.imageUrl1}" alt="상세 이미지1" class="w-full max-w-4xl mx-auto object-contain rounded-xl" />
             </div>
             <div class="bg-white rounded-2xl shadow-xl p-8">
-                <img th:src="@{${product.imageUrl2}}" alt="상세 이미지2" class="w-full max-w-4xl mx-auto object-contain rounded-xl" />
+                <img th:src="${product.imageUrl2}" alt="상세 이미지2" class="w-full max-w-4xl mx-auto object-contain rounded-xl" />
             </div>
             <div class="bg-white rounded-2xl shadow-xl p-8">
-                <img th:src="@{${product.imageUrl3}}" alt="상세 이미지3" class="w-full max-w-4xl mx-auto object-contain rounded-xl" />
+                <img th:src="${product.imageUrl3}" alt="상세 이미지3" class="w-full max-w-4xl mx-auto object-contain rounded-xl" />
             </div>
         </div>
     </section>
