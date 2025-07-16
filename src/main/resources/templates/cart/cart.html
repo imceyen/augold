@@ -86,7 +86,8 @@
             align-items: center;
         }
 
-        .nav-section a {
+        .nav-section a,
+         .nav-section .nav-text {
             color: #374151;
             text-decoration: none;
             font-weight: 500;
@@ -97,6 +98,11 @@
         .nav-section a:hover {
             color: #d97706;
         }
+
+        .nav-section a.active {
+        color: #d97706;
+        font-weight: 600;
+    }
 
         .cart-badge {
             position: absolute;
@@ -541,13 +547,13 @@
                     <a href="/customer/register">회원가입</a>
                 </th:block>
                 <th:block th:if="${loginName != null}">
-                    <span>[[${loginName}]]님 환영합니다</span>
+                    <span class = "nav-text">[[${loginName}]]님 환영합니다</span>
                     <a href="/logout">로그아웃</a>
                 </th:block>
 
+                <a href="/support">고객센터</a>
                 <a href="/mypage">마이페이지</a>
-                <a href="/cart">
-                    장바구니
+                <a href="/cart" class="active">장바구니</a>
                     <span id="cartBadge" class="cart-badge hidden">0</span>
                 </a>
             </nav>

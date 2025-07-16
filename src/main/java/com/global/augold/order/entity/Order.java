@@ -78,8 +78,6 @@ public class Order {
     }
 
 
-
-
      // 주문 생성 시 기본값 설정
 
     @PrePersist

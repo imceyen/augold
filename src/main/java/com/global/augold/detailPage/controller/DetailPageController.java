@@ -39,6 +39,13 @@ public class DetailPageController {
             }
         }
 
+
+        System.out.println("📷 이미지1: " + dto.getImageUrl1());
+        System.out.println("📷 이미지2: " + dto.getImageUrl2());
+        System.out.println("📷 이미지3: " + dto.getImageUrl3());
+
+        // 2. 옵션 조회 분기 처리
+
         List<Product> productOptions = new ArrayList<>();
 
         if ("감사패".equals(dto.getSubCtgr()) || "카네이션기념품".equals(dto.getSubCtgr())) {
@@ -51,7 +58,7 @@ public class DetailPageController {
             productOptions = productRepository.findByProductGroup(dto.getProductGroup());
         } else {
             productOptions = productRepository.findAll().stream()
-                    .filter(p -> p.getCtgrId().equals(dto.getCategoryId()))
+                    .filter(p -> p.getCtgrId().equals(dto.getCtgrId()))
                     .filter(p -> p.getProductName() != null && dto.getProductName() != null)
                     .filter(p -> {
                         String currentName = dto.getProductName().replaceAll("\\s*\\d+(\\.\\d+)?g", "")
@@ -62,6 +69,8 @@ public class DetailPageController {
                     })
                     .collect(Collectors.toList());
         }
+
+        // 3. DTO 변환
 
         List<DetailPageDTO> options = productOptions.stream()
                 .map(p -> {
@@ -79,10 +88,12 @@ public class DetailPageController {
                             .karatCode(p.getKaratCode())
                             .goldWeight(p.getGoldWeight())
                             .subCtgr(p.getSubCtgr())
-                            .categoryId(p.getCtgrId())
+                            .ctgrId(p.getCtgrId())
+                            .productInventory(p.getProductInventory())
                             .build();
                 })
                 .collect(Collectors.toList());
+
 
         options.sort(Comparator.comparingInt(opt -> {
             switch (opt.getKaratCode()) {
@@ -92,6 +103,8 @@ public class DetailPageController {
                 default: return 99;
             }
         }));
+
+        // 4. 중복 제거
 
         Set<String> seen = new HashSet<>();
         List<DetailPageDTO> deduplicatedOptions = new ArrayList<>();
@@ -105,13 +118,38 @@ public class DetailPageController {
         }
         options = deduplicatedOptions;
 
+
         DetailPageDTO baseOption = options.stream()
                 .filter(opt -> "14K".equals(opt.getKaratCode()))
                 .findFirst()
                 .orElse(!options.isEmpty() ? options.get(0) : dto);
 
-        dto.setFinalPrice(baseOption.getFinalPrice());
-        dto.setKaratCode(baseOption.getKaratCode());
+        // 5. 정렬
+        options.sort(Comparator.comparingInt(opt -> {
+            switch (opt.getKaratCode()) {
+                case "14K":
+                    return 1;
+                case "18K":
+                    return 2;
+                case "24K":
+                    return 3;
+                default:
+                    return 99;
+            }
+        }));
+
+        // 6. 골드바 가격 계산 또는 일반 상품 옵션 적용
+        if ("CTGR-00002".equals(dto.getCtgrId())) {
+            double marketPrice = detailPageService.getLatestGoldPrice();
+            double goldPricePerGram = marketPrice * 1.1;
+
+
+            if (dto.getGoldWeight() != null) {
+                double newPrice = dto.getGoldWeight() * goldPricePerGram;
+                dto.setFinalPrice(newPrice);
+                System.out.println("✅ 골드바 실시간 계산 가격: " + newPrice);
+            }
+
 
         model.addAttribute("product", dto);
         model.addAttribute("options", options);
@@ -122,11 +160,53 @@ public class DetailPageController {
             case "CAT002": selectedType = "jewelry"; break;
             case "CAT003": selectedType = "gift"; break;
             default: selectedType = "goldbar"; break;
+
+            // ✅ 골드바 재고 정보도 세팅
+            dto.setProductInventory(productRepository.findById(productId)
+                    .map(Product::getProductInventory)
+                    .orElse(0));
+
+        } else {
+            DetailPageDTO baseOption = options.stream()
+                    .filter(opt -> "14K".equals(opt.getKaratCode()))
+                    .findFirst()
+                    .orElse(!options.isEmpty() ? options.get(0) : dto);
+
+            dto.setFinalPrice(baseOption.getFinalPrice());
+            dto.setKaratCode(baseOption.getKaratCode());
+
+            // ✅ 일반 상품 재고 세팅
+            if (dto.getProductInventory() == null && baseOption.getProductInventory() != null) {
+                dto.setProductInventory(baseOption.getProductInventory());
+            }
+        }
+
+        // 7. 모델에 담기
+        model.addAttribute("product", dto);
+        model.addAttribute("options", options);
+
+        // 8. 카테고리 구분값
+        String selectedType;
+        switch (dto.getCtgrId()) {
+            case "CAT001":
+                selectedType = "goldbar";
+                break;
+            case "CAT002":
+                selectedType = "jewelry";
+                break;
+            case "CAT003":
+                selectedType = "gift";
+                break;
+            default:
+                selectedType = "goldbar";
+                break;
+
         }
         model.addAttribute("selectedType", selectedType);
 
         return "product/detailPage";
     }
+
 
     // 신규: 상품 등록/수정 POST 메서드 (상세 이미지 포함 처리)
     @PostMapping("/product/save")
@@ -172,3 +252,6 @@ public class DetailPageController {
         return "redirect:/product/" + dto.getProductId();
     }
 }
+
+}
+

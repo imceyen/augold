@@ -32,7 +32,7 @@ public class MainPageService {
 
 
     public List<MainPageInfoDTO> getMainPageProducts() {
-        List<String> ids = List.of("G0005", "S0005", "N0009", "S0008");
+        List<String> ids = List.of("PROD-G00005", "PROD-S00005", "PROD-N00009", "PROD-S00008");
 
         return productRepository.findAllById(ids).stream()
                 .map(this::convertToDTO)

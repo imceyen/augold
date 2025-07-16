@@ -96,12 +96,12 @@
     <p><strong>내용:</strong></p>
     <p th:text="${inquiry.inqContent}">문의 내용</p>
 
-    <div class="answer-section" th:if="${inquiry.inqAnswer != null and inquiry.inqAnswer != ''}">
+    <div class="answer-section" th:if="${inquiry.answerContent != null and inquiry.answerContent != ''}">
         <h2>관리자 답변</h2>
-        <p th:text="${inquiry.inqAnswer}">답변 내용</p>
+        <p th:text="${inquiry.answerContent}">답변 내용</p>
         <p><strong>답변일:</strong> <span th:text="${inquiry.replyDate != null ? #temporals.format(inquiry.replyDate, 'yyyy-MM-dd HH:mm') : '미답변'}">2025-07-15 09:00</span></p>
     </div>
-    <div class="answer-section" th:if="${inquiry.inqAnswer == null or inquiry.inqAnswer == ''}">
+    <div class="answer-section" th:if="${inquiry.answerContent == null or inquiry.answerContent == ''}">
         <h2>관리자 답변</h2>
         <p>아직 답변이 등록되지 않았습니다.</p>
     </div>

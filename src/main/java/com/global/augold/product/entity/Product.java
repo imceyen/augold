@@ -44,6 +44,9 @@ public class Product {
 
     private String productGroup;
 
+    @Column(name = "product_inventory")
+    private Integer productInventory;
+
     public String getSubCtgr() {
         return subCtgr;
     }

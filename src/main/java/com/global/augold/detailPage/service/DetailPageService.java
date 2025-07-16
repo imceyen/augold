@@ -62,7 +62,7 @@ public class DetailPageService {
                 .karatCode(product.getKaratCode())
                 .goldWeight(product.getGoldWeight())
                 .subCtgr(product.getSubCtgr())
-                .categoryId(product.getCtgrId())
+                .ctgrId(product.getCtgrId())
                 .build();
     }
 
