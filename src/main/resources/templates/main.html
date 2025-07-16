@@ -63,52 +63,172 @@
             height: calc(100% - 40px); /* 헤더 제외한 공간 */
             border: none;
         }
+         * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+
+
+       .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border-bottom: 1px solid #e5e7eb;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 0;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+
+        .logo-section:hover {
+            opacity: 0.8;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #facc15, #f59e0b);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .logo-text h1 {
+            font-size: 24px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #d97706, #92400e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0;
+            line-height: 1.2;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .logo-text p {
+            font-size: 12px;
+            color: #6b7280;
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .nav-section {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+
+        .nav-section a,
+        .nav-section .nav-text {
+            color: #374151;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+            position: relative;
+            font-family: 'Arial', sans-serif;
+            font-size: 16px;
+        }
+
+        .nav-section a:hover {
+            color: #d97706;
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ef4444;
+            color: white;
+            font-size: 12px;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* 반응형 헤더 */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .nav-section {
+                gap: 16px;
+            }
+        }
+         body {
+        font-family: 'Arial', sans-serif;
+        background-color: #f9fafb;
+        color: #374151;
+        line-height: 1.6;
+    }
     </style>
 </head>
+<body>
+<header>
+    <div class="header-container">
+        <div class="header-content">
+            <a href="/" class="logo-section">
+                <div class="logo-icon">
+                    <span>A</span>
+                </div>
+                <div class="logo-text">
+                    <h1>AuGold</h1>
+                    <p>프리미엄 금 전문몰</p>
+                </div>
+            </a>
 
-<header class="bg-white shadow border-b">
-    <div class="container mx-auto px-4 py-4 flex items-center justify-between">
-        <div class="flex items-center space-x-2">
-            <div class="w-10 h-10 gold-gradient rounded-full flex items-center justify-center">
-                <span class="text-white font-bold text-lg">A</span>
-            </div>
-            <div>
-                <h1 class="text-2xl font-bold bg-gradient-to-r from-yellow-600 to-yellow-800 bg-clip-text text-transparent">AuGold</h1>
-                <p class="text-xs text-gray-500">프리미엄 금 전문몰</p>
-            </div>
-        </div>
-        <nav class="flex space-x-8 justify-center py-4">
-            <th:block th:if="${loginName == null}">
-                <a href="/login"
-                   class="text-gray-700 hover:text-yellow-600 font-medium transition-colors">
-                    로그인
-                </a>
-                <a href="/customer/register"
-                   class="text-gray-700 hover:text-yellow-600 font-medium transition-colors">
-                    회원가입
-                </a>
-            </th:block>
+            <nav class="nav-section">
+                <th:block th:if="${loginName == null}">
+                    <a href="/login">로그인</a>
+                    <a href="/customer/register">회원가입</a>
+                </th:block>
+                <th:block th:if="${loginName != null}">
+                    <span class="nav-text">[[${loginName}]]님 환영합니다</span>
+                    <a href="/logout">로그아웃</a>
+                </th:block>
 
-            <th:block th:if="${loginName != null}">
-                <span class="text-gray-700 font-medium" th:text="${loginName} + '님 환영합니다'">홍길동님 환영합니다</span>
-                <a href="/logout"
-                   class="text-gray-700 hover:text-yellow-600 font-medium transition-colors">
-                    로그아웃
-                </a>
-                <a href="/support"
-                   class="text-gray-700 hover:text-yellow-600 font-medium transition-colors">
-                    고객센터
-                </a>
-                <a href="/mypage"
-                   class="text-gray-700 hover:text-yellow-600 font-medium transition-colors">
-                    마이페이지
-                </a>
-                <a href="/cart"
-                   class="text-gray-700 hover:text-yellow-600 font-medium transition-colors">
+                <a href="/support">고객센터</a>
+                <a href="/mypage">마이페이지</a>
+                <a href="/cart">
                     장바구니
+                    <span id="cartBadge" class="cart-badge hidden">0</span>
                 </a>
-            </th:block>
-        </nav>
+            </nav>
+        </div>
     </div>
 </header>
 
@@ -232,6 +352,7 @@
         }
       }
     });
+
 </script>
 
 <!-- 카테고리별 상품 -->
@@ -315,19 +436,19 @@
         <div>
             <h4 class="font-semibold mb-4">고객서비스</h4>
             <ul class="space-y-2 text-gray-400 text-sm">
-                <li><a href="#">주문/배송 조회</a></li>
-                <li><a href="#">반품/교환</a></li>
-                <li><a href="#">FAQ</a></li>
-                <li><a href="#">1:1 문의</a></li>
+                <li><a href="#" class="hover:text-white transition-colors duration-200">주문/배송 조회</a></li>
+                <li><a href="#" class="hover:text-white transition-colors duration-200">반품/교환</a></li>
+                <li><a href="#" class="hover:text-white transition-colors duration-200">FAQ</a></li>
+                <li><a href="/support" class="hover:text-white transition-colors duration-200">1:1 문의</a></li>
             </ul>
         </div>
         <div>
             <h4 class="font-semibold mb-4">회사정보</h4>
             <ul class="space-y-2 text-gray-400 text-sm">
-                <li><a href="#">회사소개</a></li>
-                <li><a href="#">이용약관</a></li>
-                <li><a href="#">개인정보처리방침</a></li>
-                <li><a href="#">사업자정보</a></li>
+                <li><a href="#" class="hover:text-white transition-colors duration-200">회사소개</a></li>
+                <li><a href="#" class="hover:text-white transition-colors duration-200">이용약관</a></li>
+                <li><a href="#" class="hover:text-white transition-colors duration-200">개인정보처리방침</a></li>
+                <li><a href="#" class="hover:text-white transition-colors duration-200">사업자정보</a></li>
             </ul>
         </div>
         <div>
