@@ -35,7 +35,7 @@ public class MainPageController {
         // ✅ 3. 골드바 상품에 한해 가격 갱신
         products = products.stream()
                 .map(p -> {
-                    if ("0002".equals(p.getCtgrId()) && p.getGoldWeight() != null) {
+                    if ("CTGR-00002".equals(p.getCtgrId()) && p.getGoldWeight() != null) {
                         double newPrice = p.getGoldWeight() * goldPricePerGram;
                         p.setFinalPrice(newPrice);
                     }
