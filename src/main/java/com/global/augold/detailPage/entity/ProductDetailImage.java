@@ -15,15 +15,15 @@ import jakarta.persistence.*;
 public class ProductDetailImage {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "DETAIL_ID") // 실제 DB 컬럼명
-    private Long id;
+    @Column(name = "DETAIL_ID")
+    private String id;  // ✅ Long → String
 
-    @Column(name = "PRODUCT_ID") // 여기가 중요!
+    @Column(name = "PRODUCT_ID")
     private String productId;
 
     @Column(name = "IMAGE_URL")
     private String imageUrl;
 }
+
 
 

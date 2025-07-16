@@ -20,5 +20,6 @@ public class DetailPageDTO {
     private String karatCode;
     private Double goldWeight;
     private String subCtgr;
-    private String categoryId;
+    private String ctgrId;
+    private Integer productInventory;
 }

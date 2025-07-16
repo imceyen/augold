@@ -36,7 +36,7 @@ public class CategoryPageController {
 
         // 골드바 (37.5g 제외)
         List<MainPageInfoDTO> goldbars = allProducts.stream()
-                .filter(p -> "0002".equals(p.getCtgrId()))
+                .filter(p -> "CTGR-00002".equals(p.getCtgrId()))
                 .filter(p -> p.getProductName() == null || !p.getProductName().contains("37.5"))
                 .collect(Collectors.toList());
 
@@ -63,7 +63,7 @@ public class CategoryPageController {
 
         // 기념품 전체
         List<MainPageInfoDTO> allGifts = allProducts.stream()
-                .filter(p -> "0003".equals(p.getCtgrId()))
+                .filter(p -> "CTGR-00003".equals(p.getCtgrId()))
                 .collect(Collectors.toList());
 
         // 포카락/첫돌 필터링 후 중복 제거 + 기본 옵션 가격 선택 (1.875g)
@@ -153,7 +153,7 @@ public class CategoryPageController {
 
     private List<MainPageInfoDTO> filterJewelryUniqueDesign(List<MainPageInfoDTO> products, String keyword) {
         return products.stream()
-                .filter(p -> "0001".equals(p.getCtgrId()))
+                .filter(p -> "CTGR-00001".equals(p.getCtgrId()))
                 .filter(p -> p.getProductName() != null && p.getProductName().contains(keyword))
                 .collect(Collectors.collectingAndThen(
                         Collectors.toMap(

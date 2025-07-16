@@ -30,37 +30,23 @@ public class DetailPageController {
         // 1. 상품 정보 조회
         DetailPageDTO dto = detailPageService.getProductById(productId);
 
-        // 1-1. 골드바일 경우 실시간 시세 반영
-        if ("0002".equals(dto.getCategoryId())) {
-            double marketPrice = detailPageService.getLatestGoldPrice();
-            double goldPricePerGram = marketPrice * 1.1;
-            if (dto.getGoldWeight() != null) {
-                dto.setFinalPrice(dto.getGoldWeight() * goldPricePerGram);
-            }
-        }
-
-        // 2. 옵션 조회 분기 처리
         // 2. 옵션 조회 분기 처리
         List<Product> productOptions = new ArrayList<>();
 
         if ("감사패".equals(dto.getSubCtgr()) || "카네이션기념품".equals(dto.getSubCtgr())) {
-            // 옵션 없음 (select 박스 숨김용)
             productOptions = List.of();
 
         } else if ("돌반지".equals(dto.getSubCtgr())) {
-            // 중량 옵션 존재
             productOptions = productRepository.findAll().stream()
                     .filter(p -> "돌반지".equals(p.getSubCtgr()))
                     .collect(Collectors.toList());
 
         } else if (dto.getProductGroup() != null && !dto.getProductGroup().isEmpty()) {
-            // productGroup이 있는 경우
             productOptions = productRepository.findByProductGroup(dto.getProductGroup());
 
         } else {
-            // fallback: 이름 유사성 기반 옵션 구성
             productOptions = productRepository.findAll().stream()
-                    .filter(p -> p.getCtgrId().equals(dto.getCategoryId()))
+                    .filter(p -> p.getCtgrId().equals(dto.getCtgrId()))
                     .filter(p -> p.getProductName() != null && dto.getProductName() != null)
                     .filter(p -> {
                         String currentName = dto.getProductName().replaceAll("\\s*\\d+(\\.\\d+)?g", "")
@@ -72,8 +58,7 @@ public class DetailPageController {
                     .collect(Collectors.toList());
         }
 
-
-        // 3. 옵션 DTO로 변환
+        // 3. DTO 변환
         List<DetailPageDTO> options = productOptions.stream()
                 .map(p -> {
                     String cleanName = p.getProductName();
@@ -90,53 +75,77 @@ public class DetailPageController {
                             .karatCode(p.getKaratCode())
                             .goldWeight(p.getGoldWeight())
                             .subCtgr(p.getSubCtgr())
-                            .categoryId(p.getCtgrId())
+                            .ctgrId(p.getCtgrId())
+                            .productInventory(p.getProductInventory())
                             .build();
                 })
                 .collect(Collectors.toList());
 
-        // 4. 옵션 정렬 (순도)
-        // 4. 옵션 정렬 후 추가
-        options.sort(Comparator.comparingInt(opt -> {
-            switch (opt.getKaratCode()) {
-                case "14K": return 1;
-                case "18K": return 2;
-                case "24K": return 3;
-                default: return 99;
-            }
-        }));
-
-        // ✅ 완전히 동일한 goldWeight + karatCode 조합만 제거
+        // 4. 중복 제거
         Set<String> seen = new HashSet<>();
         List<DetailPageDTO> deduplicatedOptions = new ArrayList<>();
 
         for (DetailPageDTO opt : options) {
-            String key = opt.getKaratCode() + "-" + opt.getGoldWeight(); // 예: "14K-1.875"
+            String key = opt.getKaratCode() + "-" + opt.getGoldWeight();
             if (!seen.contains(key)) {
                 seen.add(key);
                 deduplicatedOptions.add(opt);
             }
         }
-
         options = deduplicatedOptions;
 
+        // 5. 정렬
+        options.sort(Comparator.comparingInt(opt -> {
+            switch (opt.getKaratCode()) {
+                case "14K":
+                    return 1;
+                case "18K":
+                    return 2;
+                case "24K":
+                    return 3;
+                default:
+                    return 99;
+            }
+        }));
 
-        // 5. 옵션 중 기본값 적용 (기본: 14K → 없으면 첫 번째)
-        DetailPageDTO baseOption = options.stream()
-                .filter(opt -> "14K".equals(opt.getKaratCode()))
-                .findFirst()
-                .orElse(!options.isEmpty() ? options.get(0) : dto);
+        // 6. 골드바 가격 계산 또는 일반 상품 옵션 적용
+        if ("CTGR-00002".equals(dto.getCtgrId())) {
+            double marketPrice = detailPageService.getLatestGoldPrice();
+            double goldPricePerGram = marketPrice * 1.1;
 
-        dto.setFinalPrice(baseOption.getFinalPrice());
-        dto.setKaratCode(baseOption.getKaratCode());
+            if (dto.getGoldWeight() != null) {
+                double newPrice = dto.getGoldWeight() * goldPricePerGram;
+                dto.setFinalPrice(newPrice);
+                System.out.println("✅ 골드바 실시간 계산 가격: " + newPrice);
+            }
 
-        // 6. 모델에 전달
+            // ✅ 골드바 재고 정보도 세팅
+            dto.setProductInventory(productRepository.findById(productId)
+                    .map(Product::getProductInventory)
+                    .orElse(0));
+
+        } else {
+            DetailPageDTO baseOption = options.stream()
+                    .filter(opt -> "14K".equals(opt.getKaratCode()))
+                    .findFirst()
+                    .orElse(!options.isEmpty() ? options.get(0) : dto);
+
+            dto.setFinalPrice(baseOption.getFinalPrice());
+            dto.setKaratCode(baseOption.getKaratCode());
+
+            // ✅ 일반 상품 재고 세팅
+            if (dto.getProductInventory() == null && baseOption.getProductInventory() != null) {
+                dto.setProductInventory(baseOption.getProductInventory());
+            }
+        }
+
+        // 7. 모델에 담기
         model.addAttribute("product", dto);
         model.addAttribute("options", options);
 
-        // 7. 카테고리 기반 타입 설정
+        // 8. 카테고리 구분값
         String selectedType;
-        switch (dto.getCategoryId()) {
+        switch (dto.getCtgrId()) {
             case "CAT001":
                 selectedType = "goldbar";
                 break;
