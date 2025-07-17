@@ -53,7 +53,7 @@ public interface CartRepository extends JpaRepository<Cart, String> {
             nativeQuery = true)
     List<CartDTO> findByCstmNumberWithProduct(@Param("cstmNumber") String cstmNumber);
 
-    @Query("SELECT COUNT(c) FROM Cart c WHERE c cstmNumber = :cstmNumber AND c.productId = :productId")
+    @Query("SELECT COUNT(c) FROM Cart c WHERE c.cstmNumber = :cstmNumber AND c.productId = :productId")
     // 카트 엔티티의 개수를 세어 반환, 고객번호가 매개변수와 일치하는 조건, : 는 외부 값 들어가는 곳(해당하는 고객 번호를 여기다 넣고, 그거랑 같은 게 조건")
     int countByCstmNumberAndProductId(@Param("cstmNumber") String cstmNUmber, @Param("productId") String productId);
     // 특정 고객이 특정 상품을 몇 번 담았는지 -> 장바구니에 추가 하기 전 이미 해당 상품이 담겼는지 확인하는 요옫
