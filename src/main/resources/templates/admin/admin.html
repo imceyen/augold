@@ -96,7 +96,7 @@
     </div>
 
     <div class="form-container" id="productForm" style="display:none;">
-      <form onsubmit="submitProduct(event)">
+      <form onsubmit="submitProduct(event)" enctype="multipart/form-data">
         <label>상품 ID:
           <input type="text" name="productId" readonly>
         </label><br><br>
@@ -118,7 +118,9 @@
             <option value="반지">반지</option>
             <option value="목걸이">목걸이</option>
             <option value="골드바">골드바</option>
-            <option value="기념품">기념품</option>
+            <option value="감사패">감사패</option>
+            <option value="돌반지">돌반지</option>
+            <option value="카네이션 기념품">카네이션 기념품</option>
           </select>
         </label><br><br>
         <label>금 함량:
@@ -144,14 +146,8 @@
         <label>대표 이미지:
           <input type="file" name="imageFile" accept="image/*" required>
         </label><br><br>
-        <label>상세 이미지1:
-          <input type="file" name="detailImageFile1" accept="image/*">
-        </label><br><br>
-        <label>상세 이미지2:
-          <input type="file" name="detailImageFile2" accept="image/*">
-        </label><br><br>
-        <label>상세 이미지3:
-          <input type="file" name="detailImageFile3" accept="image/*">
+        <label>상세 이미지 (최대 3장):
+          <input type="file" name="detailImages" accept="image/*" multiple>
         </label><br><br>
         <button type="submit">상품 저장</button>
         <button type="button" class="delete-btn" onclick="deleteProduct()" style="display: none;">상품 삭제</button>

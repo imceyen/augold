@@ -39,6 +39,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	// ✅ Apache POI for Excel (XLSX 지원 포함)
 	implementation 'org.apache.poi:poi-ooxml:5.2.2'
+	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+
 }
 
 tasks.named('test') {

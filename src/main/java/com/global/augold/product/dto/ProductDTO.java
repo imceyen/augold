@@ -1,6 +1,7 @@
 package com.global.augold.product.dto;
 
 import lombok.*;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 상품 정보를 담는 DTO 클래스
@@ -21,6 +22,10 @@ public class ProductDTO {
     private String imageUrl;      // 대표 이미지 URL
     private String description;   // 상품 설명
     private String subCtgr;       // 서브 카테고리 (ex. 귀걸이, 반지 등)
+
+    private String imageUrl1; // 상세 이미지 1
+    private String imageUrl2; // 상세 이미지 2
+    private String imageUrl3; // 상세 이미지 3
 
 
 }

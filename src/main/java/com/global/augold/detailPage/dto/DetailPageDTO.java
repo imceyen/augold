@@ -22,4 +22,5 @@ public class DetailPageDTO {
     private String subCtgr;
     private String ctgrId;
     private Integer productInventory;
+
 }
