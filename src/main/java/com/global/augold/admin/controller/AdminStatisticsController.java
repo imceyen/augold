@@ -2,6 +2,7 @@ package com.global.augold.admin.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +20,12 @@ import java.util.concurrent.TimeUnit;
 @Controller
 public class AdminStatisticsController {
 
+    @Value("${graph.pythonExecutable.path}")
+    private String pythonExecutable;
+
+    @Value("${graph.scriptPath.path}")
+    private String scriptPath;
+
     // 기존 관리자 페이지를 렌더링하는 메소드 (이름을 명확히 함)
     @GetMapping("/admin/main")
     public String adminMainPage() {
@@ -30,15 +37,6 @@ public class AdminStatisticsController {
     @ResponseBody // 이 어노테이션은 리턴값을 HTML 페이지가 아닌 데이터(JSON)로 반환하게 함
     public ResponseEntity<Map<String, Object>> getGoldPriceForecast() {
         try {
-            // Python 실행 파일의 절대 경로 (사용자 환경에 맞게 수정)
-
-            //String pythonExecutable = "C:\\ncsGlobal\\FinalProject\\augold\\python\\.venv\\Scripts\\python.exe";
-            String pythonExecutable = "C:\\Users\\4Class_01\\AppData\\Local\\Programs\\Python\\Python312\\python.exe";
-
-            //String pythonExecutable = "C:\\ncsGlobal\\FinalProject\\augold\\python\\.venv\\Scripts\\python.exe";
-            //String pythonExecutable = "C:\\Users\\4Class_06\\AppData\\Local\\Programs\\Python\\Python312\\python.exe";
-
-            String scriptPath = "python/crawling/predict.py";
 
             File outputFile = File.createTempFile("prophet_output_", ".json");
 
