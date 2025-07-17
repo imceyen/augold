@@ -2,6 +2,7 @@ package com.global.augold.admin.runner;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -12,6 +13,14 @@ import java.io.InputStreamReader;
 @Component // 이 클래스를 Spring Bean으로 등록하여 CommandLineRunner로 동작하게 함
 public class StreamlitRunner implements CommandLineRunner {
 
+    // 1. Streamlit 실행 파일과 스크립트 경로 설정
+    // ※ 중요: 경로가 사용자 환경마다 다를 수 있으므로 환경 변수나 application.properties에서 관리하는 것이 좋습니다.
+    @Value("${streamlit.executable.path}")
+    private String streamlitExecutable;
+
+    @Value("${streamlit.script.path}")
+    private String scriptPath;
+
     // 로그를 남기기 위한 Logger 객체
     private static final Logger log = LoggerFactory.getLogger(StreamlitRunner.class);
 
@@ -21,12 +30,6 @@ public class StreamlitRunner implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         log.info("Spring Boot 애플리케이션 시작... Streamlit 챗봇을 실행합니다.");
-
-        // 1. Streamlit 실행 파일과 스크립트 경로 설정
-        // ※ 중요: 경로가 사용자 환경마다 다를 수 있으므로 환경 변수나 application.properties에서 관리하는 것이 좋습니다.
-        String streamlitExecutable = "C:\\ncsGlobal\\FinalProject\\augold\\python\\.venv\\Scripts\\streamlit.exe"; // 1. Streamlit 실행 파일의 절대 경로
-        //String streamlitExecutable = "C:\Users\4Class_13\AppData\Local\Programs\Python\Python313\Scripts\streamlit.exe";
-        String scriptPath = "python/chatbot/chatbot.py"; // 2. Spring Boot 프로젝트 루트 기준 스크립트 경로
 
         // 2. ProcessBuilder 설정
         ProcessBuilder processBuilder = new ProcessBuilder(
