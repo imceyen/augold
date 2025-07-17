@@ -56,7 +56,10 @@ public class CartController {
             String cstmNumber = getCstmNumberFromSession(session);
             String add = cartService.addToCart(cstmNumber, productId);
             return "redirect:/cart?added=true&productId=" + productId;
-        } catch (RuntimeException e) {
+        } catch (RuntimeException e) { // 재고 부족이나 기타 장바구니 오류
+            if(e.getMessage().contains("재고")){
+                return "rediirect:/product/detail/" + productId + "?error=out_of_stock";
+            }
             return "redirect:/login?error=login";
         }
     }
