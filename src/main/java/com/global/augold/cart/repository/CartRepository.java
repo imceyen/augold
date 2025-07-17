@@ -43,15 +43,12 @@ public interface CartRepository extends JpaRepository<Cart, String> {
     List<Cart> findByCstmNumberSimple(@Param("cstmNumber") String cstmNumber);
 
     @Query(value = "SELECT c.cart_number, c.product_id, c.cart_date, c.cstm_number, " +
-            "p.product_name, p.final_price, p.image_url, cat.ctgr_nm, " +
-            "gk.karat_name, p.gold_weight " +
+            "p.product_name, p.final_price, p.image_url, p.ctgr_id, p.karat_code " +
             "FROM cart c JOIN product p ON c.product_id = p.product_id " +
-            "JOIN category cat ON p.ctgr_id = cat.ctgr_id " +
-            "JOIN gold_karat gk ON p.karat_code = gk.karat_code " +
             "WHERE c.cstm_number = :cstmNumber " +
             "ORDER BY c.cart_date DESC",
             nativeQuery = true)
-    List<CartDTO> findByCstmNumberWithProduct(@Param("cstmNumber") String cstmNumber);
+    List<Object[]> findByCstmNumberWithProduct(@Param("cstmNumber") String cstmNumber);
 
     @Query("SELECT COUNT(c) FROM Cart c WHERE c.cstmNumber = :cstmNumber AND c.productId = :productId")
     // 카트 엔티티의 개수를 세어 반환, 고객번호가 매개변수와 일치하는 조건, : 는 외부 값 들어가는 곳(해당하는 고객 번호를 여기다 넣고, 그거랑 같은 게 조건")

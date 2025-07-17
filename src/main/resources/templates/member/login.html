@@ -92,7 +92,7 @@
             <span class="toggle-cstmPwd" onclick="toggleVisibility('cstmPwd', this)">🔒</span>
         </div>
 
-        <input type="hidden" name="returnUrl" th:value="${param.returnUrl != null ? param.returnUrl[0] : ''}">
+        <input type="hidden" name="returnUrl" th:value="${returnUrl}" th:if="${returnUrl != null}">
 
         <button type="submit">로그인</button>
         <a href="/" class="back-link">← 메인페이지로 돌아가기</a>

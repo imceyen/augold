@@ -23,18 +23,18 @@ public class CartDTO {
 
     // JPQL용 생성자
     public CartDTO(String cartNumber, String productId, LocalDateTime cartDate,
-                   String cstmNumber, String productName, BigDecimal finalPrice,
-                   String imageUrl, String ctgrNm, String karatName, BigDecimal goldWeight) {
+                   String cstmNumber, String productName, Double finalPrice,
+                   String imageUrl, String ctgrId, String karatCode) {
         this.cartNumber = cartNumber;
         this.productId = productId;
         this.cartDate = cartDate;
         this.cstmNumber = cstmNumber;
         this.productName = productName;
-        this.finalPrice = finalPrice;
+        this.finalPrice = finalPrice != null ? BigDecimal.valueOf(finalPrice) : BigDecimal.ZERO;
         this.imageUrl = imageUrl;
-        this.ctgrNm = ctgrNm;
-        this.karatName = karatName;
-        this.goldWeight = goldWeight;
+        this.ctgrNm = ctgrId;      // 일단 ID로 표시
+        this.karatName = karatCode; // 일단 코드로 표시
+        this.goldWeight = BigDecimal.ZERO; // 나중에 추가
     }
 
     // 기본 정보만 있는 생성자

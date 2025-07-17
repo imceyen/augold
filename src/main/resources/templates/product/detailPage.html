@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title th:text="${product.productName} + ' | AuGold'">제품 상세페이지</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         .gold-gradient {
@@ -139,6 +141,13 @@
         <!-- 오른쪽 - 상세 정보 -->
         <div class="fade-in">
             <div class="bg-white rounded-2xl shadow-xl p-8">
+                <!-- 재고 부족 에러 메시지 (Thymeleaf 버전) -->
+                <div th:if="${param.error != null and param.error[0] == 'out_of_stock'}"
+                     class="bg-red-50 border border-red-200 text-red-600 text-center py-4 px-6 rounded-xl mb-6">
+                    <p class="font-bold"><i class="fas fa-exclamation-triangle mr-2"></i>재고 부족</p>
+                    <p class="text-sm mt-1">현재 재고가 부족하여 장바구니에 담을 수 없습니다.</p>
+                </div>
+
                 <div class="mb-8">
                     <h1 class="text-4xl font-bold mb-4 text-gray-900" th:text="${product.productName}">상품명</h1>
                     <p class="text-lg text-gray-700 leading-relaxed mb-6" th:text="${product.description}">상품 설명이 들어갑니다.</p>
@@ -197,36 +206,12 @@
                 <!-- 품절 표시 (재고 0일 경우) -->
                 <div id="soldOutBanner"
                      th:if="${product.productInventory == 0}"
-                class="mb-8">
-                <div class="bg-red-50 border border-red-200 text-red-600 text-center py-6 rounded-xl">
-                    <p class="text-xl font-bold"><i class="fas fa-times-circle mr-2"></i>품절된 상품입니다</p>
-                    <p class="text-sm mt-2">해당 상품은 현재 재고가 없습니다.</p>
+                     class="mb-8">
+                    <div class="bg-red-50 border border-red-200 text-red-600 text-center py-6 rounded-xl">
+                        <p class="text-xl font-bold"><i class="fas fa-times-circle mr-2"></i>품절된 상품입니다</p>
+                        <p class="text-sm mt-2">해당 상품은 현재 재고가 없습니다.</p>
+                    </div>
                 </div>
-            </div>
-
-
-                <!--                 골드바 가격 정보 (금시세 기반)-->
-<!--                <div class="mb-8" th:if="${product.subCtgr == '골드바'}">-->
-<!--                    <h3 class="text-xl font-bold mb-4 text-gray-800 flex items-center">-->
-<!--                        <i class="fas fa-chart-line text-yellow-500 mr-2"></i>-->
-<!--                        실시간 금시세 기반 가격-->
-<!--                    </h3>-->
-<!--                    <div class="bg-gradient-to-r from-yellow-50 to-amber-50 rounded-xl p-4" data-gold-price="85000">-->
-<!--                        <div class="flex items-center justify-between mb-2">-->
-<!--                            <span class="text-sm text-gray-600">현재 금시세</span>-->
-<!--                            <span class="font-semibold text-yellow-700"-->
-<!--                                  th:text="'₩' + ${#numbers.formatInteger(goldPrice, 3, 'COMMA')} + '/g'">₩85,000/g</span>-->
-<!--                        </div>-->
-<!--                        <div class="flex items-center justify-between">-->
-<!--                            <span class="text-sm text-gray-600">판매가 (시세 + 10%)</span>-->
-<!--                            <span th:text="${#numbers.formatInteger(goldPriceWithMargin, 0, 'COMMA')}">가격</span>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                </div>-->
-
-
-
-
 
                 <!-- 주얼리 옵션 선택 (귀걸이, 목걸이, 반지) -->
                 <div class="mb-8" th:if="${product.subCtgr == '귀걸이' or product.subCtgr == '목걸이' or product.subCtgr == '반지'}">
@@ -248,20 +233,19 @@
                 </div>
 
                 <!-- 기념품 옵션 선택 (감사패, 돌반지, 카네이션기념품) -->
-                <!-- 중량 옵션: 기념품일 때만 보여줌 -->
                 <!-- 중량 선택 (감사패, 돌반지, 카네이션기념품)일 때만 출력) -->
                 <div class="mb-8" th:if="${product.subCtgr == '돌반지'}">
                     <h3 class="text-xl font-bold mb-4">중량 선택</h3>
-                    <select id="weightSelect" class="...">
+                    <select id="weightSelect" class="w-full border-2 border-gray-200 rounded-xl p-4 focus:border-yellow-500 focus:outline-none transition-colors">
                         <option value="">중량을 선택해 주세요</option>
                         <option th:each="opt : ${options}"
                                 th:value="${opt.goldWeight}"
                                 th:data-price="${opt.finalPrice}"
+                                th:data-inventory="${opt.productInventory}"
                                 th:text="${opt.goldWeight} + 'g (₩' + ${#numbers.formatInteger(opt.finalPrice, 0)} + ')'">
                         </option>
                     </select>
                 </div>
-
 
                 <!-- 수량 선택 + 구매 버튼 (재고 0일 경우 숨김) -->
                 <div th:if="${product.productInventory > 0}">
@@ -272,25 +256,40 @@
                             수량 선택
                         </h3>
                         <div class="flex items-center space-x-4">
-                            <button class="w-12 h-12 border-2 border-gray-200 rounded-lg flex items-center justify-center hover:border-yellow-500 transition-colors">
+                            <button id="minusBtn" class="w-12 h-12 border-2 border-gray-200 rounded-lg flex items-center justify-center hover:border-yellow-500 transition-colors">
                                 <i class="fas fa-minus text-gray-600"></i>
                             </button>
                             <input id="quantityInput" type="number" value="1" min="1"
                                    class="w-20 h-12 border-2 border-gray-200 rounded-lg text-center focus:border-yellow-500 focus:outline-none transition-colors" />
-                            <button class="w-12 h-12 border-2 border-gray-200 rounded-lg flex items-center justify-center hover:border-yellow-500 transition-colors">
+                            <button id="plusBtn" class="w-12 h-12 border-2 border-gray-200 rounded-lg flex items-center justify-center hover:border-yellow-500 transition-colors">
                                 <i class="fas fa-plus text-gray-600"></i>
                             </button>
                         </div>
                     </div>
-
-
                 </div>
+
                 <!-- 구매 버튼 -->
-                <div class="space-y-4">
-                    <button class="w-full bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 text-white font-bold py-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center space-x-2">
-                        <i class="fas fa-shopping-cart"></i>
-                        <span>장바구니 담기</span>
-                    </button>
+                <div class="space-y-4" th:if="${product.productInventory > 0}">
+                    <!-- 로그인한 경우에만 장바구니 담기 버튼 표시 -->
+                    <th:block th:if="${!#strings.isEmpty(loginName)}">
+                        <button id="addToCartBtn" class="w-full bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 text-white font-bold py-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center space-x-2">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span>장바구니 담기</span>
+                        </button>
+                    </th:block>
+
+                    <!-- 로그인하지 않은 경우 로그인 안내 버튼 -->
+                    <th:block th:if="${loginName == null or #strings.isEmpty(loginName)}">
+                        <form th:action="@{/login}" method="get" style="margin: 0;">
+                            <!--현재 상품 페이지 URL을 returnUrl로 전달-->
+                            <input type="hidden" name="returnUrl" th:value="@{'/product/' + ${product.productId}}">
+                            <button type="submit" class="w-full bg-gray-400 hover:bg-gray-500 text-white font-bold py-4 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2">
+                                <i class="fas fa-sign-in-alt"></i>
+                                <span>로그인 후 구매 가능</span>
+                            </button>
+                        </form>
+                    </th:block>
+
                     <button class="w-full border-2 border-yellow-500 text-yellow-700 hover:bg-yellow-50 font-bold py-4 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2">
                         <i class="fas fa-credit-card"></i>
                         <span>바로 구매하기</span>
@@ -300,8 +299,7 @@
         </div>
     </div>
 
-
-                <!-- 상세 이미지 영역 (3개 세로 정렬) -->
+    <!-- 상세 이미지 영역 (3개 세로 정렬) -->
     <section class="mb-16">
         <div class="text-center mb-12">
             <h2 class="text-3xl font-bold text-gray-900 mb-4">상품 상세 정보</h2>
@@ -372,33 +370,181 @@
     </section>
 </main>
 
-<!-- 가격 동적 업데이트 JS -->
+<!-- 완전한 JavaScript (재고 관리 + SweetAlert2 포함) -->
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const priceText = document.getElementById('price');
         const quantityInput = document.getElementById('quantityInput');
-        const minusBtn = quantityInput?.previousElementSibling;
-        const plusBtn = quantityInput?.nextElementSibling;
+        const minusBtn = document.getElementById('minusBtn');
+        const plusBtn = document.getElementById('plusBtn');
         const karatSelect = document.getElementById('karatSelect');
         const materialValue = document.getElementById('materialValue');
         const weightSelect = document.getElementById('weightSelect');
         const mainImage = document.getElementById('mainImage');
         const thumbnails = document.querySelectorAll('.thumbnail');
-
         const soldOutBanner = document.getElementById('soldOutBanner');
-        const quantityBlock = document.getElementById('quantityBlock');
+        const addToCartBtn = document.getElementById('addToCartBtn');
 
         let unitPrice = parseInt(priceText?.dataset.price) || 0;
+
+        // ✅ URL 파라미터 기반 SweetAlert2 알림
+        const urlParams = new URLSearchParams(window.location.search);
+        const error = urlParams.get('error');
+        const success = urlParams.get('success');
+
+        // 🎉 장바구니 담기 성공 (화려한 버전)
+        if (success === 'cart_added') {
+            Swal.fire({
+                icon: 'success',
+                title: '<strong>🛒 장바구니에 담았습니다!</strong>',
+                html: `
+                    <div style="text-align: center; margin: 20px 0;">
+                        <img src="${document.getElementById('mainImage')?.src || ''}"
+                             style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px; margin-bottom: 10px;">
+                        <p style="color: #666; margin: 0;">상품이 성공적으로 추가되었습니다</p>
+                    </div>
+                `,
+                showConfirmButton: true,
+                showCancelButton: true,
+                confirmButtonText: '<i class="fas fa-shopping-cart"></i> 장바구니 보기',
+                cancelButtonText: '<i class="fas fa-shopping-bag"></i> 계속 쇼핑',
+                confirmButtonColor: '#f59e0b',
+                cancelButtonColor: '#6b7280',
+                reverseButtons: true,
+                timer: 5000, // 5초 후 자동 닫힘
+                timerProgressBar: true,
+                backdrop: 'rgba(0,0,0,0.4)',
+                showClass: {
+                    popup: 'animate__animated animate__fadeInDown'
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOutUp'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '/cart';
+                }
+            });
+        }
+
+        // ⚠️ 재고 부족 (화려한 버전)
+        if (error === 'out_of_stock') {
+            Swal.fire({
+                icon: 'warning',
+                title: '<strong>⚠️ 재고 부족</strong>',
+                html: `
+                    <div style="text-align: center; padding: 10px;">
+                        <p style="color: #ef4444; font-weight: bold; margin-bottom: 10px;">현재 재고가 부족합니다</p>
+                        <p style="color: #666; font-size: 14px;">다른 상품을 둘러보시거나 재입고 알림을 신청해보세요</p>
+                    </div>
+                `,
+                confirmButtonText: '<i class="fas fa-bell"></i> 재입고 알림',
+                cancelButtonText: '<i class="fas fa-arrow-left"></i> 다른 상품 보기',
+                showCancelButton: true,
+                confirmButtonColor: '#f59e0b',
+                cancelButtonColor: '#6b7280',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // 재입고 알림 기능 (추후 구현)
+                    Swal.fire({
+                        icon: 'info',
+                        title: '재입고 알림',
+                        text: '해당 기능은 준비 중입니다.',
+                        confirmButtonColor: '#f59e0b'
+                    });
+                }
+            });
+        }
+
+        // ✅ 장바구니 담기 버튼 기능 (로딩 효과 포함)
+        if (addToCartBtn) {
+            addToCartBtn.addEventListener('click', function() {
+                const pathParts = window.location.pathname.split('/');
+                const productId = pathParts[pathParts.length - 1];
+
+                if (!productId) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: '오류',
+                        text: '상품 정보를 찾을 수 없습니다.',
+                        confirmButtonColor: '#ef4444'
+                    });
+                    return;
+                }
+
+                // 재고 확인
+                let hasStock = true;
+                let currentInventory = null;
+
+                if (karatSelect && karatSelect.value) {
+                    const selectedOption = karatSelect.selectedOptions[0];
+                    currentInventory = parseInt(selectedOption.dataset.inventory);
+                    hasStock = currentInventory > 0;
+                } else if (weightSelect && weightSelect.value) {
+                    const selectedOption = weightSelect.selectedOptions[0];
+                    currentInventory = parseInt(selectedOption.dataset.inventory);
+                    hasStock = currentInventory > 0;
+                }
+
+                if (!hasStock) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: '재고 부족',
+                        text: '선택하신 옵션의 재고가 부족합니다.',
+                        confirmButtonColor: '#ef4444'
+                    });
+                    return;
+                }
+
+                const quantity = parseInt(quantityInput?.value) || 1;
+                if (currentInventory && quantity > currentInventory) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: '수량 초과',
+                        text: `최대 ${currentInventory}개까지만 구매 가능합니다.`,
+                        confirmButtonColor: '#f59e0b'
+                    });
+                    return;
+                }
+
+                // ✅ 로딩 메시지 표시
+                Swal.fire({
+                    title: '장바구니에 담는 중...',
+                    html: '<div class="swal2-loading-container"><div class="swal2-loading"></div></div>',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                // 장바구니에 추가 요청
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/cart/add';
+
+                const productIdInput = document.createElement('input');
+                productIdInput.type = 'hidden';
+                productIdInput.name = 'productId';
+                productIdInput.value = productId;
+                form.appendChild(productIdInput);
+
+                document.body.appendChild(form);
+                form.submit();
+            });
+        }
 
         function getSelectedPrice() {
             let selectedPrice = unitPrice;
 
-            if (karatSelect && karatSelect.selectedOptions.length > 0) {
+            if (karatSelect && karatSelect.selectedOptions.length > 0 && karatSelect.value) {
                 const karatPrice = parseInt(karatSelect.selectedOptions[0].dataset.price);
                 if (!isNaN(karatPrice)) selectedPrice = karatPrice;
             }
 
-            if (weightSelect && weightSelect.selectedOptions.length > 0) {
+            if (weightSelect && weightSelect.selectedOptions.length > 0 && weightSelect.value) {
                 const weightPrice = parseInt(weightSelect.selectedOptions[0].dataset.price);
                 if (!isNaN(weightPrice)) selectedPrice = weightPrice;
             }
@@ -415,31 +561,48 @@
             }
         }
 
-        // ✅ 재고 상태 확인 (옵션 선택 시)
+        // ✅ 재고 상태 확인 및 UI 업데이트
         function updateInventoryDisplay() {
             let inventory = null;
 
-            if (karatSelect && karatSelect.selectedOptions.length > 0) {
+            if (karatSelect && karatSelect.selectedOptions.length > 0 && karatSelect.value) {
                 const inv = karatSelect.selectedOptions[0].dataset.inventory;
                 if (inv !== undefined) inventory = parseInt(inv);
             }
 
-            if (weightSelect && weightSelect.selectedOptions.length > 0) {
+            if (weightSelect && weightSelect.selectedOptions.length > 0 && weightSelect.value) {
                 const inv = weightSelect.selectedOptions[0].dataset.inventory;
                 if (inv !== undefined) inventory = parseInt(inv);
             }
 
             if (inventory !== null) {
                 if (inventory <= 0) {
-                    soldOutBanner?.classList.remove("hidden");
-                    quantityBlock?.classList.add("hidden");
+                    // 품절 배너 표시
+                    if (soldOutBanner) {
+                        soldOutBanner.classList.remove("hidden");
+                        soldOutBanner.style.display = "block";
+                    }
+                    // 장바구니 담기 버튼 비활성화
+                    if (addToCartBtn) {
+                        addToCartBtn.disabled = true;
+                        addToCartBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                    }
                 } else {
-                    soldOutBanner?.classList.add("hidden");
-                    quantityBlock?.classList.remove("hidden");
+                    // 품절 배너 숨김
+                    if (soldOutBanner) {
+                        soldOutBanner.classList.add("hidden");
+                        soldOutBanner.style.display = "none";
+                    }
+                    // 장바구니 담기 버튼 활성화
+                    if (addToCartBtn) {
+                        addToCartBtn.disabled = false;
+                        addToCartBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    }
                 }
             }
         }
 
+        // 수량 조절 버튼 이벤트
         minusBtn?.addEventListener('click', () => {
             const qty = parseInt(quantityInput.value);
             if (qty > 1) {
@@ -456,13 +619,14 @@
 
         quantityInput?.addEventListener('input', updatePrice);
 
+        // 순도 선택 이벤트
         if (karatSelect) {
             karatSelect.addEventListener('change', function () {
                 const selected = this.selectedOptions[0];
-                if (selected && selected.dataset.price) {
+                if (selected && selected.dataset.price && this.value) {
                     materialValue.textContent = selected.value;
                     updatePrice();
-                    updateInventoryDisplay(); // ✅ 재고 갱신
+                    updateInventoryDisplay();
                 }
             });
 
@@ -473,13 +637,15 @@
             }
         }
 
+        // 중량 선택 이벤트
         if (weightSelect) {
             weightSelect.addEventListener('change', function () {
                 updatePrice();
-                updateInventoryDisplay(); // ✅ 재고 갱신
+                updateInventoryDisplay();
             });
         }
 
+        // 썸네일 이미지 클릭 이벤트
         thumbnails.forEach(thumbnail => {
             thumbnail.addEventListener('click', function () {
                 if (mainImage && thumbnail.src) {
@@ -494,23 +660,11 @@
             });
         });
 
+        // 초기화
         updatePrice();
-        updateInventoryDisplay(); // ✅ 초기 상태 설정
+        updateInventoryDisplay();
     });
 </script>
-
-
-
-
-
-
-<!--    // 골드바: 금시세 기반 가격-->
-<!--    const goldPriceElement = document.querySelector('[data-gold-price]');-->
-<!--    if (goldPriceElement) {-->
-<!--        basePrice = parseInt(goldPriceElement.dataset.goldPrice) * 1.1; // 시세 + 10%-->
-<!--        currentPrice = basePrice;-->
-<!--        updatePrice();-->
-
 
 <!-- Footer -->
 <footer class="luxury-gradient text-white py-16">

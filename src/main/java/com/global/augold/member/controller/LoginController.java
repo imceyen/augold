@@ -3,6 +3,7 @@ package com.global.augold.member.controller;
 import com.global.augold.member.entity.Customer;
 import com.global.augold.member.repository.CustomerRepository;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.ui.Model;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,6 +25,7 @@ public class LoginController {
             @RequestParam(required = false) String returnUrl,
             HttpSession session
     ) {
+
         // 관리자 로그인 체크
         if ("admin".equals(cstmId) && "1234".equals(cstmPwd)) {
             session.setAttribute("loginUser", "admin"); // 문자열로 저장
@@ -36,6 +38,8 @@ public class LoginController {
         if (optCustomer.isPresent()) {
             // 로그인 성공 - 세션에 회원 정보 저장
             session.setAttribute("loginUser", optCustomer.get());
+
+
 
             //returnUrl 이 있으면 해당 페이지로 이동하게 추가, 없으면 메인으로
             if (returnUrl != null && !returnUrl.isEmpty()){
@@ -55,7 +59,21 @@ public class LoginController {
     }
 
     @GetMapping("/login")
-    public String showLoginPage() {
+    public String showLoginPage(@RequestParam(required = false) String returnUrl,
+                                @RequestParam(required = false) String error,
+                                Model model) {
+
+        // returnUrl을 이용해서 모델에 추가해서 로그인 폼에서 사용
+        if (returnUrl != null && !returnUrl.trim().isEmpty()){
+            model.addAttribute("returnUrl", returnUrl);
+        }
+
+        if("true".equals(error)){
+            model.addAttribute("errorMessage", "아이디 또는 비밀번호가 올바르지 않습니다");
+        }else if ("login".equals(error)){
+            model.addAttribute("errorMessage", "로그인이 필요한 서비스입니다.");
+        }
+
         return "member/login";  // 로그인 폼 뷰 이름
     }
 

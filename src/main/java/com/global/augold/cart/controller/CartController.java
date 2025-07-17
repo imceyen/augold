@@ -10,7 +10,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import com.global.augold.member.entity.Customer;
 import jakarta.servlet.http.HttpSession;
-
+import jakarta.servlet.http.HttpServletRequest;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Controller
@@ -28,6 +30,8 @@ public class CartController {
     }
 
     private String getCstmNumberFromSession(HttpSession session) { // 고객 정보 세션에서 가져오는 메서드
+        Object loginUserObj = session.getAttribute("loginUser");
+
         Customer loginUser = (Customer) session.getAttribute("loginUser");
         if(loginUser == null){
             throw new RuntimeException("로그인 후 사용할 수 있습니다.");
@@ -39,29 +43,50 @@ public class CartController {
 
     @GetMapping("")
     public String cartList(Model model, HttpSession session) {
+        // ✅ 세션 디버깅 추가
+
+
+        Object loginUserObj = session.getAttribute("loginUser");
+
+
         try {
             String cstmNumber = getCstmNumberFromSession(session);
+
+
             List<CartDTO> cartItems = cartService.getCartList(cstmNumber);
+
+
             model.addAttribute("cartlist", cartItems);
             return "cart/cart";
         } catch (RuntimeException e) {
+
+            e.printStackTrace();
+
             // 로그인하지 않은 경우 로그인 페이지로 리다이렉트
             return "redirect:/login?error=login&returnUrl=/cart";
         }
     }
 
     @PostMapping("/add")
-    public String addToCart(@RequestParam String productId, HttpSession session) {
+    public String addToCart(@RequestParam String productId, HttpSession session, HttpServletRequest request) {
         try {
             String cstmNumber = getCstmNumberFromSession(session);
             String add = cartService.addToCart(cstmNumber, productId);
-            return "redirect:/cart?added=true&productId=" + productId;
+            return "redirect:/product/" + productId + "?success=cart_added";
         } catch (RuntimeException e) { // 재고 부족이나 기타 장바구니 오류
             if(e.getMessage().contains("재고")){
-                return "rediirect:/product/detail/" + productId + "?error=out_of_stock";
+                return "redirect:/product/detail/" + productId + "?error=out_of_stock";
             }
-            return "redirect:/login?error=login";
+
+            // 로그인 관련 오류 시 현재 상품 페이지 URL을 returnURL로 전달함.
+            String returnUrl = getCurrentPageUrl(request, productId);
+            return "redirect:/login?error=login&returnUrl=" + URLEncoder.encode(returnUrl, StandardCharsets.UTF_8);
         }
+    }
+
+    // 현제 페이지 URL 생성 메서드
+    private String getCurrentPageUrl(HttpServletRequest request, String productId){
+        return "/product/detail/" + productId;
     }
 
     @PostMapping("/remove")

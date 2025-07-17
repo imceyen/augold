@@ -32,6 +32,7 @@ public class Cart {
     // 비즈니스 로직용 생성자 = 장바구니에 상품을 담을 때 사용
     public  Cart(String cstmNumber, String productId){
         // 사용자 정의 생성자
+        this.cartNumber = "";
         this.cstmNumber = cstmNumber;
         this.productId = productId;
         this.cartDate = LocalDateTime.now();
