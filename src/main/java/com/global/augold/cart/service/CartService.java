@@ -3,6 +3,7 @@ package com.global.augold.cart.service;
 import com.global.augold.cart.dto.CartDTO;
 import com.global.augold.cart.entity.Cart;
 import com.global.augold.cart.repository.CartRepository;
+import com.global.augold.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,9 +19,24 @@ import java.util.List;
 public class CartService{
     private final CartRepository cartRepository; // final인 이유는 DB랑 상호작용하는 중요한 구성요소라 바뀌면 안되서.
     // CartRepository cartRepository  => 타입 + 변수명
+    private final ProductRepository productRepository;
 
     public String addToCart(String cstmNumber, String productId){
-        // 일단 새행에 추가
+        // 재고 체크
+        Integer inventory = productRepository.findById(productId) // 상품 ID로 DB에서 상품 조회
+                .map(product -> product.getProductInventory()) // 상품이 존재하면 재고를 가져옴
+                .orElse(0); // 상품이 없으면 0으로 설정
+        if(inventory <= 0){
+            throw new RuntimeException("재고가 부족하여 장바구니에 담을 수 없습니다.");
+        }
+
+        // 이미 카트에 있는 수량도 체크
+        int currentCartQuantity = cartRepository.countByCstmNumberAndProductId(cstmNumber,productId);
+        if(currentCartQuantity >= inventory){
+            throw new RuntimeException("보유 재고를 초과하여 장바구니에 담을 수 없습니다");
+        }
+
+        //재고가 충분하면 카트에 추가 가능
         Cart cart = new Cart(cstmNumber, productId);
         cartRepository.save(cart);
         return "장바구니에 담겼습니다.";
@@ -73,6 +89,7 @@ public class CartService{
 
     // 카트안의 개수 조회 메서드
     public int getCartCount(String cstmNumber){ // 조회만 하면 되니깐 Repository에 있는 메서드 호출하기.
+
         return cartRepository.countByCstmNumber(cstmNumber);
     }
 

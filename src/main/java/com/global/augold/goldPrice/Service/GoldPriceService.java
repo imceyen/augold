@@ -15,6 +15,7 @@ public class GoldPriceService {
     public GoldPriceDTO getTodayGoldPrice() {
         List<GoldPriceDTO> list = ExcelReader.readGoldPriceExcel("C:/ncsGlobal/FinalProject/final_goldprice/금시세.xlsx");
 
+
         if (list == null || list.isEmpty()) {
             throw new IllegalStateException("금 시세 데이터가 없습니다.");
         }
