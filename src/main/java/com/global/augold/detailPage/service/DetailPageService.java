@@ -68,6 +68,7 @@ public class DetailPageService {
                 .goldWeight(product.getGoldWeight())
                 .subCtgr(product.getSubCtgr())
                 .ctgrId(product.getCtgrId())
+                .productInventory(product.getProductInventory())
                 .build();
     }
 

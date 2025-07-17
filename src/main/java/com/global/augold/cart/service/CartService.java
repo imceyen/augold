@@ -3,6 +3,7 @@ package com.global.augold.cart.service;
 import com.global.augold.cart.dto.CartDTO;
 import com.global.augold.cart.entity.Cart;
 import com.global.augold.cart.repository.CartRepository;
+import com.global.augold.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,16 +14,50 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-@Transactional
 @RequiredArgsConstructor // final의 생성자를 자동으로 만들어줌
 public class CartService{
     private final CartRepository cartRepository; // final인 이유는 DB랑 상호작용하는 중요한 구성요소라 바뀌면 안되서.
     // CartRepository cartRepository  => 타입 + 변수명
+    private final ProductRepository productRepository;
 
     public String addToCart(String cstmNumber, String productId){
-        // 일단 새행에 추가
+
+
+        //  재고 체크 디버깅 추가
+
+        Integer inventory = productRepository.findById(productId)
+                .map(product -> product.getProductInventory())
+                .orElse(0);
+
+
+        if (inventory <= 0) {
+
+            throw new RuntimeException("재고가 부족하여 장바구니에 담을 수 없습니다.");
+        }
+
+
+
+        int currentCartQuantity = cartRepository.countByCstmNumberAndProductId(cstmNumber, productId);
+
+
+        if (currentCartQuantity >= inventory) {
+
+            throw new RuntimeException("보유 재고를 초과하여 장바구니에 담을 수 없습니다.");
+        }
+
+
+
         Cart cart = new Cart(cstmNumber, productId);
-        cartRepository.save(cart);
+
+
+        try {
+            cartRepository.save(cart);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("장바구니 저장 중 오류가 발생했습니다: " + e.getMessage());
+        }
+
         return "장바구니에 담겼습니다.";
     }
 
@@ -51,7 +86,24 @@ public class CartService{
         // 만약 복합 쿼리가 오류때문에 반환 못할시 기본 정보라도 반환하게 예외처리
         try {
             // 복합 쿼리로 모든 정보를 한번에 가져오기
-            List<CartDTO> cartItems = cartRepository.findByCstmNumberWithProduct(cstmNumber);
+            List<Object[]> rawResults = cartRepository.findByCstmNumberWithProduct(cstmNumber);
+            List<CartDTO> cartItems = new ArrayList<>();
+
+            for (Object[] row : rawResults) {
+                CartDTO dto = new CartDTO(
+                        (String) row[0],           // cart_number
+                        (String) row[1],           // product_id
+                        ((java.sql.Timestamp) row[2]).toLocalDateTime(), // cart_date
+                        (String) row[3],           // cstm_number
+                        (String) row[4],           // product_name
+                        row[5] != null ? ((Number) row[5]).doubleValue() : 0.0, // final_price
+                        (String) row[6],           // image_url
+                        (String) row[7],           // ctgr_id
+                        (String) row[8]            // karat_code
+                );
+                cartItems.add(dto);
+            }
+
             return groupCartItems(cartItems);
         } catch (Exception e) {
             // 복합 쿼리 실패 시 기본 정보만 반환 (예외 처리)
@@ -73,6 +125,7 @@ public class CartService{
 
     // 카트안의 개수 조회 메서드
     public int getCartCount(String cstmNumber){ // 조회만 하면 되니깐 Repository에 있는 메서드 호출하기.
+
         return cartRepository.countByCstmNumber(cstmNumber);
     }
 
