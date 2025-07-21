@@ -817,9 +817,51 @@
             });
         });
 
+        // 가격 포맷팅 함수 추가
+        function formatAllPrices() {
+            // 1. 선택박스 옵션들 포맷팅
+            const weightSelect = document.getElementById('weightSelect');
+            if (weightSelect) {
+                const options = weightSelect.querySelectorAll('option[data-price]');
+                options.forEach(option => {
+                    const price = parseInt(option.dataset.price);
+                    const weight = option.value;
+                    if (weight && price) {
+                        option.textContent = `${weight}g (₩${price.toLocaleString('ko-KR')})`;
+                    }
+                });
+            }
+
+            // 2. 순도 선택박스도 동일하게 (필요시)
+            const karatSelect = document.getElementById('karatSelect');
+            if (karatSelect) {
+                const options = karatSelect.querySelectorAll('option[data-price]');
+                options.forEach(option => {
+                    const price = parseInt(option.dataset.price);
+                    const karat = option.value;
+                    if (karat && price) {
+                        option.textContent = `${karat}`;
+                    }
+                });
+            }
+        }
+
+        // updatePrice 함수도 수정
+        function updatePrice() {
+            const qty = parseInt(quantityInput?.value) || 1;
+            const currentUnitPrice = getSelectedPrice();
+            const total = currentUnitPrice * qty;
+            if (priceText) {
+                priceText.textContent = '₩' + total.toLocaleString('ko-KR'); // 여기 수정
+            }
+        }
+
         // 초기화
+        formatAllPrices(); // 추가
         updatePrice();
         updateInventoryDisplay();
+    });
+</script>
     });
 </script>
 
