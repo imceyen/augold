@@ -618,7 +618,7 @@
                                     <div class="product-specs">
                                         <div th:if="${item.ctgrNm}">
                                             <span>카테고리: </span>
-                                            <span th:text="${item.ctgrNm}">목걸이</span>
+                                            <span th:text="${item.productGroup}">목걸이</span>
                                         </div>
                                         <div th:if="${item.karatName}">
                                             <span>순도: </span>
@@ -793,7 +793,7 @@
     // 개별 삭제
     function deleteItem(button) {
         const productId = button.getAttribute('data-product-id');
-        if (confirm('이 상품을 삭제하시겠습니까?')) {
+        if (confirm('이 상품을 장바구니에서 삭제하시겠습니까?')) {
             const form = document.createElement('form');
             form.method = 'post';
             form.action = '/cart/remove';
@@ -834,9 +834,9 @@
         const currentQuantity = parseInt(quantityDisplay.textContent);
 
         if (currentQuantity <= 1) {
-            if (confirm('상품을 장바구니에서 제거하시겠습니까?')) {
+
                 deleteItem(button);
-            }
+
             return;
         }
 

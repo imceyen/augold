@@ -7,83 +7,75 @@ import com.global.augold.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.ArrayList;
 
+// ✅ 필요한 import만 정리
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor // final의 생성자를 자동으로 만들어줌
-public class CartService{
-    private final CartRepository cartRepository; // final인 이유는 DB랑 상호작용하는 중요한 구성요소라 바뀌면 안되서.
-    // CartRepository cartRepository  => 타입 + 변수명
+@RequiredArgsConstructor
+@Transactional // 클래스 레벨 트랜잭션 추가
+public class CartService {
+    private final CartRepository cartRepository;
     private final ProductRepository productRepository;
 
-    public String addToCart(String cstmNumber, String productId){
 
-
-        //  재고 체크 디버깅 추가
-
+    public String addToCart(String cstmNumber, String productId, int quantity, String karatCode, double finalPrice) {
+        // 재고 체크
         Integer inventory = productRepository.findById(productId)
                 .map(product -> product.getProductInventory())
                 .orElse(0);
 
-
         if (inventory <= 0) {
-
             throw new RuntimeException("재고가 부족하여 장바구니에 담을 수 없습니다.");
         }
 
+        // ✅ 기존 아이템 찾기 (같은 상품 + 같은 순도)
+        Optional<Cart> existingCart = cartRepository.findByCstmNumberAndProductIdAndKaratCode(cstmNumber, productId, karatCode);
 
+        if (existingCart.isPresent()) {
+            // ✅ 기존 아이템이 있으면 수량 증가
+            Cart cart = existingCart.get();
+            int newQuantity = cart.getQuantity() + quantity;
 
-        int currentCartQuantity = cartRepository.countByCstmNumberAndProductId(cstmNumber, productId);
+            // 재고 확인 (기존 수량 + 새로 담을 수량)
+            if (newQuantity > inventory) {
+                throw new RuntimeException("보유 재고를 초과하여 장바구니에 담을 수 없습니다.");
+            }
 
+            cart.setQuantity(newQuantity);
+            cart.setCartDate(LocalDateTime.now()); // 날짜 업데이트
 
-        if (currentCartQuantity >= inventory) {
+            try {
+                cartRepository.save(cart);
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new RuntimeException("장바구니 수량 업데이트 중 오류가 발생했습니다: " + e.getMessage());
+            }
 
-            throw new RuntimeException("보유 재고를 초과하여 장바구니에 담을 수 없습니다.");
-        }
+        } else {
+            // ✅ 기존 아이템이 없으면 새로 생성
+            if (quantity > inventory) {
+                throw new RuntimeException("보유 재고를 초과하여 장바구니에 담을 수 없습니다.");
+            }
 
+            Cart cart = new Cart(cstmNumber, productId, quantity, karatCode);
 
-
-        Cart cart = new Cart(cstmNumber, productId);
-
-
-        try {
-            cartRepository.save(cart);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("장바구니 저장 중 오류가 발생했습니다: " + e.getMessage());
+            try {
+                cartRepository.save(cart);
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new RuntimeException("장바구니 저장 중 오류가 발생했습니다: " + e.getMessage());
+            }
         }
 
         return "장바구니에 담겼습니다.";
     }
 
-    private List<CartDTO> groupCartItems(List<CartDTO> cartItems) {
-        Map<String, CartDTO> groupedItems = new HashMap<>();
-
-        for (CartDTO item : cartItems) {
-            String productId = item.getProductId();
-
-            if (groupedItems.containsKey(productId)) {
-                // 이미 있는 상품이면 수량 증가
-                CartDTO existingItem = groupedItems.get(productId);
-                existingItem.setQuantity(existingItem.getQuantity() + 1);
-            } else {
-                // 새로운 상품이면 수량 1로 설정
-                item.setQuantity(1);
-                groupedItems.put(productId, item);
-            }
-        }
-
-        return new ArrayList<>(groupedItems.values());
-    }
-
-    // 복합 쿼리 사용 (Product, Category, GoldKarat 정보 포함)
-    public List<CartDTO> getCartList(String cstmNumber){
-        // 만약 복합 쿼리가 오류때문에 반환 못할시 기본 정보라도 반환하게 예외처리
+    // ✅ 수정된 getCartList - groupCartItems 제거 + quantity 처리
+    public List<CartDTO> getCartList(String cstmNumber) {
         try {
             // 복합 쿼리로 모든 정보를 한번에 가져오기
             List<Object[]> rawResults = cartRepository.findByCstmNumberWithProduct(cstmNumber);
@@ -99,67 +91,82 @@ public class CartService{
                         row[5] != null ? ((Number) row[5]).doubleValue() : 0.0, // final_price
                         (String) row[6],           // image_url
                         (String) row[7],           // ctgr_id
-                        (String) row[8]            // karat_code
+                        (String) row[8],           // c.karat_code ← Cart의 karat_code
+                        (String) row[9],           // product_group
+                        row[10] != null ? ((Number) row[10]).intValue() : 1  // ✅ c.quantity 추가
                 );
                 cartItems.add(dto);
             }
 
-            return groupCartItems(cartItems);
+
+            return cartItems;
+
         } catch (Exception e) {
-            // 복합 쿼리 실패 시 기본 정보만 반환 (예외 처리)
-            // 기본정보는 CartDTO 생성자 순서에 맞게 배치
-            List<Cart> carts = cartRepository.findByCstmNumberSimple(cstmNumber); // DB에서 해당 고객의 Cart엔티티들을 List로 가져와서 carts 변수에 저장
-            List<CartDTO> basicItems = carts.stream() // 이 리스트를 스트림으로 변환해서 하나씩 처리할 수 있게 하기.
-                    .map(cart -> new CartDTO( // cart를 CartDTO로 변환 Cart라서 형변환 필수 -> 는 이렇게 바꿔라 는 의미
+            // 복합 쿼리 실패 시 기본 정보만 반환 (fallback)
+            List<Cart> carts = cartRepository.findByCstmNumberSimple(cstmNumber);
+            List<CartDTO> basicItems = carts.stream()
+                    .map(cart -> new CartDTO(
                             cart.getCartNumber(),
                             cart.getProductId(),
                             cart.getCartDate(),
                             cart.getCstmNumber()
-                    )) // 없는건 null로 반환
-                    .toList(); // 변환된 CartDTO 객체들을 다시 List로 모아서 반환
-            return groupCartItems(basicItems);
-            // 전체 흐름 [cart1, cart2, cart3] -> 스트림 -> [cartDTO1, cartDTO2, cartDTO3] 원본 리스트를 스트림으로 하나씩 변환해서 cartDTO로 하나씩 변환함.
+                    ))
+                    .toList();
+
+
+            return basicItems;
         }
     }
 
+    // ✅ 새로운 decreaseQuantity (karatCode 포함)
+    public boolean decreaseQuantity(String cstmNumber, String productId, String karatCode) {
+        Optional<Cart> cart = cartRepository.findByCstmNumberAndProductIdAndKaratCode(cstmNumber, productId, karatCode);
+        if (cart.isPresent()) {
+            Cart existingCart = cart.get();
+            if (existingCart.getQuantity() > 1) {
+                // 수량이 1보다 크면 1 감소
+                existingCart.setQuantity(existingCart.getQuantity() - 1);
+                existingCart.setCartDate(LocalDateTime.now());
+                cartRepository.save(existingCart);
+            } else {
+                // 수량이 1이면 아예 삭제
+                cartRepository.delete(existingCart);
+            }
+            return true;
+        }
+        return false;
+    }
 
-    // 카트안의 개수 조회 메서드
-    public int getCartCount(String cstmNumber){ // 조회만 하면 되니깐 Repository에 있는 메서드 호출하기.
+    // ✅ 순도별 수량 확인 메서드
+    public int getQuantityByKarat(String cstmNumber, String productId, String karatCode) {
+        Optional<Cart> cart = cartRepository.findByCstmNumberAndProductIdAndKaratCode(cstmNumber, productId, karatCode);
+        return cart.map(Cart::getQuantity).orElse(0);
+    }
 
+    // ✅ 유지되는 메서드들 (변경 없음)
+    public int getCartCount(String cstmNumber) {
         return cartRepository.countByCstmNumber(cstmNumber);
     }
 
-    public boolean deleteCartItems(String cstmNumber, List<String> productIds){
-        try { // 예외 처리 시작
-            int totalDelete = 0; // 삭제할 상품 갯수 초기화
-            for (String productId : productIds){ // 삭제할 상품 목록(productIds)을 하나씩 꺼내서 반복 처리
-                int deleted = cartRepository.deleteByCstmNumberAndProductId(cstmNumber, productId); // 현재 상품을 장바구니에 삭제 시도
-                // deleted : 실제로 삭제된 개수
+    public boolean deleteCartItems(String cstmNumber, List<String> productIds) {
+        try {
+            int totalDelete = 0;
+            for (String productId : productIds) {
+                int deleted = cartRepository.deleteByCstmNumberAndProductId(cstmNumber, productId);
                 totalDelete += deleted;
             }
-
-            return totalDelete == productIds.size(); // 삭제된 개수가 요청한 개수와 같아야 성공
+            return totalDelete == productIds.size();
         } catch (Exception e) {
             return false;
         }
     }
 
-    public boolean deleteAllItems(String cstmNumber){ // 장바구니에 있는 아이템들을 일괄로 삭제하는 메서드
+    public boolean deleteAllItems(String cstmNumber) {
         try {
             int deletedCount = cartRepository.deleteByCstmNumber(cstmNumber);
             return deletedCount > 0;
         } catch (Exception e) {
             return false;
         }
-    }
-    // 수량 감소용 메서드
-    public boolean decreaseQuantity(String cstmNumber, String productId) {
-        // 해당 상품의 가장 최근 Cart 1개만 삭제
-        List<Cart> carts = cartRepository.findByCstmNumberAndProductIdOrderByCartDateDesc(cstmNumber, productId);
-        if (!carts.isEmpty()) {
-            cartRepository.delete(carts.get(0));
-            return true;
-        }
-        return false;
     }
 }

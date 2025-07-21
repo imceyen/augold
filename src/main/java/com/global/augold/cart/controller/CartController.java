@@ -14,6 +14,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseBody;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/cart")
@@ -68,25 +72,44 @@ public class CartController {
     }
 
     @PostMapping("/add")
-    public String addToCart(@RequestParam String productId, HttpSession session, HttpServletRequest request) {
+    @ResponseBody
+    public ResponseEntity<?> addToCart(@RequestParam String productId,
+                                       @RequestParam(defaultValue = "1") int quantity,
+                                       @RequestParam(required = false) String karatCode,
+                                       @RequestParam double finalPrice,
+                                       HttpSession session) {
         try {
             String cstmNumber = getCstmNumberFromSession(session);
-            String add = cartService.addToCart(cstmNumber, productId);
-            return "redirect:/product/" + productId + "?success=cart_added";
-        } catch (RuntimeException e) { // 재고 부족이나 기타 장바구니 오류
-            if(e.getMessage().contains("재고")){
-                return "redirect:/product/detail/" + productId + "?error=out_of_stock";
+
+            if (cstmNumber == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("error", "login_required"));
             }
 
-            // 로그인 관련 오류 시 현재 상품 페이지 URL을 returnURL로 전달함.
-            String returnUrl = getCurrentPageUrl(request, productId);
-            return "redirect:/login?error=login&returnUrl=" + URLEncoder.encode(returnUrl, StandardCharsets.UTF_8);
+            String result = cartService.addToCart(cstmNumber, productId, quantity, karatCode, finalPrice);
+
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "장바구니에 추가되었습니다.",
+                    "productId", productId,
+                    "quantity", quantity,
+                    "karatCode", karatCode != null ? karatCode : "",
+                    "finalPrice", finalPrice
+            ));
+
+        } catch (RuntimeException e) {
+            if(e.getMessage().contains("재고")){
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "out_of_stock", "message", "재고가 부족합니다."));
+            }
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "login_required", "message", "로그인이 필요합니다."));
         }
     }
 
     // 현제 페이지 URL 생성 메서드
     private String getCurrentPageUrl(HttpServletRequest request, String productId){
-        return "/product/detail/" + productId;
+        return "/product/" + productId;
     }
 
     @PostMapping("/remove")
@@ -124,10 +147,10 @@ public class CartController {
 
     @PostMapping("/decrease")
     @ResponseBody
-    public ResponseEntity<String> decreaseQuantity(@RequestParam String productId, HttpSession session) {
+    public ResponseEntity<String> decreaseQuantity(@RequestParam String productId,String karatCode,HttpSession session) {
         try {
             String cstmNumber = getCstmNumberFromSession(session);
-            boolean result = cartService.decreaseQuantity(cstmNumber, productId);
+            boolean result = cartService.decreaseQuantity(cstmNumber, productId, karatCode);
             return ResponseEntity.ok(result ? "success" : "failure");
         } catch (RuntimeException e) {
             return ResponseEntity.status(401).body("login_required");
