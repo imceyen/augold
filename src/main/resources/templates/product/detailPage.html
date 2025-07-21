@@ -150,7 +150,7 @@
 
                 <div class="mb-8">
                     <h1 class="text-4xl font-bold mb-4 text-gray-900" th:text="${product.productName}">상품명</h1>
-                    <p class="text-lg text-gray-700 leading-relaxed mb-6" th:text="${product.description}">상품 설명이 들어갑니다.</p>
+                    <p id="productDescription" class="text-lg text-gray-700 leading-relaxed mb-6" th:text="${product.description}">상품 설명이 들어갑니다.</p>
 
                     <!-- 가격 정보 -->
                     <div class="bg-gradient-to-r from-yellow-50 to-amber-50 rounded-xl p-6 mb-6">
@@ -242,6 +242,8 @@
                                 th:value="${opt.goldWeight}"
                                 th:data-price="${opt.finalPrice}"
                                 th:data-inventory="${opt.productInventory}"
+                                th:data-product-id="${opt.productId}"
+                                th:data-description="${opt.description}"
                                 th:text="${opt.goldWeight} + 'g (₩' + ${#numbers.formatInteger(opt.finalPrice, 0)} + ')'">
                         </option>
                     </select>
@@ -470,12 +472,40 @@
     }
 
 
-    <!--2. 장바구니 담기 버튼 클릭 이벤트 수정-->
+
+    // 장바구니 담기 버튼 클릭 이벤트
     // 장바구니 담기 버튼 클릭 이벤트
     if (addToCartBtn) {
         addToCartBtn.addEventListener('click', function() {
-            const pathParts = window.location.pathname.split('/');
-            const productId = pathParts[pathParts.length - 1];
+            let productId;
+
+        // 중량 선택이 있는 경우 (돌반지 등)
+        if (weightSelect && weightSelect.value && weightSelect.selectedOptions[0]) {
+            const selectedOption = weightSelect.selectedOptions[0];
+            productId = selectedOption.dataset.productId;
+            console.log('✅ 중량 선택된 productId:', productId);
+        }
+        // 순도 선택이 있는 경우 (목걸이, 귀걸이 등)
+        else if (karatSelect && karatSelect.value && karatSelect.selectedOptions[0]) {
+            const selectedOption = karatSelect.selectedOptions[0];
+            productId = selectedOption.dataset.productId || window.location.pathname.split('/').pop();
+            console.log('✅ 순도 선택된 productId:', productId);
+        }
+        // 옵션 선택이 없는 경우 (기본 상품)
+        else {
+            productId = window.location.pathname.split('/').pop();
+            console.log('✅ 기본 productId:', productId);
+        }
+
+        if (!productId) {
+            Swal.fire({
+                icon: 'error',
+                title: '상품 선택 오류',
+                text: '상품을 선택해주세요.',
+                confirmButtonColor: '#ef4444'
+            });
+            return;
+        }
 
             if (!productId) {
                 Swal.fire({
@@ -795,13 +825,31 @@
         }
 
         // 중량 선택 이벤트
-        if (weightSelect) {
-            weightSelect.addEventListener('change', function () {
-                updatePrice();
-                updateInventoryDisplay();
-            });
-        }
+        // 중량 선택 이벤트
+    if (weightSelect) {
+        weightSelect.addEventListener('change', function () {
+            const selectedOption = this.selectedOptions[0];
 
+            // ✅ Description 업데이트 추가
+            if (selectedOption && selectedOption.dataset.description) {
+                const descriptionElement = document.getElementById('productDescription');
+                if (descriptionElement) {
+                    descriptionElement.textContent = selectedOption.dataset.description;
+
+                    // 부드러운 애니메이션 효과
+                    descriptionElement.style.opacity = '0.5';
+                    setTimeout(() => {
+                        descriptionElement.style.opacity = '1';
+                    }, 150);
+                }
+                console.log('✅ Description 업데이트:', selectedOption.dataset.description);
+            }
+
+            // 기존 함수들
+            updatePrice();
+            updateInventoryDisplay();
+        });
+    }
         // 썸네일 이미지 클릭 이벤트
         thumbnails.forEach(thumbnail => {
             thumbnail.addEventListener('click', function () {

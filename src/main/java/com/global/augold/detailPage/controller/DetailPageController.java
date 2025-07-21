@@ -70,6 +70,8 @@ public class DetailPageController {
                                 .replaceAll("\\s+", " ").trim();
                     }
 
+
+
                     return DetailPageDTO.builder()
                             .productId(p.getProductId())
                             .productName(cleanName)
@@ -79,6 +81,7 @@ public class DetailPageController {
                             .subCtgr(p.getSubCtgr())
                             .ctgrId(p.getCtgrId())
                             .productInventory(p.getProductInventory())
+                            .description(p.getDescription())
                             .build();
                 })
                 .toList();
@@ -145,5 +148,6 @@ public class DetailPageController {
 
         return "product/detailPage";
     }
+
 }
 
