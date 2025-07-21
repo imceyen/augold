@@ -37,6 +37,33 @@
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
+    /* 통계 하위 탭 스타일 */
+    .stats-subtab-bar {
+        margin-bottom: 20px;
+        display: flex;
+        border-bottom: 1px solid #ccc;
+    }
+    .stats-subtab-bar button {
+        padding: 10px 15px;
+        border: none;
+        background-color: #eee;
+        cursor: pointer;
+        margin-right: 5px;
+        font-size: 14px;
+    }
+    .stats-subtab-bar button.active {
+        background-color: white;
+        border-bottom: 3px solid goldenrod;
+        font-weight: bold;
+    }
+
+    .stats-subtab-content {
+        display: none;
+    }
+    .stats-subtab-content.active {
+        display: block;
+    }
+
     table {
         border-collapse: collapse;
         width: 100%;
@@ -82,13 +109,14 @@
 </header>
 
 <div class="tab-bar">
-  <button class="tab-btn active" onclick="showTab('productTab')">상품 관리</button>
-  <button class="tab-btn" onclick="showTab('statsTab')">통계</button>
-  <button class="tab-btn" onclick="showTab('receiptTab')">영수증 등록</button>
-  <button class="tab-btn" onclick="showTab('inquiryTab')">문의 답변</button>
+  <button class="tab-btn active" onclick="showTab('productTab', event)">상품 관리</button>
+  <button class="tab-btn" onclick="showTab('statsTab', event)">통계</button>
+  <button class="tab-btn" onclick="showTab('receiptTab', event)">영수증 등록</button>
+  <button class="tab-btn" onclick="showTab('inquiryTab', event)">문의 답변</button>
 </div>
 
 <div class="content">
+  <!-- 상품 관리 -->
   <div id="productTab" class="tab-content active">
     <div style="display: flex; justify-content: space-between; align-items: center;">
       <h3>상품 관리</h3>
@@ -96,7 +124,7 @@
     </div>
 
     <div class="form-container" id="productForm" style="display:none;">
-      <form onsubmit="submitProduct(event)">
+      <form onsubmit="submitProduct(event)" enctype="multipart/form-data">
         <label>상품 ID:
           <input type="text" name="productId" readonly>
         </label><br><br>
@@ -118,7 +146,9 @@
             <option value="반지">반지</option>
             <option value="목걸이">목걸이</option>
             <option value="골드바">골드바</option>
-            <option value="기념품">기념품</option>
+            <option value="감사패">감사패</option>
+            <option value="돌반지">돌반지</option>
+            <option value="카네이션 기념품">카네이션 기념품</option>
           </select>
         </label><br><br>
         <label>금 함량:
@@ -144,14 +174,8 @@
         <label>대표 이미지:
           <input type="file" name="imageFile" accept="image/*" required>
         </label><br><br>
-        <label>상세 이미지1:
-          <input type="file" name="detailImageFile1" accept="image/*">
-        </label><br><br>
-        <label>상세 이미지2:
-          <input type="file" name="detailImageFile2" accept="image/*">
-        </label><br><br>
-        <label>상세 이미지3:
-          <input type="file" name="detailImageFile3" accept="image/*">
+        <label>상세 이미지 (최대 3장):
+          <input type="file" name="detailImages" accept="image/*" multiple>
         </label><br><br>
         <button type="submit">상품 저장</button>
         <button type="button" class="delete-btn" onclick="deleteProduct()" style="display: none;">상품 삭제</button>
@@ -170,20 +194,47 @@
     </table>
   </div>
 
-  <!-- 통계 부분 테스트 -->
+  <!-- 통계 탭 -->
   <div id="statsTab" class="tab-content">
-    <h3>금 시세 예측 통계</h3>
+    <h3>통계 분석</h3>
 
-    <!-- Plotly.js CDN 추가 -->
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-
-    <!-- 그래프가 그려질 영역들 -->
-    <div id="loadingMessage" style="text-align: center; padding: 50px; font-size: 1.2em;">
-      데이터를 불러오는 중입니다...
+    <!-- 통계 하위 탭 버튼 -->
+    <div class="stats-subtab-bar">
+      <button class="stats-subtab-btn" onclick="showStatsSubTab('salesAnalysis', event)">매출 분석 및 예측</button>
+      <button class="stats-subtab-btn active" onclick="showStatsSubTab('goldPrice', event)">금 시세 분석 및 예측</button>
+      <button class="stats-subtab-btn" onclick="showStatsSubTab('demographics', event)">성별/연령대별 매출/구매패턴 분석</button>
+      <button class="stats-subtab-btn" onclick="showStatsSubTab('orderTrends', event)">판매날짜 기반 주문 트렌드 분석</button>
+      <button class="stats-subtab-btn" onclick="showStatsSubTab('categoryProfit', event)">카테고리별 이익률 분석/예측</button>
     </div>
-    <div id="forecastPlot" class="plot-container" style="width: 90%; max-width: 900px; margin: 20px auto; display: none;"></div>
-    <div id="trendPlot" class="plot-container" style="width: 90%; max-width: 900px; margin: 20px auto; display: none;"></div>
-    <div id="weeklyPlot" class="plot-container" style="width: 90%; max-width: 900px; margin: 20px auto; display: none;"></div>
+
+    <!-- 하위 탭 컨텐츠 -->
+    <div id="salesAnalysis" class="stats-subtab-content">
+      <p>매출 분석 및 예측 데이터를 보여주는 영역입니다. (추후 구현 예정)</p>
+    </div>
+
+    <div id="goldPrice" class="stats-subtab-content active">
+      <!-- Plotly.js CDN 추가 -->
+      <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+      <div id="loadingMessage" style="text-align: center; padding: 50px; font-size: 1.2em;">
+        데이터를 불러오는 중입니다...
+      </div>
+      <div id="forecastPlot" class="plot-container" style="width: 90%; max-width: 900px; margin: 20px auto; display: none;"></div>
+      <div id="trendPlot" class="plot-container" style="width: 90%; max-width: 900px; margin: 20px auto; display: none;"></div>
+      <div id="weeklyPlot" class="plot-container" style="width: 90%; max-width: 900px; margin: 20px auto; display: none;"></div>
+    </div>
+
+    <div id="demographics" class="stats-subtab-content">
+      <p>성별/연령대별 매출 및 구매패턴 분석 데이터를 보여주는 영역입니다. (추후 구현 예정)</p>
+    </div>
+
+    <div id="orderTrends" class="stats-subtab-content">
+      <p>판매날짜(월/요일) 기반 주문 트렌드 분석 데이터를 보여주는 영역입니다. (추후 구현 예정)</p>
+    </div>
+
+    <div id="categoryProfit" class="stats-subtab-content">
+      <p>카테고리별 이익률 분석 및 예측 데이터를 보여주는 영역입니다. (추후 구현 예정)</p>
+    </div>
   </div>
 
   <div id="receiptTab" class="tab-content">
@@ -241,8 +292,6 @@
                 <td>${inq.cstmNumber}</td>
                 <td>
                  <a href="/admin/inquiry/${inq.inqNumber}">${inq.inqTitle}</a>
-
-                  </a>
                 </td>
                 <td>${inq.inqStatus}</td>
                 <td>${new Date(inq.inqDate).toLocaleString()}</td>
@@ -258,14 +307,11 @@
     }
   </script>
 
-
 </div>
 
 <script>
   let editing = false;
   let editProductId = null;
-
-
 
   function toggleForm(show = null) {
       const form = document.getElementById('productForm');
@@ -323,10 +369,7 @@
               form.basePrice.value = p.basePrice;
               form.finalPrice.value = p.finalPrice;
               form.description.value = p.description;
-              form.imageUrl.value = p.imageUrl;
-              form.imageUrl1.value = p.imageUrl1 || "";
-              form.imageUrl2.value = p.imageUrl2 || "";
-              form.imageUrl3.value = p.imageUrl3 || "";
+              // 이미지 관련은 필요 시 추가 구현
 
               editProductId = id;
               editing = true;
@@ -336,22 +379,18 @@
           });
   }
 
-function submitProduct(event) {
+  function submitProduct(event) {
     event.preventDefault();
     const form = event.target;
 
-    // JSON 대신 FormData 사용 (파일 포함 가능)
     const formData = new FormData(form);
-
-    // 상품 ID, 이름 등 텍스트 필드도 자동으로 포함됨
 
     const method = editing ? 'PUT' : 'POST';
     const url = editing ? `/api/products/${editProductId}` : '/api/products';
 
     fetch(url, {
         method: method,
-        body: formData,  // FormData 그대로 전달
-        // Content-Type 헤더는 fetch가 자동으로 설정함
+        body: formData,
     }).then(res => {
         if (res.ok) {
             alert(editing ? "수정 완료!" : "상품이 등록되었습니다!");
@@ -366,9 +405,7 @@ function submitProduct(event) {
             alert("저장 실패");
         }
     });
-}
-
-
+  }
 
   function deleteProduct() {
       if (!editProductId) return;
@@ -411,91 +448,113 @@ function submitProduct(event) {
           console.error(err);
       });
   }
-</script>
 
-<script>
+
   /**
- * 탭을 보여주는 함수를 수정하여, 통계 탭이 처음 열릴 때 데이터를 로드하도록 함.
- */
-let statsLoaded = false; // 통계 데이터가 이미 로드되었는지 확인하는 플래그
+   * 메인 탭 전환 함수
+   */
+  let statsLoaded = false; // 통계 데이터 로드 여부
 
-function showTab(tabId) {
-    const tabs = document.querySelectorAll('.tab-content');
-    const buttons = document.querySelectorAll('.tab-btn');
-    tabs.forEach(tab => tab.classList.remove('active'));
-    buttons.forEach(btn => btn.classList.remove('active'));
-    document.getElementById(tabId).classList.add('active');
-    event.target.classList.add('active');
+  function showTab(tabId, event) {
+      const tabs = document.querySelectorAll('.tab-content');
+      const buttons = document.querySelectorAll('.tab-btn');
+      tabs.forEach(tab => tab.classList.remove('active'));
+      buttons.forEach(btn => btn.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      event.currentTarget.classList.add('active');
 
-    // 통계 탭을 처음 클릭했을 때만 데이터를 불러옴
-    if (tabId === 'statsTab' && !statsLoaded) {
-        loadGoldPriceForecast();
-        statsLoaded = true; // 로드되었음을 표시
-    }
-}
+      // 통계 탭 최초 진입 시 기본 하위탭 금 시세 로드
+      if (tabId === 'statsTab') {
+          showStatsSubTab('goldPrice'); // 기본 하위탭 활성화
 
+          if (!statsLoaded) {
+              loadGoldPriceForecast();
+              statsLoaded = true;
+          }
+      }
+  }
 
-/**
- * 금 시세 예측 데이터를 서버에서 비동기적으로 가져와 그래프를 그리는 함수
- */
-function loadGoldPriceForecast() {
-    const loadingMsg = document.getElementById('loadingMessage');
-    const forecastPlotDiv = document.getElementById('forecastPlot');
-    const trendPlotDiv = document.getElementById('trendPlot');
-    const weeklyPlotDiv = document.getElementById('weeklyPlot');
+  /**
+   * 통계 탭 내 하위 탭 전환 함수
+   */
+  function showStatsSubTab(subTabId, event) {
+      // 버튼 active 토글
+      const buttons = document.querySelectorAll('.stats-subtab-bar button');
+      buttons.forEach(btn => btn.classList.remove('active'));
+      if(event) event.currentTarget.classList.add('active');
 
-    // 로딩 메시지 표시
-    loadingMsg.style.display = 'block';
-    forecastPlotDiv.style.display = 'none';
-    trendPlotDiv.style.display = 'none';
-    weeklyPlotDiv.style.display = 'none';
+      // 하위 탭 콘텐츠 표시
+      const contents = document.querySelectorAll('.stats-subtab-content');
+      contents.forEach(content => content.classList.remove('active'));
+      document.getElementById(subTabId).classList.add('active');
 
-    fetch('/api/statistics/gold-price-forecast')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('서버 응답 오류: ' + response.statusText);
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.error) {
-                throw new Error(data.error);
-            }
+      // 금 시세 탭 선택 시 그래프 로딩 보장
+      if (subTabId === 'goldPrice') {
+          if (!statsLoaded) {
+              loadGoldPriceForecast();
+              statsLoaded = true;
+          }
+      }
+  }
 
-            loadingMsg.style.display = 'none'; // 로딩 메시지 숨기기
+  /**
+   * 금 시세 예측 데이터 로드 및 그래프 그리기 함수
+   */
+  function loadGoldPriceForecast() {
+      const loadingMsg = document.getElementById('loadingMessage');
+      const forecastPlotDiv = document.getElementById('forecastPlot');
+      const trendPlotDiv = document.getElementById('trendPlot');
+      const weeklyPlotDiv = document.getElementById('weeklyPlot');
 
-            // 그래프 영역 보이기
-            forecastPlotDiv.style.display = 'block';
-            trendPlotDiv.style.display = 'block';
-            weeklyPlotDiv.style.display = 'block';
+      loadingMsg.style.display = 'block';
+      forecastPlotDiv.style.display = 'none';
+      trendPlotDiv.style.display = 'none';
+      weeklyPlotDiv.style.display = 'none';
 
-            // 1. 메인 예측 그래프 그리기 (이전 답변의 JS 코드와 동일)
-            const forecast = data.forecast;
-            const traceActual = { x: forecast.ds, y: forecast.y, mode: 'markers', type: 'scatter', name: '실제 가격' };
-            const tracePredicted = { x: forecast.ds, y: forecast.yhat, mode: 'lines', type: 'scatter', name: '예측 가격', line: { color: 'blue' } };
-            const traceUpperBand = { x: forecast.ds, y: forecast.yhat_upper, mode: 'lines', line: { width: 0 }, showlegend: false };
-            const traceLowerBand = { x: forecast.ds, y: forecast.yhat_lower, mode: 'lines', line: { width: 0 }, fill: 'tonexty', fillcolor: 'rgba(0, 100, 255, 0.2)', showlegend: false };
-            const forecastLayout = { title: '향후 30일 금 시세 예측', xaxis: { title: '날짜' }, yaxis: { title: '가격 (원/g)' } };
-            Plotly.newPlot('forecastPlot', [traceUpperBand, traceLowerBand, traceActual, tracePredicted], forecastLayout);
+      fetch('/api/statistics/gold-price-forecast')
+          .then(response => {
+              if (!response.ok) {
+                  throw new Error('서버 응답 오류: ' + response.statusText);
+              }
+              return response.json();
+          })
+          .then(data => {
+              if (data.error) {
+                  throw new Error(data.error);
+              }
 
-            // 2. 트렌드 그래프 그리기
-            const trend = data.trend;
-            const trendTrace = { x: trend.ds, y: trend.y, mode: 'lines', type: 'scatter', name: '트렌드' };
-            const trendLayout = { title: '시세 트렌드', xaxis: { title: '날짜' }, yaxis: { title: '트렌드 값' } };
-            Plotly.newPlot('trendPlot', [trendTrace], trendLayout);
+              loadingMsg.style.display = 'none';
+              forecastPlotDiv.style.display = 'block';
+              trendPlotDiv.style.display = 'block';
+              weeklyPlotDiv.style.display = 'block';
 
-            // 3. 주간 계절성 그래프 그리기
-            const weekly = data.weekly;
-            const weeklyTrace = { x: weekly.x, y: weekly.y, mode: 'lines', type: 'scatter', name: '주간 계절성' };
-            const weeklyLayout = { title: '주간 계절성', xaxis: { title: '요일' }, yaxis: { title: '계절성 영향' } };
-            Plotly.newPlot('weeklyPlot', [weeklyTrace], weeklyLayout);
-        })
-        .catch(error => {
-            console.error('Error fetching forecast data:', error);
-            loadingMsg.innerText = '데이터를 불러오는 데 실패했습니다. 잠시 후 다시 시도해주세요. \n오류: ' + error.message;
-            loadingMsg.style.color = 'red';
-        });
-}
+              // 예측 그래프
+              const forecast = data.forecast;
+              const traceActual = { x: forecast.ds, y: forecast.y, mode: 'markers', type: 'scatter', name: '실제 가격' };
+              const tracePredicted = { x: forecast.ds, y: forecast.yhat, mode: 'lines', type: 'scatter', name: '예측 가격', line: { color: 'blue' } };
+              const traceUpperBand = { x: forecast.ds, y: forecast.yhat_upper, mode: 'lines', line: { width: 0 }, showlegend: false };
+              const traceLowerBand = { x: forecast.ds, y: forecast.yhat_lower, mode: 'lines', line: { width: 0 }, fill: 'tonexty', fillcolor: 'rgba(0, 100, 255, 0.2)', showlegend: false };
+              const forecastLayout = { title: '향후 30일 금 시세 예측', xaxis: { title: '날짜' }, yaxis: { title: '가격 (원/g)' } };
+              Plotly.newPlot('forecastPlot', [traceUpperBand, traceLowerBand, traceActual, tracePredicted], forecastLayout);
+
+              // 트렌드 그래프
+              const trend = data.trend;
+              const trendTrace = { x: trend.ds, y: trend.y, mode: 'lines', type: 'scatter', name: '트렌드' };
+              const trendLayout = { title: '시세 트렌드', xaxis: { title: '날짜' }, yaxis: { title: '트렌드 값' } };
+              Plotly.newPlot('trendPlot', [trendTrace], trendLayout);
+
+              // 주간 계절성 그래프
+              const weekly = data.weekly;
+              const weeklyTrace = { x: weekly.x, y: weekly.y, mode: 'lines', type: 'scatter', name: '주간 계절성' };
+              const weeklyLayout = { title: '주간 계절성', xaxis: { title: '요일' }, yaxis: { title: '계절성 영향' } };
+              Plotly.newPlot('weeklyPlot', [weeklyTrace], weeklyLayout);
+          })
+          .catch(error => {
+              console.error('Error fetching forecast data:', error);
+              loadingMsg.innerText = '데이터를 불러오는 데 실패했습니다. 잠시 후 다시 시도해주세요. \n오류: ' + error.message;
+              loadingMsg.style.color = 'red';
+          });
+  }
 
 </script>
 

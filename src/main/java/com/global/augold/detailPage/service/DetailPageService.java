@@ -1,5 +1,6 @@
 package com.global.augold.detailPage.service;
 
+import com.global.augold.common.util.FileUploadUtil;
 import com.global.augold.detailPage.repository.DetailPageRepository;
 import com.global.augold.detailPage.entity.ProductDetailImage;
 import com.global.augold.detailPage.dto.DetailPageDTO;
@@ -7,8 +8,12 @@ import com.global.augold.product.entity.Product;
 import com.global.augold.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;  // 트랜잭션 추가
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 import java.util.List;
+
 import com.global.augold.goldPrice.Service.GoldPriceService;
 import com.global.augold.goldPrice.dto.GoldPriceDTO;
 
@@ -67,15 +72,15 @@ public class DetailPageService {
                 .build();
     }
 
-    // **추가**: 상세 이미지 저장/수정 메서드
+    // 상세 이미지 저장/수정 메서드
     @Transactional
     public void saveDetailImages(DetailPageDTO dto) {
         String productId = dto.getProductId();
 
-        // 1. 기존 이미지 모두 삭제
+        // 기존 이미지 모두 삭제
         detailImageRepository.deleteByProductId(productId);
 
-        // 2. 이미지 3장까지 저장 (null/빈값은 저장 안 함)
+        // 이미지 최대 3장까지 저장
         if (dto.getImageUrl1() != null && !dto.getImageUrl1().isEmpty()) {
             ProductDetailImage img1 = ProductDetailImage.builder()
                     .productId(productId)
@@ -98,4 +103,10 @@ public class DetailPageService {
             detailImageRepository.save(img3);
         }
     }
-}
+
+    // 상세 이미지 업로드 처리
+    public String uploadImage(MultipartFile file) throws IOException {
+        String uploadDir = "C:/upload/detail";
+        return FileUploadUtil.upload(file, uploadDir);
+    }
+} 

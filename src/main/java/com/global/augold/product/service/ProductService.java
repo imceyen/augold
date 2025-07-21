@@ -5,7 +5,9 @@ import com.global.augold.product.entity.Product;
 import com.global.augold.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -87,37 +89,36 @@ public class ProductService {
                 .build();
     }
 
+
     /**
      * subCtgr 값에 따라 productId 자동 생성
      */
     public String generateNextProductId(String subCtgr) {
         String prefix;
         switch (subCtgr) {
-            case "귀걸이": prefix = "E"; break;
-            case "반지":   prefix = "R"; break;
-            case "목걸이": prefix = "N"; break;
-            case "골드바": prefix = "G"; break;
-            case "감사패":
-            case "돌반지":
-            case "카네이션기념품": prefix = "S"; break;
-            default: prefix = "X"; break;
+            case "귀걸이": prefix = "PROD-E"; break;
+            case "반지":   prefix = "PROD-R"; break;
+            case "목걸이": prefix = "PROD-N"; break;
+            case "골드바": prefix = "PROD-G"; break;
+            case "감사패", "돌반지", "카네이션 기념품": prefix = "PROD-S"; break;
+            default: prefix = "PROD-X"; break;
         }
 
-        String fullPrefix = "PROD_" + prefix;
-        List<Product> products = productRepository.findByProductIdStartingWith(fullPrefix);
+        // 해당 prefix로 시작하는 모든 상품 ID 조회
+        List<Product> products = productRepository.findByProductIdStartingWith(prefix);
 
+        // 숫자 부분 추출해서 max 찾기
         int maxNumber = products.stream()
-                .map(p -> p.getProductId().replace(fullPrefix, ""))
+                .map(p -> p.getProductId().replace(prefix, ""))
                 .filter(s -> s.matches("\\d+"))
                 .mapToInt(Integer::parseInt)
                 .max()
                 .orElse(0);
 
         int nextNumber = maxNumber + 1;
-
-        // 여기서 숫자 부분을 5자리로 포맷팅
-        return String.format("%s%05d", fullPrefix, nextNumber);
+        return String.format("%s%05d", prefix, nextNumber);
     }
+
 
 
 }
