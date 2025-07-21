@@ -228,8 +228,15 @@
       <p>성별/연령대별 매출 및 구매패턴 분석 데이터를 보여주는 영역입니다. (추후 구현 예정)</p>
     </div>
 
-    <div id="orderTrends" class="stats-subtab-content">
-      <p>판매날짜(월/요일) 기반 주문 트렌드 분석 데이터를 보여주는 영역입니다. (추후 구현 예정)</p>
+    <div id="orderTrends" class="stats-subtab-content active">
+      <div id="orderTrendsLoading" style="text-align: center; padding: 50px; font-size: 1.2em;">
+        데이터를 불러오는 중입니다...
+      </div>
+      <div id="salesForecastPlot" class="plot-container" style="width: 90%; max-width: 1000px; margin: 20px auto; display: none;"></div>
+      <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+        <div id="salesWeeklyPlot" class="plot-container" style="width: 90%; max-width: 480px; margin: 20px auto; display: none;"></div>
+        <div id="salesYearlyPlot" class="plot-container" style="width: 90%; max-width: 480px; margin: 20px auto; display: none;"></div>
+      </div>
     </div>
 
     <div id="categoryProfit" class="stats-subtab-content">
@@ -310,6 +317,7 @@
 </div>
 
 <script>
+  // 상품 관리 관련 변수 및 함수
   let editing = false;
   let editProductId = null;
 
@@ -318,7 +326,9 @@
       form.style.display = (show === true || (show === null && form.style.display === 'none')) ? 'block' : 'none';
   }
 
+  // 페이지 로드 시 실행될 함수들
   document.addEventListener('DOMContentLoaded', () => {
+      // 상품 관리 초기화
       document.querySelector('select[name="subCtgr"]').addEventListener("change", function () {
           const subCtgr = this.value;
           if (!subCtgr || editing) return;
@@ -329,8 +339,13 @@
                   document.querySelector('#productForm input[name="productId"]').value = productId;
               });
       });
-
       fetchProducts();
+
+      // 문의 관리 초기화
+      fetchInquiries();
+
+      // 기본 탭 설정 (여기서는 상품 관리 탭이 기본으로 활성화됨)
+      // 만약 다른 탭을 기본으로 하고 싶다면 이 부분을 수정할 수 있습니다.
   });
 
   function fetchProducts() {
@@ -356,42 +371,37 @@
   }
 
   function editProduct(id) {
-      fetch(`/api/products/${id}`)
-          .then(res => res.json())
-          .then(p => {
-              const form = document.querySelector('#productForm form');
-              form.productId.value = p.productId;
-              form.productName.value = p.productName;
-              form.ctgrId.value = p.ctgrId;
-              form.subCtgr.value = p.subCtgr;
-              form.karatCode.value = p.karatCode;
-              form.goldWeight.value = p.goldWeight;
-              form.basePrice.value = p.basePrice;
-              form.finalPrice.value = p.finalPrice;
-              form.description.value = p.description;
-              // 이미지 관련은 필요 시 추가 구현
+    fetch(`/api/products/${id}`)
+        .then(res => res.json())
+        .then(p => {
+            const form = document.querySelector('#productForm form');
+            form.productId.value = p.productId;
+            form.productName.value = p.productName;
+            form.ctgrId.value = p.ctgrId;
+            form.subCtgr.value = p.subCtgr;
+            form.karatCode.value = p.karatCode;
+            form.goldWeight.value = p.goldWeight;
+            form.basePrice.value = p.basePrice;
+            form.finalPrice.value = p.finalPrice;
+            form.description.value = p.description;
 
-              editProductId = id;
-              editing = true;
-              toggleForm(true);
-              form.querySelector("button[type='submit']").innerText = "상품 수정";
-              form.querySelector(".delete-btn").style.display = "inline-block";
-          });
+            editProductId = id;
+            editing = true;
+            toggleForm(true);
+            form.querySelector("button[type='submit']").innerText = "상품 수정";
+            form.querySelector(".delete-btn").style.display = "inline-block";
+        });
   }
 
   function submitProduct(event) {
     event.preventDefault();
     const form = event.target;
-
     const formData = new FormData(form);
-
     const method = editing ? 'PUT' : 'POST';
     const url = editing ? `/api/products/${editProductId}` : '/api/products';
 
-    fetch(url, {
-        method: method,
-        body: formData,
-    }).then(res => {
+    fetch(url, { method: method, body: formData })
+      .then(res => {
         if (res.ok) {
             alert(editing ? "수정 완료!" : "상품이 등록되었습니다!");
             form.reset();
@@ -411,9 +421,8 @@
       if (!editProductId) return;
       if (!confirm("정말로 삭제하시겠습니까?")) return;
 
-      fetch(`/api/products/${editProductId}`, {
-          method: 'DELETE'
-      }).then(res => {
+      fetch(`/api/products/${editProductId}`, { method: 'DELETE' })
+        .then(res => {
           if (res.ok) {
               alert("삭제 완료!");
               const form = document.querySelector('#productForm form');
@@ -430,15 +439,42 @@
       });
   }
 
+  // 문의 관리 함수
+  function fetchInquiries() {
+      fetch('/api/inquiries')
+        .then(res => {
+          if (!res.ok) throw new Error("문의 목록을 불러오지 못했습니다.");
+          return res.json();
+        })
+        .then(data => {
+          const tbody = document.querySelector("#inquiryTable tbody");
+          tbody.innerHTML = "";
+          data.forEach((inq, index) => {
+            const row = `
+              <tr>
+                <td>${index + 1}</td>
+                <td>${inq.cstmNumber}</td>
+                <td><a href="/admin/inquiry/${inq.inqNumber}">${inq.inqTitle}</a></td>
+                <td>${inq.inqStatus}</td>
+                <td>${new Date(inq.inqDate).toLocaleString()}</td>
+              </tr>
+            `;
+            tbody.insertAdjacentHTML("beforeend", row);
+          });
+        })
+        .catch(err => {
+          console.error(err);
+          alert(err.message);
+        });
+  }
+
+  // 영수증 관리 함수
   function uploadReceipt(event) {
       event.preventDefault();
       const form = document.getElementById("receiptForm");
       const formData = new FormData(form);
 
-      fetch('/api/receipt/upload', {
-          method: 'POST',
-          body: formData
-      })
+      fetch('/api/receipt/upload', { method: 'POST', body: formData })
       .then(res => res.json())
       .then(data => {
           document.getElementById("ocrResult").innerText = "📄 OCR 결과:\n" + data.text;
@@ -449,51 +485,56 @@
       });
   }
 
+  // --- 탭 및 통계 관련 로직 ---
+
+  // 각 통계 탭의 데이터 로드 여부를 추적하는 플래그
+  let goldPriceStatsLoaded = false;
+  let orderTrendsLoaded = false;
+  // (추후 다른 통계 탭 추가 시 여기에 플래그 추가)
 
   /**
    * 메인 탭 전환 함수
    */
-  let statsLoaded = false; // 통계 데이터 로드 여부
-
   function showTab(tabId, event) {
-      const tabs = document.querySelectorAll('.tab-content');
-      const buttons = document.querySelectorAll('.tab-btn');
-      tabs.forEach(tab => tab.classList.remove('active'));
-      buttons.forEach(btn => btn.classList.remove('active'));
+      // 모든 탭 컨텐츠와 버튼 비활성화
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+      // 클릭된 탭과 버튼 활성화
       document.getElementById(tabId).classList.add('active');
       event.currentTarget.classList.add('active');
 
-      // 통계 탭 최초 진입 시 기본 하위탭 금 시세 로드
+      // '통계' 탭을 처음 열 때 기본 하위 탭 로직 실행
       if (tabId === 'statsTab') {
-          showStatsSubTab('goldPrice'); // 기본 하위탭 활성화
-
-          if (!statsLoaded) {
-              loadGoldPriceForecast();
-              statsLoaded = true;
+          // '판매날짜 기반 주문 트렌드 분석'을 기본 하위 탭으로 설정
+          const defaultSubTabButton = document.querySelector('.stats-subtab-btn[onclick*="orderTrends"]');
+          if (defaultSubTabButton && !defaultSubTabButton.classList.contains('active')) {
+              showStatsSubTab('orderTrends', { currentTarget: defaultSubTabButton });
           }
       }
   }
 
   /**
-   * 통계 탭 내 하위 탭 전환 함수
+   * 통계 하위 탭 전환 함수 (수정된 핵심 로직)
    */
   function showStatsSubTab(subTabId, event) {
-      // 버튼 active 토글
-      const buttons = document.querySelectorAll('.stats-subtab-bar button');
-      buttons.forEach(btn => btn.classList.remove('active'));
-      if(event) event.currentTarget.classList.add('active');
+      // 모든 하위 탭 버튼과 컨텐츠 비활성화
+      document.querySelectorAll('.stats-subtab-bar button').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.stats-subtab-content').forEach(content => content.classList.remove('active'));
 
-      // 하위 탭 콘텐츠 표시
-      const contents = document.querySelectorAll('.stats-subtab-content');
-      contents.forEach(content => content.classList.remove('active'));
+      // 클릭된 하위 탭 버튼과 컨텐츠 활성화
+      if (event && event.currentTarget) {
+          event.currentTarget.classList.add('active');
+      }
       document.getElementById(subTabId).classList.add('active');
 
-      // 금 시세 탭 선택 시 그래프 로딩 보장
-      if (subTabId === 'goldPrice') {
-          if (!statsLoaded) {
-              loadGoldPriceForecast();
-              statsLoaded = true;
-          }
+      // 각 하위 탭에 맞는 데이터 로드 함수를 *필요할 때만* 호출
+      if (subTabId === 'goldPrice' && !goldPriceStatsLoaded) {
+          loadGoldPriceForecast();
+          goldPriceStatsLoaded = true; // 로드 완료 플래그 설정
+      } else if (subTabId === 'orderTrends' && !orderTrendsLoaded) {
+          loadOrderTrends();
+          orderTrendsLoaded = true; // 로드 완료 플래그 설정
       }
   }
 
@@ -502,60 +543,102 @@
    */
   function loadGoldPriceForecast() {
       const loadingMsg = document.getElementById('loadingMessage');
-      const forecastPlotDiv = document.getElementById('forecastPlot');
-      const trendPlotDiv = document.getElementById('trendPlot');
-      const weeklyPlotDiv = document.getElementById('weeklyPlot');
+      const plotDivs = ['forecastPlot', 'trendPlot', 'weeklyPlot'];
 
       loadingMsg.style.display = 'block';
-      forecastPlotDiv.style.display = 'none';
-      trendPlotDiv.style.display = 'none';
-      weeklyPlotDiv.style.display = 'none';
+      plotDivs.forEach(id => document.getElementById(id).style.display = 'none');
 
       fetch('/api/statistics/gold-price-forecast')
           .then(response => {
-              if (!response.ok) {
-                  throw new Error('서버 응답 오류: ' + response.statusText);
-              }
+              if (!response.ok) throw new Error('서버 응답 오류: ' + response.statusText);
               return response.json();
           })
           .then(data => {
-              if (data.error) {
-                  throw new Error(data.error);
-              }
+              if (data.error) throw new Error(data.error);
 
               loadingMsg.style.display = 'none';
-              forecastPlotDiv.style.display = 'block';
-              trendPlotDiv.style.display = 'block';
-              weeklyPlotDiv.style.display = 'block';
+              plotDivs.forEach(id => document.getElementById(id).style.display = 'block');
 
               // 예측 그래프
               const forecast = data.forecast;
-              const traceActual = { x: forecast.ds, y: forecast.y, mode: 'markers', type: 'scatter', name: '실제 가격' };
-              const tracePredicted = { x: forecast.ds, y: forecast.yhat, mode: 'lines', type: 'scatter', name: '예측 가격', line: { color: 'blue' } };
-              const traceUpperBand = { x: forecast.ds, y: forecast.yhat_upper, mode: 'lines', line: { width: 0 }, showlegend: false };
-              const traceLowerBand = { x: forecast.ds, y: forecast.yhat_lower, mode: 'lines', line: { width: 0 }, fill: 'tonexty', fillcolor: 'rgba(0, 100, 255, 0.2)', showlegend: false };
-              const forecastLayout = { title: '향후 30일 금 시세 예측', xaxis: { title: '날짜' }, yaxis: { title: '가격 (원/g)' } };
-              Plotly.newPlot('forecastPlot', [traceUpperBand, traceLowerBand, traceActual, tracePredicted], forecastLayout);
+              Plotly.newPlot('forecastPlot', [
+                { x: forecast.ds, y: forecast.yhat_upper, mode: 'lines', line: { width: 0 }, showlegend: false },
+                { x: forecast.ds, y: forecast.yhat_lower, mode: 'lines', line: { width: 0 }, fill: 'tonexty', fillcolor: 'rgba(0, 100, 255, 0.2)', showlegend: false },
+                { x: forecast.ds, y: forecast.y, mode: 'markers', type: 'scatter', name: '실제 가격' },
+                { x: forecast.ds, y: forecast.yhat, mode: 'lines', type: 'scatter', name: '예측 가격', line: { color: 'blue' } }
+              ], { title: '향후 30일 금 시세 예측', xaxis: { title: '날짜' }, yaxis: { title: '가격 (원/g)' } });
 
               // 트렌드 그래프
               const trend = data.trend;
-              const trendTrace = { x: trend.ds, y: trend.y, mode: 'lines', type: 'scatter', name: '트렌드' };
-              const trendLayout = { title: '시세 트렌드', xaxis: { title: '날짜' }, yaxis: { title: '트렌드 값' } };
-              Plotly.newPlot('trendPlot', [trendTrace], trendLayout);
+              Plotly.newPlot('trendPlot', [{ x: trend.ds, y: trend.y, mode: 'lines', type: 'scatter', name: '트렌드' }], { title: '시세 트렌드', xaxis: { title: '날짜' }, yaxis: { title: '트렌드 값' } });
 
               // 주간 계절성 그래프
               const weekly = data.weekly;
-              const weeklyTrace = { x: weekly.x, y: weekly.y, mode: 'lines', type: 'scatter', name: '주간 계절성' };
-              const weeklyLayout = { title: '주간 계절성', xaxis: { title: '요일' }, yaxis: { title: '계절성 영향' } };
-              Plotly.newPlot('weeklyPlot', [weeklyTrace], weeklyLayout);
+              Plotly.newPlot('weeklyPlot', [{ x: weekly.x, y: weekly.y, mode: 'lines', type: 'scatter', name: '주간 계절성' }], { title: '주간 계절성', xaxis: { title: '요일' }, yaxis: { title: '계절성 영향' } });
           })
           .catch(error => {
               console.error('Error fetching forecast data:', error);
-              loadingMsg.innerText = '데이터를 불러오는 데 실패했습니다. 잠시 후 다시 시도해주세요. \n오류: ' + error.message;
+              loadingMsg.innerText = '데이터를 불러오는 데 실패했습니다. \n오류: ' + error.message;
               loadingMsg.style.color = 'red';
           });
   }
 
+  /**
+   * 요일, 월별 트렌드 분석 데이터 로드 및 그래프 그리기 함수
+   */
+  function loadOrderTrends() {
+      const loadingMsg = document.getElementById('orderTrendsLoading');
+      const plotDivs = ['salesForecastPlot', 'salesWeeklyPlot', 'salesYearlyPlot'];
+
+      loadingMsg.style.display = 'block';
+      plotDivs.forEach(id => document.getElementById(id).style.display = 'none');
+
+      fetch('/api/statistics/order-trends')
+          .then(response => {
+              if (!response.ok) throw new Error('서버 응답 오류: ' + response.statusText);
+              return response.json();
+          })
+          .then(data => {
+              if (data.error) throw new Error(data.error);
+
+              loadingMsg.style.display = 'none';
+              plotDivs.forEach(id => document.getElementById(id).style.display = 'block');
+
+              // 1. 전체 매출 예측 그래프 (salesForecastPlot)
+              const forecastData = data.main_forecast;
+              Plotly.newPlot('salesForecastPlot', [
+                  { x: forecastData.map(d => d.ds), y: forecastData.map(d => d.yhat_upper), mode: 'lines', line: { width: 0 }, showlegend: false },
+                  { x: forecastData.map(d => d.ds), y: forecastData.map(d => d.yhat_lower), mode: 'lines', line: { width: 0 }, fill: 'tonexty', fillcolor: 'rgba(65, 105, 225, 0.2)', showlegend: false },
+                  { x: forecastData.map(d => d.ds), y: forecastData.map(d => d.y), mode: 'markers', type: 'scatter', name: '실제 매출', marker: { color: 'black', size: 4 } },
+                  { x: forecastData.map(d => d.ds), y: forecastData.map(d => d.yhat), mode: 'lines', type: 'scatter', name: '예측 매출', line: { color: 'royalblue' } }
+              ], { title: '총 매출 예측 (향후 90일)', xaxis: { title: '날짜' }, yaxis: { title: '매출액 (원)', tickformat: ',.0f' } });
+
+              // 2. 요일별 매출 트렌드 그래프 (salesWeeklyPlot)
+              const weeklyData = data.weekly_seasonality;
+              Plotly.newPlot('salesWeeklyPlot', [{
+                  x: weeklyData.map(d => d.day_name),
+                  y: weeklyData.map(d => d.weekly_effect),
+                  type: 'bar',
+                  name: '요일별 효과',
+                  marker: { color: weeklyData.map(d => d.weekly_effect > 0 ? 'crimson' : 'royalblue') }
+              }], { title: '요일별 매출 트렌드', xaxis: { title: '요일' }, yaxis: { title: '매출 증감 효과 (원)', tickformat: ',.0f' } });
+
+              // 3. 월별 매출 트렌드 그래프 (salesYearlyPlot)
+              const yearlyData = data.yearly_seasonality;
+              Plotly.newPlot('salesYearlyPlot', [{
+                  x: yearlyData.map(d => d.month_name),
+                  y: yearlyData.map(d => d.yearly_effect),
+                  mode: 'lines+markers',
+                  type: 'scatter',
+                  name: '월별 효과'
+              }], { title: '월별 매출 트렌드', xaxis: { title: '월' }, yaxis: { title: '매출 증감 효과 (원)', tickformat: ',.0f' } });
+          })
+          .catch(error => {
+              console.error('Error fetching order trends data:', error);
+              loadingMsg.innerText = '데이터를 불러오는 데 실패했습니다. \n오류: ' + error.message;
+              loadingMsg.style.color = 'red';
+          });
+  }
 </script>
 
 </body>
