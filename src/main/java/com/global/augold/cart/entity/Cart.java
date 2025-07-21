@@ -29,12 +29,24 @@ public class Cart {
     @Column(name = "CART_DATE")
     private  LocalDateTime cartDate; // 담은날짜
 
+
+    @Column(name = "QUANTITY")
+    private int quantity = 1;
+
+    // karatCode 필드 추가
+    @Column(name = "KARAT_CODE")
+    private String karatCode;
+
     // 비즈니스 로직용 생성자 = 장바구니에 상품을 담을 때 사용
-    public  Cart(String cstmNumber, String productId){
+    public  Cart(String cstmNumber, String productId, int quantity, String karatCode){
         // 사용자 정의 생성자
         this.cartNumber = "";
         this.cstmNumber = cstmNumber;
         this.productId = productId;
+        this.quantity = quantity;
+        this.karatCode = karatCode;
         this.cartDate = LocalDateTime.now();
     }
+
+
 }

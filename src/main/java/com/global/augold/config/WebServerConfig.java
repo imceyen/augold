@@ -1,22 +1,2 @@
-package com.global.augold.config;
-
-import org.apache.catalina.connector.Connector;
-import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
-import org.springframework.boot.web.server.WebServerFactoryCustomizer;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
-public class WebServerConfig {
-
-    @Bean
-    public TomcatServletWebServerFactory containerFactory() {
-        return new TomcatServletWebServerFactory() {
-            @Override
-            protected void customizeConnector(Connector connector) {
-                super.customizeConnector(connector);
-                connector.setProperty("fileCountMax", "20");
-            }
-        };
-    }
-}
+// 이 파일은 Tomcat 9.x 환경에서는 더 이상 필요하지 않으므로 비워둡니다.
 
