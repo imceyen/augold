@@ -27,9 +27,19 @@ public class AdminStatisticsController {
     @Value("${graph.scriptPath.path}")
     private String goldPriceScriptPath;
 
+    // ✅ 카테고리별 이익률 Python 스크립트 경로
+    @Value("${graph.categoryProfitScriptPath.path}")
+    private String categoryProfitScriptPath;
+
     // ✅ 매출 트렌드 분석 Python 스크립트 경로 (💥 이 설정 누락 시 ??? 표시됨)
     @Value("${graph.salesScriptPath.path}")
     private String salesTrendScriptPath;
+
+    // ✅ 성별 연령별 분석 Python 스크립트 경로
+    @Value("${graph.sexage.script.path}")
+    private String sexAgeScriptPath;
+
+
 
     // ✅ 관리자 페이지 렌더링
     @GetMapping("/admin/main")
@@ -37,11 +47,20 @@ public class AdminStatisticsController {
         return "admin/admin"; // templates/admin/admin.html
     }
 
+
+
     // ✅ 금 가격 예측 API
     @GetMapping("/api/statistics/gold-price-forecast")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> getGoldPriceForecast() {
         return executePythonScript(goldPriceScriptPath);
+    }
+
+    // ✅ 카테고리별 이익률 분석 API
+    @GetMapping("/api/statistics/category-profit")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> getCategoryProfit() {
+        return executePythonScript(categoryProfitScriptPath);
     }
 
     // ✅ 매출 트렌드 분석 API
@@ -51,6 +70,14 @@ public class AdminStatisticsController {
         return executePythonScript(salesTrendScriptPath);
     }
 
+    // ✅ 성별 연령별 분석 API
+    @GetMapping("/api/statistics/sex-age-chart")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> getSexAgeChart() {
+        return executePythonScript(sexAgeScriptPath);
+    }
+
+
     // ✅ 공통 Python 실행 함수
     private ResponseEntity<Map<String, Object>> executePythonScript(String scriptPath) {
         try {
@@ -59,6 +86,8 @@ public class AdminStatisticsController {
 
             // 프로세스 빌더 설정
             ProcessBuilder processBuilder = new ProcessBuilder(pythonExecutable, scriptPath, outputFile.getAbsolutePath());
+            // 실제 실행 명령어 로그 출력
+            System.out.println("실행 명령어: " + processBuilder.command());
             processBuilder.redirectErrorStream(true);
             Process process = processBuilder.start();
 
