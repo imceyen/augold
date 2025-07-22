@@ -23,14 +23,6 @@ public class CartService {
 
 
     public String addToCart(String cstmNumber, String productId, int quantity, String karatCode, double finalPrice) {
-        // 재고 체크
-        Integer inventory = productRepository.findById(productId)
-                .map(product -> product.getProductInventory())
-                .orElse(0);
-
-        if (inventory <= 0) {
-            throw new RuntimeException("재고가 부족하여 장바구니에 담을 수 없습니다.");
-        }
 
         // ✅ 기존 아이템 찾기 (같은 상품 + 같은 순도)
         Optional<Cart> existingCart = cartRepository.findByCstmNumberAndProductIdAndKaratCode(cstmNumber, productId, karatCode);
@@ -40,10 +32,6 @@ public class CartService {
             Cart cart = existingCart.get();
             int newQuantity = cart.getQuantity() + quantity;
 
-            // 재고 확인 (기존 수량 + 새로 담을 수량)
-            if (newQuantity > inventory) {
-                throw new RuntimeException("보유 재고를 초과하여 장바구니에 담을 수 없습니다.");
-            }
 
             cart.setQuantity(newQuantity);
             cart.setCartDate(LocalDateTime.now()); // 날짜 업데이트
@@ -56,10 +44,6 @@ public class CartService {
             }
 
         } else {
-            // ✅ 기존 아이템이 없으면 새로 생성
-            if (quantity > inventory) {
-                throw new RuntimeException("보유 재고를 초과하여 장바구니에 담을 수 없습니다.");
-            }
 
             Cart cart = new Cart(cstmNumber, productId, quantity, karatCode);
 

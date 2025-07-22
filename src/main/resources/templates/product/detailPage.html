@@ -10,43 +10,49 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         .gold-gradient {
-          background: linear-gradient(135deg, #facc15, #f59e0b);
+            background: linear-gradient(135deg, #facc15, #f59e0b);
         }
         .luxury-gradient {
-          background: linear-gradient(135deg, #1f2937, #374151);
+            background: linear-gradient(135deg, #1f2937, #374151);
         }
         .glass-effect {
-          backdrop-filter: blur(10px);
-          background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.1);
         }
         .hover-lift {
-          transition: all 0.3s ease;
+            transition: all 0.3s ease;
         }
         .hover-lift:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            transform: translateY(-4px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
         }
         .fade-in {
-          animation: fadeIn 0.8s ease-in;
+            animation: fadeIn 0.8s ease-in;
         }
         @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         .image-gallery {
-          scrollbar-width: thin;
-          scrollbar-color: #f59e0b #f3f4f6;
+            scrollbar-width: thin;
+            scrollbar-color: #f59e0b #f3f4f6;
         }
         .image-gallery::-webkit-scrollbar {
-          width: 6px;
+            width: 6px;
         }
         .image-gallery::-webkit-scrollbar-track {
-          background: #f3f4f6;
-          border-radius: 3px;
+            background: #f3f4f6;
+            border-radius: 3px;
         }
         .image-gallery::-webkit-scrollbar-thumb {
-          background: #f59e0b;
-          border-radius: 3px;
+            background: #f59e0b;
+            border-radius: 3px;
         }
     </style>
 </head>
@@ -134,7 +140,6 @@
                     <img th:src="${product.imageUrl3}" alt="상세 이미지3"
                          class="thumbnail w-20 h-20 object-cover rounded-lg border-2 border-gray-200 cursor-pointer hover:border-yellow-400 transition-colors" />
                 </div>
-
             </div>
         </div>
 
@@ -162,7 +167,6 @@
                                    th:attr="data-price=${product.finalPrice}"
                                    th:text="'₩' + ${#numbers.formatInteger(product.finalPrice, 3, 'COMMA')}">
                                 </p>
-
                             </div>
                             <div class="text-right">
                                 <div class="w-16 h-16 gold-gradient rounded-full flex items-center justify-center">
@@ -192,7 +196,6 @@
                             <p class="text-sm text-gray-600 mb-1">소재</p>
                             <p class="font-semibold text-gray-800" id="materialValue" th:text="${product.karatCode}">14K</p>
                         </div>
-
                         <div class="bg-gray-50 rounded-lg p-4">
                             <p class="text-sm text-gray-600 mb-1">중량</p>
                             <p class="font-semibold text-gray-800"
@@ -204,8 +207,7 @@
                 </div>
 
                 <!-- 품절 표시 (재고 0일 경우) -->
-
-                <div id="soldOutBanner" class="mb-8 hidden">  <!-- ✅ th:if 제거, hidden 클래스 추가 -->
+                <div id="soldOutBanner" class="mb-8 hidden">
                     <div class="bg-red-50 border border-red-200 text-red-600 text-center py-6 rounded-xl">
                         <p class="text-xl font-bold"><i class="fas fa-times-circle mr-2"></i>품절된 상품입니다</p>
                         <p class="text-sm mt-2">해당 상품은 현재 재고가 없습니다.</p>
@@ -271,6 +273,16 @@
 
                 <!-- 구매 버튼 -->
                 <div class="space-y-4" th:if="${product.productInventory > 0}">
+                    <!-- 재고 경고 (장바구니 버튼 우측 위) -->
+                    <div id="stockWarning" class="hidden">
+                        <div class="flex justify-end mb-2">
+                            <div class="bg-orange-50 border border-orange-200 text-orange-700 px-3 py-2 rounded-lg flex items-center text-sm shadow-sm">
+                                <i class="fas fa-exclamation-triangle text-orange-500 mr-2"></i>
+                                <span id="stockWarningText">재고 5개 남음</span>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- 로그인한 경우에만 장바구니 담기 버튼 표시 -->
                     <th:block th:if="${!#strings.isEmpty(loginName)}">
                         <button id="addToCartBtn" class="w-full bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 text-white font-bold py-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center space-x-2">
@@ -389,359 +401,332 @@
         window.history.replaceState({}, document.title, cleanUrl);
         let unitPrice = parseInt(priceText?.dataset.price) || 0;
 
-
         const urlParams = new URLSearchParams(window.location.search);
         const error = urlParams.get('error');
         const success = urlParams.get('success');
 
-
-
-
         if (success === 'cart_added') {
-        // URL에서 실제 담긴 정보 가져오기 (페이지 select 상태 무시)
-        const addedQuantity = urlParams.get('quantity') || '1';
-        const addedKaratCode = urlParams.get('karatCode') || '';
-        const addedFinalPrice = urlParams.get('finalPrice') || '';
+            // URL에서 실제 담긴 정보 가져오기 (페이지 select 상태 무시)
+            const addedQuantity = urlParams.get('quantity') || '1';
+            const addedKaratCode = urlParams.get('karatCode') || '';
+            const addedFinalPrice = urlParams.get('finalPrice') || '';
 
-        // 상품 기본 정보
-        const productName = document.querySelector('h1.text-4xl')?.textContent || '상품';
-        const productImage = document.getElementById('mainImage')?.src || '';
+            // 상품 기본 정보
+            const productName = document.querySelector('h1.text-4xl')?.textContent || '상품';
+            const productImage = document.getElementById('mainImage')?.src || '';
 
-        // 실제 담긴 정보로 계산
-        const unitPrice = addedFinalPrice ? parseInt(addedFinalPrice) : 0;
-        const totalPrice = unitPrice * parseInt(addedQuantity);
-        const karatDisplay = addedKaratCode ? ` (${addedKaratCode})` : '';
+            // 실제 담긴 정보로 계산
+            const unitPrice = addedFinalPrice ? parseInt(addedFinalPrice) : 0;
+            const totalPrice = unitPrice * parseInt(addedQuantity);
+            const karatDisplay = addedKaratCode ? ` (${addedKaratCode})` : '';
 
-        Swal.fire({
-            icon: 'success',
-            title: '<strong>🛒 장바구니에 담았습니다!</strong>',
-            html: `
-                <div style="display: flex; align-items: center; gap: 20px; padding: 20px;">
-                    <div style="flex-shrink: 0;">
-                        <img src="${productImage}"
-                             style="width: 120px; height: 120px; object-fit: cover; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                    </div>
-                    <div style="flex: 1; text-align: left;">
-                        <h4 style="color: #374151; font-weight: bold; margin: 0 0 15px 0; font-size: 18px;">
-                            ${productName}${karatDisplay}
-                        </h4>
-                        <div style="background: #fef3c7; padding: 12px; border-radius: 8px;">
-                            <p style="color: #92400e; margin: 5px 0; font-size: 14px;">
-                                <strong>수량:</strong> ${addedQuantity}개
-                            </p>
-                            ${addedKaratCode ? `
-                            <p style="color: #92400e; margin: 5px 0; font-size: 14px;">
-                                <strong>순도:</strong> ${addedKaratCode}
-                            </p>
-                            ` : ''}
-                            <hr style="border: 0; border-top: 1px solid #fcd34d; margin: 8px 0;">
-                            <p style="color: #78350f; margin: 5px 0; font-size: 16px; font-weight: bold;">
-                                <strong>총 금액:</strong> ₩${totalPrice.toLocaleString()}
-                            </p>
+            Swal.fire({
+                icon: 'success',
+                title: '<strong>🛒 장바구니에 담았습니다!</strong>',
+                html: `
+                    <div style="display: flex; align-items: center; gap: 20px; padding: 20px;">
+                        <div style="flex-shrink: 0;">
+                            <img src="${productImage}"
+                                 style="width: 120px; height: 120px; object-fit: cover; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                        </div>
+                        <div style="flex: 1; text-align: left;">
+                            <h4 style="color: #374151; font-weight: bold; margin: 0 0 15px 0; font-size: 18px;">
+                                ${productName}${karatDisplay}
+                            </h4>
+                            <div style="background: #fef3c7; padding: 12px; border-radius: 8px;">
+                                <p style="color: #92400e; margin: 5px 0; font-size: 14px;">
+                                    <strong>수량:</strong> ${addedQuantity}개
+                                </p>
+                                ${addedKaratCode ? `
+                                <p style="color: #92400e; margin: 5px 0; font-size: 14px;">
+                                    <strong>순도:</strong> ${addedKaratCode}
+                                </p>
+                                ` : ''}
+                                <hr style="border: 0; border-top: 1px solid #fcd34d; margin: 8px 0;">
+                                <p style="color: #78350f; margin: 5px 0; font-size: 16px; font-weight: bold;">
+                                    <strong>총 금액:</strong> ₩${totalPrice.toLocaleString()}
+                                </p>
+                            </div>
                         </div>
                     </div>
-                </div>
-            `,
-            showConfirmButton: true,
-            showCancelButton: true,
-            confirmButtonText: '<i class="fas fa-shopping-cart"></i> 장바구니 보기',
-            cancelButtonText: '<i class="fas fa-shopping-bag"></i> 계속 쇼핑',
-            confirmButtonColor: '#f59e0b',
-            cancelButtonColor: '#6b7280',
-            reverseButtons: true,
-            timer: 5000,
-            timerProgressBar: true,
-            backdrop: 'rgba(0,0,0,0.4)',
-            width: '500px',
-            showClass: {
-                popup: 'animate__animated animate__fadeInDown'
-            },
-            hideClass: {
-                popup: 'animate__animated animate__fadeOutUp'
-            }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                window.location.href = '/cart';
-            }
-        });
-
-        // URL 파라미터 정리
-        const cleanUrl = window.location.pathname;
-        window.history.replaceState({}, document.title, cleanUrl);
-    }
-
-
-
-
-    // 장바구니 담기 버튼 클릭 이벤트
-    if (addToCartBtn) {
-        addToCartBtn.addEventListener('click', function() {
-            let productId;
-        // 옵션 선택 강제 (돌반지의 경우)
-    if (weightSelect && !weightSelect.value) {
-        Swal.fire({
-            icon: 'warning',
-            title: '옵션 선택 필요',
-            text: '중량을 선택해주세요.',
-            confirmButtonColor: '#f59e0b'
-        });
-        return;
-    }
-
-    // 순도 선택 강제 (주얼리의 경우)
-    if (karatSelect && !karatSelect.value) {
-        Swal.fire({
-            icon: 'warning',
-            title: '옵션 선택 필요',
-            text: '순도를 선택해주세요.',
-            confirmButtonColor: '#f59e0b'
-        });
-        return;
-    }
-
-        // 중량 선택이 있는 경우 (돌반지 등)
-        if (weightSelect && weightSelect.value && weightSelect.selectedOptions[0]) {
-            const selectedOption = weightSelect.selectedOptions[0];
-            productId = selectedOption.dataset.productId;
-            console.log('✅ 중량 선택된 productId:', productId);
-        }
-        // 순도 선택이 있는 경우 (목걸이, 귀걸이 등)
-        else if (karatSelect && karatSelect.value && karatSelect.selectedOptions[0]) {
-            const selectedOption = karatSelect.selectedOptions[0];
-            productId = selectedOption.dataset.productId || window.location.pathname.split('/').pop();
-            console.log('✅ 순도 선택된 productId:', productId);
-        }
-        // 옵션 선택이 없는 경우 (기본 상품)
-        else {
-            productId = window.location.pathname.split('/').pop();
-            console.log('✅ 기본 productId:', productId);
-        }
-
-        if (!productId) {
-            Swal.fire({
-                icon: 'error',
-                title: '상품 선택 오류',
-                text: '상품을 선택해주세요.',
-                confirmButtonColor: '#ef4444'
-            });
-            return;
-        }
-
-            if (!productId) {
-                Swal.fire({
-                    icon: 'error',
-                    title: '오류',
-                    text: '상품 정보를 찾을 수 없습니다.',
-                    confirmButtonColor: '#ef4444'
-                });
-                return;
-            }
-
-            // 먼저 변수들 정의
-            const quantity = parseInt(quantityInput?.value) || 1;
-            const selectedKarat = karatSelect?.value || document.getElementById('materialValue')?.textContent?.trim() || '';
-            const currentPrice = getSelectedPrice();
-
-            // 재고 확인
-            let hasStock = true;
-            let currentInventory = null;
-
-            if (karatSelect && karatSelect.value) {
-                const selectedOption = karatSelect.selectedOptions[0];
-                currentInventory = parseInt(selectedOption.dataset.inventory);
-                hasStock = currentInventory > 0;
-            } else if (weightSelect && weightSelect.value) {
-                const selectedOption = weightSelect.selectedOptions[0];
-                currentInventory = parseInt(selectedOption.dataset.inventory);
-                hasStock = currentInventory > 0;
-            }
-
-            if (!hasStock) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: '재고 부족',
-                    text: '선택하신 옵션의 재고가 부족합니다.',
-                    confirmButtonColor: '#ef4444'
-                });
-                return;
-            }
-
-            if (currentInventory && quantity > currentInventory) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: '수량 초과',
-                    text: `최대 ${currentInventory}개까지만 구매 가능합니다.`,
-                    confirmButtonColor: '#f59e0b'
-                });
-                return;
-            }
-
-            // 로딩 메시지
-            Swal.fire({
-                title: '장바구니에 담는 중...',
-                html: '<div class="swal2-loading-container"><div class="swal2-loading"></div></div>',
-                allowOutsideClick: false,
-                allowEscapeKey: false,
-                showConfirmButton: false,
-                didOpen: () => {
-                    Swal.showLoading();
+                `,
+                showConfirmButton: true,
+                showCancelButton: true,
+                confirmButtonText: '<i class="fas fa-shopping-cart"></i> 장바구니 보기',
+                cancelButtonText: '<i class="fas fa-shopping-bag"></i> 계속 쇼핑',
+                confirmButtonColor: '#f59e0b',
+                cancelButtonColor: '#6b7280',
+                reverseButtons: true,
+                timer: 5000,
+                timerProgressBar: true,
+                backdrop: 'rgba(0,0,0,0.4)',
+                width: '500px',
+                showClass: {
+                    popup: 'animate__animated animate__fadeInDown'
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOutUp'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '/cart';
                 }
             });
 
-            // CSRF 토큰 가져오기
-            const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
-            const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+            // URL 파라미터 정리
+            const cleanUrl = window.location.pathname;
+            window.history.replaceState({}, document.title, cleanUrl);
+        }
 
-            // Ajax 요청 데이터 준비
-            const formData = new FormData();
-            formData.append('productId', productId);
-            formData.append('quantity', quantity);
-            formData.append('finalPrice', currentPrice);
+        // 장바구니 담기 버튼 클릭 이벤트
+        if (addToCartBtn) {
+            addToCartBtn.addEventListener('click', function() {
+                let productId;
 
-            if (selectedKarat) {
-                formData.append('karatCode', selectedKarat);
-            }
-
-            // Ajax 요청
-            fetch('/cart/add', {
-                method: 'POST',
-                headers: {
-                    [csrfHeader]: csrfToken
-                },
-                body: formData
-            })
-            .then(response => {
-                if (response.redirected) {
-                    // 리다이렉트 응답인 경우 (기존 방식 유지)
-                    window.location.href = response.url;
+                // 옵션 선택 강제 (돌반지의 경우)
+                if (weightSelect && !weightSelect.value) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: '옵션 선택 필요',
+                        text: '중량을 선택해주세요.',
+                        confirmButtonColor: '#f59e0b'
+                    });
                     return;
                 }
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                // 순도 선택 강제 (주얼리의 경우)
+                if (karatSelect && !karatSelect.value) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: '옵션 선택 필요',
+                        text: '순도를 선택해주세요.',
+                        confirmButtonColor: '#f59e0b'
+                    });
+                    return;
                 }
 
-                return response.json();
-            })
-            .then(data => {
-                Swal.close(); // 로딩 닫기
-
-                if (data && data.success) {
-                    // 성공 시 기존 SweetAlert 로직 사용
-                    showCartAddedAlert(quantity, selectedKarat, currentPrice);
-                } else if (data && data.error) {
-                    handleCartError(data.error);
+                // 중량 선택이 있는 경우 (돌반지 등)
+                if (weightSelect && weightSelect.value && weightSelect.selectedOptions[0]) {
+                    const selectedOption = weightSelect.selectedOptions[0];
+                    productId = selectedOption.dataset.productId;
+                    console.log('✅ 중량 선택된 productId:', productId);
                 }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                Swal.close(); // 로딩 닫기
+                // 순도 선택이 있는 경우 (목걸이, 귀걸이 등)
+                else if (karatSelect && karatSelect.value && karatSelect.selectedOptions[0]) {
+                    const selectedOption = karatSelect.selectedOptions[0];
+                    productId = selectedOption.dataset.productId || window.location.pathname.split('/').pop();
+                    console.log('✅ 순도 선택된 productId:', productId);
+                }
+                // 옵션 선택이 없는 경우 (기본 상품)
+                else {
+                    productId = window.location.pathname.split('/').pop();
+                    console.log('✅ 기본 productId:', productId);
+                }
 
+                if (!productId) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: '상품 선택 오류',
+                        text: '상품을 선택해주세요.',
+                        confirmButtonColor: '#ef4444'
+                    });
+                    return;
+                }
+
+                // 먼저 변수들 정의
+                const quantity = parseInt(quantityInput?.value) || 1;
+                const selectedKarat = karatSelect?.value || document.getElementById('materialValue')?.textContent?.trim() || '';
+                const currentPrice = getSelectedPrice();
+
+                // 품절 여부만 확인 (재고 0인지만 체크)
+                let isOutOfStock = false;
+
+                if (karatSelect && karatSelect.value) {
+                    const selectedOption = karatSelect.selectedOptions[0];
+                    const inventory = parseInt(selectedOption.dataset.inventory);
+                    isOutOfStock = inventory === 0;
+                } else if (weightSelect && weightSelect.value) {
+                    const selectedOption = weightSelect.selectedOptions[0];
+                    const inventory = parseInt(selectedOption.dataset.inventory);
+                    isOutOfStock = inventory === 0;
+                }
+
+                if (isOutOfStock) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: '품절 상품',
+                        text: '현재 품절된 상품입니다.',
+                        confirmButtonColor: '#ef4444'
+                    });
+                    return;
+                }
+
+                // 로딩 메시지
                 Swal.fire({
-                    icon: 'error',
-                    title: '오류 발생',
-                    text: '장바구니 추가 중 오류가 발생했습니다. 다시 시도해주세요.',
-                    confirmButtonColor: '#ef4444'
-                });
-            });
-        });
-    }
-
-    // 장바구니 추가 성공 알림 함수
-    function showCartAddedAlert(quantity, karatCode, finalPrice) {
-        const productName = document.querySelector('h1.text-4xl')?.textContent || '상품';
-        const productImage = document.getElementById('mainImage')?.src || '';
-        const totalPrice = finalPrice * quantity;
-        const karatDisplay = karatCode ? ` (${karatCode})` : '';
-
-        Swal.fire({
-            icon: 'success',
-            title: '<strong>🛒 장바구니에 담았습니다!</strong>',
-            html: `
-                <div style="display: flex; align-items: center; gap: 20px; padding: 20px;">
-                    <div style="flex-shrink: 0;">
-                        <img src="${productImage}"
-                             style="width: 120px; height: 120px; object-fit: cover; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                    </div>
-                    <div style="flex: 1; text-align: left;">
-                        <h4 style="color: #374151; font-weight: bold; margin: 0 0 15px 0; font-size: 18px;">
-                            ${productName}${karatDisplay}
-                        </h4>
-                        <div style="background: #fef3c7; padding: 12px; border-radius: 8px;">
-                            <p style="color: #92400e; margin: 5px 0; font-size: 14px;">
-                                <strong>수량:</strong> ${quantity}개
-                            </p>
-                            ${karatCode ? `
-                            <p style="color: #92400e; margin: 5px 0; font-size: 14px;">
-                                <strong>순도:</strong> ${karatCode}
-                            </p>
-                            ` : ''}
-                            <hr style="border: 0; border-top: 1px solid #fcd34d; margin: 8px 0;">
-                            <p style="color: #78350f; margin: 5px 0; font-size: 16px; font-weight: bold;">
-                                <strong>총 금액:</strong> ₩${totalPrice.toLocaleString()}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            `,
-            showConfirmButton: true,
-            showCancelButton: true,
-            confirmButtonText: '<i class="fas fa-shopping-cart"></i> 장바구니 보기',
-            cancelButtonText: '<i class="fas fa-shopping-bag"></i> 계속 쇼핑',
-            confirmButtonColor: '#f59e0b',
-            cancelButtonColor: '#6b7280',
-            reverseButtons: true,
-            timer: 5000,
-            timerProgressBar: true,
-            backdrop: 'rgba(0,0,0,0.4)',
-            width: '500px',
-            showClass: {
-                popup: 'animate__animated animate__fadeInDown'
-            },
-            hideClass: {
-                popup: 'animate__animated animate__fadeOutUp'
-            }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                window.location.href = '/cart';
-            }
-        });
-    }
-
-    // 에러 처리 함수
-    function handleCartError(errorType) {
-        switch(errorType) {
-            case 'out_of_stock':
-                Swal.fire({
-                    icon: 'warning',
-                    title: '재고 부족',
-                    text: '현재 재고가 부족하여 장바구니에 담을 수 없습니다.',
-                    confirmButtonColor: '#ef4444'
-                });
-                break;
-            case 'login_required':
-                Swal.fire({
-                    icon: 'info',
-                    title: '로그인 필요',
-                    text: '장바구니 담기를 위해 로그인이 필요합니다.',
-                    confirmButtonColor: '#f59e0b',
-                    confirmButtonText: '로그인하기'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        const returnUrl = encodeURIComponent(window.location.pathname);
-                        window.location.href = `/login?returnUrl=${returnUrl}`;
+                    title: '장바구니에 담는 중...',
+                    html: '<div class="swal2-loading-container"><div class="swal2-loading"></div></div>',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
                     }
                 });
-                break;
-            default:
-                Swal.fire({
-                    icon: 'error',
-                    title: '오류 발생',
-                    text: '알 수 없는 오류가 발생했습니다.',
-                    confirmButtonColor: '#ef4444'
+
+                // CSRF 토큰 가져오기
+                const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+                const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+
+                // Ajax 요청 데이터 준비
+                const formData = new FormData();
+                formData.append('productId', productId);
+                formData.append('quantity', quantity);
+                formData.append('finalPrice', currentPrice);
+
+                if (selectedKarat) {
+                    formData.append('karatCode', selectedKarat);
+                }
+
+                // Ajax 요청
+                fetch('/cart/add', {
+                    method: 'POST',
+                    headers: {
+                        [csrfHeader]: csrfToken
+                    },
+                    body: formData
+                })
+                .then(response => {
+                    if (response.redirected) {
+                        // 리다이렉트 응답인 경우 (기존 방식 유지)
+                        window.location.href = response.url;
+                        return;
+                    }
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    return response.json();
+                })
+                .then(data => {
+                    Swal.close(); // 로딩 닫기
+
+                    if (data && data.success) {
+                        // 성공 시 기존 SweetAlert 로직 사용
+                        showCartAddedAlert(quantity, selectedKarat, currentPrice);
+                    } else if (data && data.error) {
+                        handleCartError(data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.close(); // 로딩 닫기
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: '오류 발생',
+                        text: '장바구니 추가 중 오류가 발생했습니다. 다시 시도해주세요.',
+                        confirmButtonColor: '#ef4444'
+                    });
                 });
+            });
         }
-    }
+
+        // 장바구니 추가 성공 알림 함수
+        function showCartAddedAlert(quantity, karatCode, finalPrice) {
+            const productName = document.querySelector('h1.text-4xl')?.textContent || '상품';
+            const productImage = document.getElementById('mainImage')?.src || '';
+            const totalPrice = finalPrice * quantity;
+            const karatDisplay = karatCode ? ` (${karatCode})` : '';
+
+            Swal.fire({
+                icon: 'success',
+                title: '<strong>🛒 장바구니에 담았습니다!</strong>',
+                html: `
+                    <div style="display: flex; align-items: center; gap: 20px; padding: 20px;">
+                        <div style="flex-shrink: 0;">
+                            <img src="${productImage}"
+                                 style="width: 120px; height: 120px; object-fit: cover; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                        </div>
+                        <div style="flex: 1; text-align: left;">
+                            <h4 style="color: #374151; font-weight: bold; margin: 0 0 15px 0; font-size: 18px;">
+                                ${productName}${karatDisplay}
+                            </h4>
+                            <div style="background: #fef3c7; padding: 12px; border-radius: 8px;">
+                                <p style="color: #92400e; margin: 5px 0; font-size: 14px;">
+                                    <strong>수량:</strong> ${quantity}개
+                                </p>
+                                ${karatCode ? `
+                                <p style="color: #92400e; margin: 5px 0; font-size: 14px;">
+                                    <strong>순도:</strong> ${karatCode}
+                                </p>
+                                ` : ''}
+                                <hr style="border: 0; border-top: 1px solid #fcd34d; margin: 8px 0;">
+                                <p style="color: #78350f; margin: 5px 0; font-size: 16px; font-weight: bold;">
+                                    <strong>총 금액:</strong> ₩${totalPrice.toLocaleString()}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                showConfirmButton: true,
+                showCancelButton: true,
+                confirmButtonText: '<i class="fas fa-shopping-cart"></i> 장바구니 보기',
+                cancelButtonText: '<i class="fas fa-shopping-bag"></i> 계속 쇼핑',
+                confirmButtonColor: '#f59e0b',
+                cancelButtonColor: '#6b7280',
+                reverseButtons: true,
+                timer: 5000,
+                timerProgressBar: true,
+                backdrop: 'rgba(0,0,0,0.4)',
+                width: '500px',
+                showClass: {
+                    popup: 'animate__animated animate__fadeInDown'
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOutUp'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '/cart';
+                }
+            });
+        }
+
+        // 에러 처리 함수
+        function handleCartError(errorType) {
+            switch(errorType) {
+                case 'out_of_stock':
+                    Swal.fire({
+                        icon: 'warning',
+                        title: '재고 부족',
+                        text: '현재 재고가 부족하여 장바구니에 담을 수 없습니다.',
+                        confirmButtonColor: '#ef4444'
+                    });
+                    break;
+                case 'login_required':
+                    Swal.fire({
+                        icon: 'info',
+                        title: '로그인 필요',
+                        text: '장바구니 담기를 위해 로그인이 필요합니다.',
+                        confirmButtonColor: '#f59e0b',
+                        confirmButtonText: '로그인하기'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            const returnUrl = encodeURIComponent(window.location.pathname);
+                            window.location.href = `/login?returnUrl=${returnUrl}`;
+                        }
+                    });
+                    break;
+                default:
+                    Swal.fire({
+                        icon: 'error',
+                        title: '오류 발생',
+                        text: '알 수 없는 오류가 발생했습니다.',
+                        confirmButtonColor: '#ef4444'
+                    });
+            }
+        }
 
         function getSelectedPrice() {
             let selectedPrice = unitPrice;
@@ -764,67 +749,70 @@
             const currentUnitPrice = getSelectedPrice();
             const total = currentUnitPrice * qty;
             if (priceText) {
-                priceText.textContent = '₩' + total.toLocaleString();
+                priceText.textContent = '₩' + total.toLocaleString('ko-KR');
             }
         }
-
 
         function updateInventoryDisplay() {
-    let inventory = null;
+            let inventory = null;
 
-    if (karatSelect && karatSelect.selectedOptions.length > 0 && karatSelect.value) {
-        const inv = karatSelect.selectedOptions[0].dataset.inventory;
-        if (inv !== undefined) inventory = parseInt(inv);
-    }
-
-    if (weightSelect && weightSelect.selectedOptions.length > 0 && weightSelect.value) {
-        const inv = weightSelect.selectedOptions[0].dataset.inventory;
-        if (inv !== undefined) inventory = parseInt(inv);
-    }
-
-        if (inventory !== null) {
-            if (inventory <= 0) {
-               // 품절 배너 표시
-                if (soldOutBanner) {
-                    soldOutBanner.classList.remove("hidden");
-                    soldOutBanner.style.display = "block";
-                }
-
-            // 장바구니 담기 버튼 비활성화
-            if (addToCartBtn) {
-                addToCartBtn.disabled = true;
-                addToCartBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            if (karatSelect && karatSelect.selectedOptions.length > 0 && karatSelect.value) {
+                const inv = karatSelect.selectedOptions[0].dataset.inventory;
+                if (inv !== undefined) inventory = parseInt(inv);
             }
 
-            // 바로 구매하기 버튼 비활성화
-            const buyNowBtn = document.getElementById('buyNowBtn');
-            if (buyNowBtn) {
-                buyNowBtn.disabled = true;
-                buyNowBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            if (weightSelect && weightSelect.selectedOptions.length > 0 && weightSelect.value) {
+                const inv = weightSelect.selectedOptions[0].dataset.inventory;
+                if (inv !== undefined) inventory = parseInt(inv);
             }
 
-        } else {
-                // 품절 배너 숨김
-                if (soldOutBanner) {
-                    soldOutBanner.classList.add("hidden");
-                    soldOutBanner.style.display = "none";
+            if (inventory !== null) {
+                if (inventory === 0) {
+                    // 완전 품절일 때만 UI 비활성화
+                    if (soldOutBanner) {
+                        soldOutBanner.classList.remove("hidden");
+                        soldOutBanner.style.display = "block";
+                    }
+                    if (addToCartBtn) {
+                        addToCartBtn.disabled = true;
+                        addToCartBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                    }
+                    const buyNowBtn = document.getElementById('buyNowBtn');
+                    if (buyNowBtn) {
+                        buyNowBtn.disabled = true;
+                        buyNowBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                    }
+                } else {
+                    // 재고가 1개라도 있으면 활성화
+                    if (soldOutBanner) {
+                        soldOutBanner.classList.add("hidden");
+                        soldOutBanner.style.display = "none";
+                    }
+                    if (addToCartBtn) {
+                        addToCartBtn.disabled = false;
+                        addToCartBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    }
+                    const buyNowBtn = document.getElementById('buyNowBtn');
+                    if (buyNowBtn) {
+                        buyNowBtn.disabled = false;
+                        buyNowBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    }
                 }
+            }
 
-                // 장바구니 담기 버튼 활성화
-                if (addToCartBtn) {
-                    addToCartBtn.disabled = false;
-                    addToCartBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                }
+            // ✅ 재고 경고 표시 로직 추가
+            const stockWarning = document.getElementById('stockWarning');
+            const stockWarningText = document.getElementById('stockWarningText');
 
-                // 바로 구매하기 버튼 활성화
-                const buyNowBtn = document.getElementById('buyNowBtn');
-                if (buyNowBtn) {
-                    buyNowBtn.disabled = false;
-                    buyNowBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                }
+            if (inventory !== null && inventory <= 5 && inventory > 0) {
+                // 재고 5개 이하일 때 경고 표시
+                stockWarningText.textContent = `재고 ${inventory}개 남음`;
+                stockWarning.classList.remove('hidden');
+            } else {
+                // 재고 충분하거나 품절일 때 숨김
+                stockWarning.classList.add('hidden');
             }
         }
-    }
 
         // 수량 조절 버튼 이벤트
         minusBtn?.addEventListener('click', () => {
@@ -861,30 +849,31 @@
             }
         }
 
+        // 중량 선택 이벤트
+        if (weightSelect) {
+            weightSelect.addEventListener('change', function () {
+                const selectedOption = this.selectedOptions[0];
 
-    if (weightSelect) {
-        weightSelect.addEventListener('change', function () {
-            const selectedOption = this.selectedOptions[0];
+                // Description 업데이트 추가
+                if (selectedOption && selectedOption.dataset.description) {
+                    const descriptionElement = document.getElementById('productDescription');
+                    if (descriptionElement) {
+                        descriptionElement.textContent = selectedOption.dataset.description;
 
-            //  Description 업데이트 추가
-            if (selectedOption && selectedOption.dataset.description) {
-                const descriptionElement = document.getElementById('productDescription');
-                if (descriptionElement) {
-                    descriptionElement.textContent = selectedOption.dataset.description;
-
-
-                    descriptionElement.style.opacity = '0.5';
-                    setTimeout(() => {
-                        descriptionElement.style.opacity = '1';
-                    }, 150);
+                        // 부드러운 애니메이션 효과
+                        descriptionElement.style.opacity = '0.5';
+                        setTimeout(() => {
+                            descriptionElement.style.opacity = '1';
+                        }, 150);
+                    }
                 }
-            }
 
-            // 기존 함수들
-            updatePrice();
-            updateInventoryDisplay();
-        });
-    }
+                // 기존 함수들
+                updatePrice();
+                updateInventoryDisplay();
+            });
+        }
+
         // 썸네일 이미지 클릭 이벤트
         thumbnails.forEach(thumbnail => {
             thumbnail.addEventListener('click', function () {
@@ -929,22 +918,10 @@
             }
         }
 
-        // updatePrice 함수도 수정
-        function updatePrice() {
-            const qty = parseInt(quantityInput?.value) || 1;
-            const currentUnitPrice = getSelectedPrice();
-            const total = currentUnitPrice * qty;
-            if (priceText) {
-                priceText.textContent = '₩' + total.toLocaleString('ko-KR'); // 여기 수정
-            }
-        }
-
         // 초기화
-        formatAllPrices(); // 추가
+        formatAllPrices();
         updatePrice();
         updateInventoryDisplay();
-    });
-</script>
     });
 </script>
 

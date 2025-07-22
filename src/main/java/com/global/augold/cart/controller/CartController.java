@@ -98,13 +98,20 @@ public class CartController {
             ));
 
         } catch (RuntimeException e) {
-            if(e.getMessage().contains("재고")){
-                return ResponseEntity.badRequest()
-                        .body(Map.of("error", "out_of_stock", "message", "재고가 부족합니다."));
-            }
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("error", "login_required", "message", "로그인이 필요합니다."));
+        if(e.getMessage().contains("품절")){
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "out_of_stock", "message", "품절된 상품입니다."));
         }
+        // 재고 부족(하지만 품절은 아님)인 경우 성공으로 처리
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "장바구니에 추가되었습니다.",
+                "productId", productId,
+                "quantity", quantity,
+                "karatCode", karatCode != null ? karatCode : "",
+                "finalPrice", finalPrice
+        ));
+    }
     }
 
     // 현제 페이지 URL 생성 메서드
