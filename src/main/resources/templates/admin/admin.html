@@ -214,7 +214,7 @@
 
     <div id="goldPrice" class="stats-subtab-content active">
       <!-- Plotly.js CDN 추가 -->
-      <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+      <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
 
       <div id="loadingMessage" style="text-align: center; padding: 50px; font-size: 1.2em;">
         데이터를 불러오는 중입니다...
@@ -225,13 +225,16 @@
     </div>
 
     <!-- 📊 성별·연령대별 매출 차트 영역 -->
-    <div id="genderAgeChart" class="stats-subtab-content">
+    <div id="demographics" class="stats-subtab-content">
       <p>성별 및 연령대별 매출 분석 시각화 결과입니다.</p>
       <div id="sexAgeLoading" style="text-align: center; padding: 40px; font-size: 1.1em;">
         데이터를 불러오는 중입니다...
       </div>
       <!-- ✅ 이곳에 Plotly 차트가 출력됩니다 -->
-      <div id="genderAgeChartPlot" style="margin-top: 30px; display: none;"></div>
+      <div style="display: flex; gap: 30px; justify-content: center;">
+        <div id="genderAgeChartPlotMale" style="flex:1; min-width:350px; max-width:600px;"></div>
+        <div id="genderAgeChartPlotFemale" style="flex:1; min-width:350px; max-width:600px;"></div>
+      </div>
     </div>
 
 
@@ -503,7 +506,8 @@
   // 각 통계 탭의 데이터 로드 여부를 추적하는 플래그
   let goldPriceStatsLoaded = false;
   let orderTrendsLoaded = false;
-  // (추후 다른 통계 탭 추가 시 여기에 플래그 추가)
+  let categoryProfitLoaded = false;
+  let demographicsLoaded = false;
 
   /**
    * 메인 탭 전환 함수
@@ -528,28 +532,43 @@
   }
 
   /**
-   * 통계 하위 탭 전환 함수 (수정된 핵심 로직)
+   * 통계 하위 탭 전환 함수 (모든 하위 탭에 대해 한 번에 하나만 active)
    */
   function showStatsSubTab(subTabId, event) {
       // 모든 하위 탭 버튼과 컨텐츠 비활성화
       document.querySelectorAll('.stats-subtab-bar button').forEach(btn => btn.classList.remove('active'));
       document.querySelectorAll('.stats-subtab-content').forEach(content => content.classList.remove('active'));
 
+      // null 체크 추가
+      const subTabDiv = document.getElementById(subTabId);
+      if (!subTabDiv) {
+          console.error(`[showStatsSubTab] id="${subTabId}"인 div가 없습니다.`);
+          return;
+      }
+
       // 클릭된 하위 탭 버튼과 컨텐츠 활성화
       if (event && event.currentTarget) {
           event.currentTarget.classList.add('active');
       }
-      document.getElementById(subTabId).classList.add('active');
+      subTabDiv.classList.add('active');
 
       // 각 하위 탭에 맞는 데이터 로드 함수를 *필요할 때만* 호출
       if (subTabId === 'goldPrice' && !goldPriceStatsLoaded) {
           loadGoldPriceForecast();
-          goldPriceStatsLoaded = true; // 로드 완료 플래그 설정
+          goldPriceStatsLoaded = true;
       } else if (subTabId === 'orderTrends' && !orderTrendsLoaded) {
           loadOrderTrends();
-          orderTrendsLoaded = true; // 로드 완료 플래그 설정
+          orderTrendsLoaded = true;
+      } else if (subTabId === 'categoryProfit' && !categoryProfitLoaded) {
+          loadCategoryProfit();
+          categoryProfitLoaded = true;
+      } else if (subTabId === 'demographics' && !demographicsLoaded) {
+          loadDemographicsChart();
+          demographicsLoaded = true;
       }
   }
+
+  // --- 차트 로드 함수들 ---
 
   /**
    * 금 시세 예측 데이터 로드 및 그래프 그리기 함수
@@ -652,6 +671,136 @@
               loadingMsg.style.color = 'red';
           });
   }
+
+  // 카테고리별 이익률 분석 및 예측 데이터 로드 및 그래프 그리기 함수
+  function loadCategoryProfit() {
+      const plotDiv = document.getElementById("categoryProfitPlot");
+      const loadingDiv = document.getElementById("categoryProfitLoading");
+      if (!plotDiv || !loadingDiv) {
+          console.error("[categoryProfit] 필요한 div가 없습니다.");
+          return;
+      }
+      plotDiv.style.display = "none";
+      loadingDiv.style.display = "block";
+
+      fetch('/api/statistics/category-profit')
+          .then(res => res.json())
+          .then(data => {
+              if (!data || !data.monthly || !data.forecast) {
+                  loadingDiv.innerText = "데이터가 없습니다.";
+                  return;
+              }
+              const months = data.monthly.map(item => item.Month);
+              const margins = data.monthly.map(item => item.Profit_Margin);
+              const forecast = data.forecast;
+
+              loadingDiv.style.display = "none";
+              plotDiv.style.display = "block";
+
+              Plotly.newPlot("categoryProfitPlot", [
+                  {
+                      x: months,
+                      y: margins,
+                      mode: 'lines+markers',
+                      name: '이익률',
+                      line: { color: 'green' }
+                  },
+                  {
+                      x: [forecast.month],
+                      y: [forecast.predicted_margin],
+                      mode: 'markers+text',
+                      name: '예측값',
+                      marker: { size: 10, color: 'red' },
+                      text: ['예측'],
+                      textposition: 'top center'
+                  }
+              ], {
+                  title: '카테고리별 이익률 분석 및 7월 예측',
+                  xaxis: { title: '월' },
+                  yaxis: { title: '이익률' }
+              });
+          })
+          .catch(err => {
+              loadingDiv.innerText = "데이터 로딩 중 오류가 발생했습니다.";
+              console.error('이익률 분석 불러오기 실패:', err);
+          });
+  }
+
+  // 성별/연령대별 차트 (탭 클릭 시에만 로드)
+  function loadDemographicsChart() {
+    const loadingDiv = document.getElementById("sexAgeLoading");
+    const plotDivMale = document.getElementById("genderAgeChartPlotMale");
+    const plotDivFemale = document.getElementById("genderAgeChartPlotFemale");
+    if (!loadingDiv || !plotDivMale || !plotDivFemale) {
+      console.error("[성별/연령대] 필요한 div가 없습니다.");
+      return;
+    }
+    fetch("/temp_output.json")
+      .then(response => response.json())
+      .then(data => {
+        if (!data || !data.male || !data.female) {
+          loadingDiv.innerText = "데이터가 없습니다.";
+          return;
+        }
+        const maleData = data.male;
+        const femaleData = data.female;
+
+        const ageGroups = [...new Set([...maleData, ...femaleData].map(d => d.Age_Group))];
+        const categories = [...new Set([...maleData, ...femaleData].map(d => d.Category))];
+
+        // 🔹 남성 데이터 시리즈 생성
+        const maleSeries = categories.map(category => {
+          return {
+            x: ageGroups,
+            y: ageGroups.map(ageGroup => {
+              const item = maleData.find(d => d.Age_Group === ageGroup && d.Category === category);
+              return item ? item.Total_Price : 0;
+            }),
+            name: `${category}`,
+            type: 'bar'
+          };
+        });
+
+        // 🔹 여성 데이터 시리즈 생성
+        const femaleSeries = categories.map(category => {
+          return {
+            x: ageGroups,
+            y: ageGroups.map(ageGroup => {
+              const item = femaleData.find(d => d.Age_Group === ageGroup && d.Category === category);
+              return item ? item.Total_Price : 0;
+            }),
+            name: `${category}`,
+            type: 'bar'
+          };
+        });
+
+        // 🔹 공통 레이아웃
+        const baseLayout = {
+          barmode: 'group',
+          xaxis: { title: '연령대' },
+          yaxis: { title: '총 매출 (원)' },
+          legend: { orientation: 'h' },
+          height: 450
+        };
+
+        // 🔹 남성/여성 각각의 차트로 나란히 출력
+        Plotly.newPlot("genderAgeChartPlotMale", maleSeries, {
+          ...baseLayout,
+          title: '👨 남성 연령대별 · 카테고리별 매출'
+        });
+        Plotly.newPlot("genderAgeChartPlotFemale", femaleSeries, {
+          ...baseLayout,
+          title: '👩 여성 연령대별 · 카테고리별 매출'
+        });
+
+        // 🔹 로딩 메시지 숨기기
+        loadingDiv.style.display = "none";
+      })
+      .catch(error => {
+        loadingDiv.innerText = "데이터 로딩 중 오류가 발생했습니다.";
+        console.error("❌ JSON 로딩 오류:", error);
+      });
+  }
 </script>
 
   <script> // 영업이익률 차트
@@ -661,10 +810,17 @@
         document.querySelectorAll('.stats-subtab-bar button').forEach(btn => btn.classList.remove('active'));
         document.querySelectorAll('.stats-subtab-content').forEach(content => content.classList.remove('active'));
 
+        // null 체크 추가
+        const subTabDiv = document.getElementById(subTabId);
+        if (!subTabDiv) {
+            console.error(`[showStatsSubTab] id="${subTabId}"인 div가 없습니다.`);
+            return;
+        }
+
         if (event && event.currentTarget) {
             event.currentTarget.classList.add('active');
         }
-        document.getElementById(subTabId).classList.add('active');
+        subTabDiv.classList.add('active');
 
         // ✅ 이익률 데이터 불러오기
         if (subTabId === 'categoryProfit' && !categoryProfitLoaded) {
@@ -676,14 +832,20 @@
     function loadCategoryProfit() {
         const plotDiv = document.getElementById("categoryProfitPlot");
         const loadingDiv = document.getElementById("categoryProfitLoading");
-
+        if (!plotDiv || !loadingDiv) {
+            console.error("[categoryProfit] 필요한 div가 없습니다.");
+            return;
+        }
         plotDiv.style.display = "none";
         loadingDiv.style.display = "block";
 
         fetch('/api/statistics/category-profit')
             .then(res => res.json())
             .then(data => {
-                // ✅ 여기서 JSON 구조 해석
+                if (!data || !data.monthly || !data.forecast) {
+                    loadingDiv.innerText = "데이터가 없습니다.";
+                    return;
+                }
                 const months = data.monthly.map(item => item.Month);
                 const margins = data.monthly.map(item => item.Profit_Margin);
                 const forecast = data.forecast;
@@ -723,9 +885,20 @@
 
   <script>//성별 연령별 분석
     document.addEventListener("DOMContentLoaded", function () {
+      const loadingDiv = document.getElementById("sexAgeLoading");
+      const plotDivMale = document.getElementById("genderAgeChartPlotMale");
+      const plotDivFemale = document.getElementById("genderAgeChartPlotFemale");
+      if (!loadingDiv || !plotDivMale || !plotDivFemale) {
+        console.error("[성별/연령대] 필요한 div가 없습니다.");
+        return;
+      }
       fetch("/temp_output.json")
         .then(response => response.json())
         .then(data => {
+          if (!data || !data.male || !data.female) {
+            loadingDiv.innerText = "데이터가 없습니다.";
+            return;
+          }
           const maleData = data.male;
           const femaleData = data.female;
 
@@ -767,23 +940,28 @@
             height: 450
           };
 
-          // 🔹 각각 출력
-          Plotly.newPlot("genderAgeChartPlot", maleSeries, {
-            ...baseLayout,
-            title: '남성 연령대별 · 카테고리별 매출 분석'
-          });
+          // 🔹 남성/여성 series를 모두 합쳐서 한 번에 그리기
+          const allSeries = [
+            ...maleSeries.map(s => ({ ...s, name: '남성-' + s.name })),
+            ...femaleSeries.map(s => ({ ...s, name: '여성-' + s.name }))
+          ];
 
-          Plotly.newPlot("genderAgeChartPlot", femaleSeries, {
+          // 🔹 남성/여성 각각의 차트로 나란히 출력
+          Plotly.newPlot("genderAgeChartPlotMale", maleSeries, {
             ...baseLayout,
-            title: '여성 연령대별 · 카테고리별 매출 분석'
+            title: '👨 남성 연령대별 · 카테고리별 매출'
+          });
+          Plotly.newPlot("genderAgeChartPlotFemale", femaleSeries, {
+            ...baseLayout,
+            title: '👩 여성 연령대별 · 카테고리별 매출'
           });
 
           // 🔹 로딩 메시지 숨기고 차트 보여주기
-          document.getElementById("sexAgeLoading").style.display = "none";
-          document.getElementById("sexAgeMalePlot").style.display = "block";
-          document.getElementById("sexAgeFemalePlot").style.display = "block";
+          loadingDiv.style.display = "none";
+          plotDiv.style.display = "block";
         })
         .catch(error => {
+          loadingDiv.innerText = "데이터 로딩 중 오류가 발생했습니다.";
           console.error("❌ JSON 로딩 오류:", error);
         });
     });
