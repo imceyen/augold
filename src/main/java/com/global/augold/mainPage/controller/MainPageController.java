@@ -5,7 +5,9 @@ import com.global.augold.goldPrice.Service.GoldPriceService;
 import com.global.augold.mainPage.dto.MainPageInfoDTO;
 import com.global.augold.mainPage.service.MainPageService;
 import com.global.augold.member.entity.Customer;
+
 import jakarta.servlet.http.HttpSession;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
