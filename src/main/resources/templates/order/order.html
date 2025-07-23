@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>주문서 작성 | AuGold</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        .gold-gradient {
+            background: linear-gradient(135deg, #facc15, #f59e0b);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #facc15, #f59e0b);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+            padding: 12px 24px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+<!-- 헤더 -->
+<header class="bg-white shadow-sm border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-6 py-4">
+        <div class="flex items-center justify-between">
+            <a href="/" class="flex items-center space-x-3">
+                <div class="w-10 h-10 gold-gradient rounded-full flex items-center justify-center">
+                    <span class="text-white font-bold">A</span>
+                </div>
+                <span class="text-xl font-bold text-gray-800">AuGold</span>
+            </a>
+            <nav class="flex space-x-6">
+                <a href="/cart" class="text-gray-600 hover:text-yellow-600 transition-colors">장바구니</a>
+                <a href="/mypage" class="text-gray-600 hover:text-yellow-600 transition-colors">마이페이지</a>
+            </nav>
+        </div>
+    </div>
+</header>
+
+<main class="max-w-4xl mx-auto px-6 py-8">
+    <!-- 페이지 헤더 -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">주문서 작성</h1>
+        <div class="flex items-center space-x-2 text-sm text-gray-600">
+            <span>장바구니</span>
+            <span>→</span>
+            <span class="text-yellow-600 font-semibold">주문서 작성</span>
+            <span>→</span>
+            <span>결제</span>
+        </div>
+    </div>
+
+    <!-- ✅ OrderCreateRequest DTO로 전송하는 폼 -->
+    <form action="/order/create" method="post" id="orderForm">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- 주문 상품 정보 -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- 주문 상품 -->
+                <div class="bg-white rounded-xl shadow-sm border p-6">
+                    <h2 class="text-xl font-bold mb-4">주문 상품</h2>
+
+                    <div class="space-y-4" th:each="item : ${cartItems}">
+                        <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
+                            <img th:src="${item.imageUrl}" alt="상품 이미지"
+                                 class="w-16 h-16 object-cover rounded-lg"
+                                 onerror="this.src='https://via.placeholder.com/64x64/f3f4f6/9ca3af?text=Gold'">
+
+                            <div class="flex-1">
+                                <h3 class="font-semibold text-gray-900" th:text="${item.productName}">상품명</h3>
+                                <div class="text-sm text-gray-600 space-y-1">
+                                    <div th:if="${item.karatName}">
+                                        <span>순도: </span>
+                                        <span th:text="${item.karatName}">18K</span>
+                                    </div>
+                                    <div th:if="${item.goldWeight}">
+                                        <span>금 중량: </span>
+                                        <span th:text="${item.goldWeight + 'g'}">5.2g</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="text-right">
+                                <div class="font-bold text-lg text-gray-900"
+                                     th:text="'₩' + ${#numbers.formatDecimal(item.finalPrice * item.quantity, 0, 'COMMA', 0, 'POINT')}">
+                                    ₩1,200,000
+                                </div>
+                                <div class="text-sm text-gray-600" th:text="${item.quantity + '개'}">1개</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 배송 정보 (OrderCreateRequest 필드들) -->
+                <div class="bg-white rounded-xl shadow-sm border p-6">
+                    <h2 class="text-xl font-bold mb-4">배송 정보</h2>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label for="deliveryAddr" class="block text-sm font-medium text-gray-700 mb-2">
+                                배송 주소 <span class="text-red-500">*</span>
+                            </label>
+                            <textarea
+                                    id="deliveryAddr"
+                                    name="deliveryAddr"
+                                    rows="3"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                                    placeholder="배송받을 주소를 입력해주세요"
+                                    th:text="${customerAddr}"
+                                    required></textarea>
+                        </div>
+
+                        <div>
+                            <label for="deliveryPhone" class="block text-sm font-medium text-gray-700 mb-2">
+                                연락처 <span class="text-red-500">*</span>
+                            </label>
+                            <input
+                                    type="tel"
+                                    id="deliveryPhone"
+                                    name="deliveryPhone"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                                    placeholder="010-0000-0000"
+                                    th:value="${customerPhone}"
+                                    required>
+                        </div>
+
+                        <div>
+                            <label for="orderMemo" class="block text-sm font-medium text-gray-700 mb-2">
+                                배송 요청사항
+                            </label>
+                            <textarea
+                                    id="orderMemo"
+                                    name="orderMemo"
+                                    rows="2"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                                    placeholder="배송 시 요청사항이 있으시면 입력해주세요 (선택사항)"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 주문 요약 -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-xl shadow-sm border p-6 sticky top-6">
+                    <h2 class="text-xl font-bold mb-4">주문 요약</h2>
+
+                    <div class="space-y-3 mb-6">
+                        <div class="flex justify-between text-sm">
+                            <span>상품 개수</span>
+                            <span th:text="${#lists.size(cartItems)} + '개'">3개</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span>상품 금액</span>
+                            <span th:text="'₩' + ${#numbers.formatDecimal(totalAmount, 0, 'COMMA', 0, 'POINT')}">₩2,500,000</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span>배송비</span>
+                            <span>무료</span>
+                        </div>
+                        <div class="border-t pt-3 mt-3">
+                            <div class="flex justify-between text-lg font-bold">
+                                <span>총 결제 금액</span>
+                                <span class="text-yellow-600" th:text="'₩' + ${#numbers.formatDecimal(totalAmount, 0, 'COMMA', 0, 'POINT')}">₩2,500,000</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <button type="submit" class="w-full btn-primary">
+                            주문하기
+                        </button>
+                        <button type="button" onclick="goBack()" class="w-full btn-secondary">
+                            이전으로
+                        </button>
+                    </div>
+
+                    <!-- 주문 안내 -->
+                    <div class="mt-6 text-xs text-gray-500 space-y-1">
+                        <p>• 주문 후 결제 페이지로 이동합니다</p>
+                        <p>• 결제 완료 후 주문이 확정됩니다</p>
+                        <p>• 배송은 영업일 기준 2-3일 소요됩니다</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</main>
+
+<script>
+    // 이전으로 버튼
+    function goBack() {
+        if (confirm('작성 중인 내용이 사라집니다. 장바구니로 돌아가시겠습니까?')) {
+            window.location.href = '/cart';
+        }
+    }
+
+    // 폼 유효성 검사
+    document.getElementById('orderForm').addEventListener('submit', function(e) {
+        const deliveryAddr = document.getElementById('deliveryAddr').value.trim();
+        const deliveryPhone = document.getElementById('deliveryPhone').value.trim();
+
+        if (!deliveryAddr) {
+            alert('배송 주소를 입력해주세요.');
+            e.preventDefault();
+            return;
+        }
+
+        if (!deliveryPhone) {
+            alert('연락처를 입력해주세요.');
+            e.preventDefault();
+            return;
+        }
+
+        // 전화번호 형식 검증
+        const phoneRegex = /^01[0-9]-?[0-9]{3,4}-?[0-9]{4}$/;
+        if (!phoneRegex.test(deliveryPhone.replace(/-/g, ''))) {
+            alert('올바른 전화번호 형식을 입력해주세요. (예: 010-0000-0000)');
+            e.preventDefault();
+            return;
+        }
+
+        // 최종 확인
+        if (!confirm('입력한 정보로 주문을 진행하시겠습니까?')) {
+            e.preventDefault();
+            return;
+        }
+    });
+
+    // 전화번호 자동 하이픈 추가
+    document.getElementById('deliveryPhone').addEventListener('input', function(e) {
+        let value = e.target.value.replace(/[^0-9]/g, '');
+
+        if (value.length >= 3 && value.length <= 7) {
+            value = value.substring(0, 3) + '-' + value.substring(3);
+        } else if (value.length >= 8) {
+            value = value.substring(0, 3) + '-' + value.substring(3, 7) + '-' + value.substring(7, 11);
+        }
+
+        e.target.value = value;
+    });
+</script>
+</body>
+</html>

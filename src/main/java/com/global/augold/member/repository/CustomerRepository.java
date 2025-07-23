@@ -17,5 +17,12 @@ public interface CustomerRepository extends JpaRepository<Customer, String> {
     Optional<Customer> findByCstmIdAndCstmPwd(String cstmId, String cstmPwd);
     // ✅ 로그인용: 아이디로 회원 조회
     Optional<Customer> findByCstmId(String cstmId);
+
+    // ✅ PaymentService에서 사용하는 메서드 추가
+    Optional<Customer> findByCstmNumber(String cstmNumber);
+
+    // 번호로 찾기
+    Optional<Customer> findByCstmPhone(String cstmPhone);
+    boolean existsByCstmNumber(String cstmNumber);
 }
 

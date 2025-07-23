@@ -119,6 +119,14 @@
           background-color: #c0392b;
         }
 
+        .btn-edit.orders {
+          background-color: #f39c12;
+        }
+
+        .btn-edit.orders:hover {
+          background-color: #e67e22;
+        }
+
         @media (max-width: 600px) {
           main.container {
             padding: 20px;
@@ -171,6 +179,11 @@
     <div class="info-row">
         <div class="info-label">전화번호</div>
         <a href="/phone" class="btn-edit" role="button" tabindex="0">수정</a>
+    </div>
+
+    <div class="info-row">
+        <div class="info-label">주문 내역</div>
+        <a href="/order/myorders" class="btn-edit orders" role="button" tabindex="0">내 주문내역</a>
     </div>
 
     <div class="info-row">
