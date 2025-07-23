@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>결제 실패 | AuGold</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        .w-100 { width: 100%; }
+        .h-100 { height: 100%; }
+
+        .wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 24px;
+            overflow: auto;
+            min-height: 80vh;
+        }
+
+        .max-w-540 { max-width: 540px; }
+
+        .btn {
+            padding: 11px 22px;
+            border: none;
+            border-radius: 8px;
+            background-color: #f2f4f6;
+            color: #4e5968;
+            font-weight: 600;
+            font-size: 17px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn:hover { background-color: #e5e7eb; }
+
+        .btn.primary {
+            background: linear-gradient(135deg, #facc15, #f59e0b);
+            color: white;
+        }
+
+        .btn.primary:hover {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            transform: translateY(-1px);
+        }
+
+        .btn.danger {
+            background-color: #ef4444;
+            color: white;
+        }
+
+        .btn.danger:hover {
+            background-color: #dc2626;
+        }
+
+        .text-center { text-align: center; }
+        .flex { display: flex; }
+        .flex-column { display: flex; flex-direction: column; }
+        .justify-between { justify-content: space-between; }
+        .align-center { align-items: center; }
+
+        .button-group {
+            margin-top: 32px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 16px;
+        }
+
+        .title {
+            margin-top: 32px;
+            margin-bottom: 0;
+            color: #191f28;
+            font-weight: bold;
+            font-size: 24px;
+        }
+
+        .response-section {
+            margin-top: 60px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            font-size: 20px;
+        }
+
+        .response-section .response-label {
+            font-weight: 600;
+            color: #333d48;
+            font-size: 17px;
+        }
+
+        .response-section .response-text {
+            font-weight: 500;
+            color: #4e5968;
+            font-size: 17px;
+            padding-left: 16px;
+            word-break: break-word;
+            text-align: right;
+        }
+
+        .gold-gradient {
+            background: linear-gradient(135deg, #facc15, #f59e0b);
+        }
+
+        .error-icon {
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* 반응형 */
+        @media (max-width: 768px) {
+            .wrapper { padding: 16px; }
+            .max-w-540 { max-width: 100%; }
+            .title { font-size: 20px; }
+            .response-section { margin-top: 40px; font-size: 16px; }
+            .response-section .response-label,
+            .response-section .response-text { font-size: 15px; }
+            .button-group { margin-top: 24px; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+<!-- 헤더 -->
+<header class="bg-white shadow-sm border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-6 py-4">
+        <div class="flex items-center justify-between">
+            <a href="/" class="flex items-center space-x-3">
+                <div class="w-10 h-10 gold-gradient rounded-full flex items-center justify-center">
+                    <span class="text-white font-bold">A</span>
+                </div>
+                <span class="text-xl font-bold text-gray-800">AuGold</span>
+            </a>
+        </div>
+    </div>
+</header>
+
+<main class="wrapper w-100">
+    <div class="flex-column align-center w-100 max-w-540">
+        <img src="https://static.toss.im/lotties/error-spot-no-loop-space-apng.png"
+             width="160" height="160" alt="실패" class="error-icon">
+        <h2 class="title text-red-600">결제를 실패했어요 😞</h2>
+
+        <div class="response-section w-100">
+            <div class="flex justify-between">
+                <span class="response-label">오류 코드</span>
+                <span id="error-code" class="response-text text-red-600"></span>
+            </div>
+            <div class="flex justify-between">
+                <span class="response-label">오류 메시지</span>
+                <span id="error-message" class="response-text text-red-600"></span>
+            </div>
+        </div>
+
+        <!-- 도움말 섹션 -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-6 w-100">
+            <h3 class="font-semibold text-blue-800 mb-2">💡 해결 방법</h3>
+            <ul class="text-sm text-blue-700 space-y-1">
+                <li>• 카드 정보를 다시 확인해주세요</li>
+                <li>• 카드 한도나 잔액을 확인해주세요</li>
+                <li>• 다른 결제 수단을 시도해보세요</li>
+                <li>• 문제가 지속되면 카드사에 문의해주세요</li>
+            </ul>
+        </div>
+
+        <div class="w-100 button-group">
+            <a class="btn primary w-100" href="/cart">장바구니로 돌아가기</a>
+
+            <div class="flex" style="gap: 16px;">
+                <a class="btn w-100" href="/">홈으로 가기</a>
+                <a class="btn w-100" href="mailto:help@augold.co.kr">고객센터 문의</a>
+            </div>
+
+            <!-- 재시도 버튼 (특정 오류의 경우만 표시) -->
+            <button id="retryButton" class="btn danger w-100" style="display: none;" onclick="retryPayment()">
+                다시 결제하기
+            </button>
+        </div>
+    </div>
+</main>
+
+<!-- JavaScript -->
+<script>
+    // URL 파라미터에서 에러 정보 추출
+    const urlParams = new URLSearchParams(window.location.search);
+    const errorCode = urlParams.get("code");
+    const errorMessage = urlParams.get("message");
+
+    // 화면 요소들
+    const errorCodeElement = document.getElementById("error-code");
+    const errorMessageElement = document.getElementById("error-message");
+    const retryButton = document.getElementById("retryButton");
+
+    // 에러 코드별 사용자 친화적 메시지 변환
+    function getFriendlyErrorMessage(code, originalMessage) {
+        const errorMessages = {
+            'PAY_PROCESS_CANCELED': '사용자가 결제를 취소했습니다.',
+            'PAY_PROCESS_ABORTED': '결제 진행 중 중단되었습니다.',
+            'REJECT_CARD_COMPANY': '카드사에서 결제를 거절했습니다.',
+            'INVALID_CARD_COMPANY': '유효하지 않은 카드사입니다.',
+            'NOT_SUPPORTED_INSTALLMENT': '지원하지 않는 할부 개월수입니다.',
+            'EXCEED_MAX_CARD_INSTALLMENT': '카드 할부 한도를 초과했습니다.',
+            'INVALID_STOPPED_CARD': '정지된 카드입니다.',
+            'EXCEED_MAX_DAILY_PAYMENT_COUNT': '일일 결제 한도를 초과했습니다.',
+            'NOT_SUPPORTED_MONTHLY_INSTALLMENT': '월 단위 할부가 지원되지 않습니다.',
+            'EXCEED_MAX_PAYMENT_AMOUNT': '최대 결제 금액을 초과했습니다.',
+            'NOT_FOUND_TERMINAL_ID': '터미널 ID를 찾을 수 없습니다.',
+            'INVALID_AUTHORIZE_AUTH': '유효하지 않은 인증입니다.',
+            'TIMEOUT': '결제 시간이 초과되었습니다.',
+            'NETWORK_ERROR': '네트워크 오류가 발생했습니다.',
+            'SYSTEM_ERROR': '시스템 오류가 발생했습니다.',
+            'CONFIRM_ERROR': '결제 승인 중 오류가 발생했습니다.',
+            'UNKNOWN_ERROR': '알 수 없는 오류가 발생했습니다.'
+        };
+
+        return errorMessages[code] || originalMessage || '결제 처리 중 오류가 발생했습니다.';
+    }
+
+    // 재시도 가능한 오류 코드들
+    function isRetryableError(code) {
+        const retryableCodes = ['TIMEOUT', 'NETWORK_ERROR', 'SYSTEM_ERROR'];
+        return retryableCodes.includes(code);
+    }
+
+    // 재시도 함수
+    function retryPayment() {
+        const orderNumber = sessionStorage.getItem('lastOrderNumber');
+        if (orderNumber) {
+            window.location.href = `/payment/request?orderNumber=${orderNumber}`;
+        } else {
+            window.location.href = '/cart';
+        }
+    }
+
+    // 결제 실패 로그를 서버에 전송
+    async function logPaymentFailure(code, message) {
+        try {
+            await fetch('/payment/api/log-failure', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    errorCode: code,
+                    errorMessage: message,
+                    timestamp: new Date().toISOString(),
+                    userAgent: navigator.userAgent,
+                    url: window.location.href
+                }),
+            });
+        } catch (error) {
+            console.error('결제 실패 로그 전송 실패:', error);
+        }
+    }
+
+    // 페이지 로드 시 처리
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('결제 실패:', { errorCode, errorMessage });
+
+        // 에러 정보 표시
+        if (errorCodeElement) {
+            errorCodeElement.textContent = errorCode || "UNKNOWN_ERROR";
+        }
+
+        // 사용자 친화적 메시지로 변경
+        const friendlyMessage = getFriendlyErrorMessage(errorCode, errorMessage);
+        if (errorMessageElement) {
+            errorMessageElement.textContent = friendlyMessage;
+        }
+
+        // 재시도 가능한 오류인 경우 재시도 버튼 표시
+        if (isRetryableError(errorCode)) {
+            retryButton.style.display = 'block';
+        }
+
+        // 자동 새로고침 방지를 위한 세션 스토리지 체크
+        const failureLogged = sessionStorage.getItem('payment_failure_logged');
+        if (!failureLogged) {
+            sessionStorage.setItem('payment_failure_logged', 'true');
+
+            // 서버에 결제 실패 로그 전송
+            logPaymentFailure(errorCode, errorMessage);
+        }
+    });
+
+    // 페이지 이탈 시 세션 스토리지 정리
+    window.addEventListener('beforeunload', () => {
+        sessionStorage.removeItem('payment_failure_logged');
+    });
+</script>
+</body>
+</html>

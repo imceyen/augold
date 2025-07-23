@@ -3,7 +3,7 @@
 // ===============================
 
 package com.global.augold.order.entity;
-
+import com.global.augold.payment.entity.Payment;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;

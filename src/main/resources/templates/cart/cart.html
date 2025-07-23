@@ -898,7 +898,9 @@
         });
     }
 
-    // 주문하기
+   // Cart.html의 orderProducts() 함수 수정 (기존 함수 교체)
+
+    // 주문하기 (수정된 버전)
     function orderProducts() {
         const checkedBoxes = document.querySelectorAll('.product-checkbox:checked');
         if (checkedBoxes.length === 0) {
@@ -906,10 +908,100 @@
             return;
         }
 
-        // 주문 페이지로 이동하는 로직
-        // 실제 구현에 맞게 수정해주세요
-        window.location.href = '/order';
+        // 선택된 상품들의 총 금액 계산
+        const totalAmount = calculateSelectedTotal();
+        if (totalAmount <= 0) {
+            alert('주문 금액이 올바르지 않습니다.');
+            return;
+        }
+
+        // 전체 선택 확인
+        const totalItems = document.querySelectorAll('.product-checkbox').length;
+        const selectedItems = checkedBoxes.length;
+
+        if (selectedItems < totalItems) {
+            if (!confirm(`전체 ${totalItems}개 상품 중 ${selectedItems}개만 선택되었습니다.\n선택된 상품만 주문하시겠습니까?`)) {
+                return;
+            }
+        }
+
+        // 주문 확인 다이얼로그
+        const formattedAmount = new Intl.NumberFormat('ko-KR', {
+            style: 'currency',
+            currency: 'KRW'
+        }).format(totalAmount);
+
+        if (confirm(`${selectedItems}개 상품을 주문하시겠습니까?\n\n총 금액: ${formattedAmount}\n\n확인을 누르면 주문서 작성 페이지로 이동합니다.`)) {
+
+            // 🔥 실제 주문 처리
+            // 만약 부분 선택이면 선택된 상품만 주문 처리 필요
+            if (selectedItems < totalItems) {
+                // TODO: 선택된 상품만 주문 처리하는 로직 추가
+                alert('현재는 전체 상품 주문만 지원됩니다.\n전체 선택 후 주문해주세요.');
+                return;
+            }
+
+            // 전체 선택인 경우 주문 페이지로 이동
+            try {
+                // 세션 스토리지에 주문 정보 임시 저장 (필요시)
+                sessionStorage.setItem('orderFromCart', 'true');
+                sessionStorage.setItem('orderItemCount', selectedItems);
+                sessionStorage.setItem('orderTotalAmount', totalAmount);
+
+                // 주문 페이지로 이동
+                window.location.href = '/order';
+
+            } catch (error) {
+                console.error('주문 처리 중 오류:', error);
+                alert('주문 처리 중 오류가 발생했습니다. 다시 시도해주세요.');
+            }
+        }
     }
+
+    // 선택된 상품의 총 금액 계산 (추가 함수)
+    function calculateSelectedTotal() {
+        let total = 0;
+        const checkedBoxes = document.querySelectorAll('.product-checkbox:checked');
+
+        checkedBoxes.forEach(checkbox => {
+            const productItem = checkbox.closest('.product-item');
+            const priceElement = productItem.querySelector('.product-price');
+            const priceText = priceElement.textContent.replace(/[^\d]/g, '');
+            total += parseInt(priceText) || 0;
+        });
+
+        return total;
+    }
+
+    // 선택된 상품 개수 표시 (추가 함수)
+    function updateSelectedCount() {
+        const checkedBoxes = document.querySelectorAll('.product-checkbox:checked');
+        const totalItems = document.querySelectorAll('.product-checkbox').length;
+
+        // 선택 개수 표시 업데이트 (필요시 HTML에 요소 추가)
+        console.log(`선택됨: ${checkedBoxes.length}/${totalItems}`);
+    }
+
+    // 체크박스 변경 시 선택 개수 업데이트 (기존 이벤트 리스너에 추가)
+    document.addEventListener('DOMContentLoaded', function() {
+        updateCartCount();
+        updateTotalPrice();
+
+        // 체크박스 변경 시 선택 개수 업데이트
+        document.querySelectorAll('.product-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                updateSelectedCount(); // 추가
+
+                // 기존 코드
+                const allCheckboxes = document.querySelectorAll('.product-checkbox');
+                const checkedCheckboxes = document.querySelectorAll('.product-checkbox:checked');
+                const selectAllCheckbox = document.getElementById('selectAll');
+
+                selectAllCheckbox.checked = allCheckboxes.length === checkedCheckboxes.length;
+                selectAllCheckbox.indeterminate = checkedCheckboxes.length > 0 && checkedCheckboxes.length < allCheckboxes.length;
+            });
+        });
+    });
 </script>
 </body>
 </html>

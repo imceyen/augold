@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>결제 성공 | AuGold</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    .w-100 { width: 100%; }
+    .h-100 { height: 100%; }
+
+    .wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 24px;
+        overflow: auto;
+        min-height: 80vh;
+    }
+
+    .max-w-540 { max-width: 540px; }
+
+    .btn {
+        padding: 11px 22px;
+        border: none;
+        border-radius: 8px;
+        background-color: #f2f4f6;
+        color: #4e5968;
+        font-weight: 600;
+        font-size: 17px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+    }
+
+    .btn:hover { background-color: #e5e7eb; }
+
+    .btn.primary {
+        background: linear-gradient(135deg, #facc15, #f59e0b);
+        color: white;
+    }
+
+    .btn.primary:hover {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        transform: translateY(-1px);
+    }
+
+    .text-center { text-align: center; }
+    .flex { display: flex; }
+    .flex-column { display: flex; flex-direction: column; }
+    .justify-between { justify-content: space-between; }
+    .align-center { align-items: center; }
+
+    .confirm-loading {
+        margin-top: 72px;
+        height: 400px;
+        justify-content: space-between;
+    }
+
+    .confirm-success {
+        display: none;
+        margin-top: 72px;
+    }
+
+    .button-group {
+        margin-top: 32px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 16px;
+    }
+
+    .title {
+        margin-top: 32px;
+        margin-bottom: 0;
+        color: #191f28;
+        font-weight: bold;
+        font-size: 24px;
+    }
+
+    .description {
+        margin-top: 8px;
+        color: #4e5968;
+        font-size: 17px;
+        font-weight: 500;
+    }
+
+    .response-section {
+        margin-top: 60px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        font-size: 20px;
+    }
+
+    .response-section .response-label {
+        font-weight: 600;
+        color: #333d48;
+        font-size: 17px;
+    }
+
+    .response-section .response-text {
+        font-weight: 500;
+        color: #4e5968;
+        font-size: 17px;
+        padding-left: 16px;
+        word-break: break-word;
+        text-align: right;
+    }
+
+    .gold-gradient {
+        background: linear-gradient(135deg, #facc15, #f59e0b);
+    }
+
+    /* 반응형 */
+    @media (max-width: 768px) {
+        .wrapper { padding: 16px; }
+        .max-w-540 { max-width: 100%; }
+        .title { font-size: 20px; }
+        .description { font-size: 15px; }
+        .response-section { margin-top: 40px; font-size: 16px; }
+        .response-section .response-label,
+        .response-section .response-text { font-size: 15px; }
+    }
+  </style>
+</head>
+<body class="bg-gray-50">
+<!-- 헤더 -->
+<header class="bg-white shadow-sm border-b border-gray-200">
+  <div class="max-w-7xl mx-auto px-6 py-4">
+    <div class="flex items-center justify-between">
+      <a href="/" class="flex items-center space-x-3">
+        <div class="w-10 h-10 gold-gradient rounded-full flex items-center justify-center">
+          <span class="text-white font-bold">A</span>
+        </div>
+        <span class="text-xl font-bold text-gray-800">AuGold</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main class="wrapper w-100">
+  <!-- 결제 승인 대기 섹션 -->
+  <div class="flex-column align-center confirm-loading w-100 max-w-540">
+    <div class="flex-column align-center">
+      <img src="https://static.toss.im/lotties/loading-spot-apng.png" width="120" height="120" alt="로딩">
+      <h2 class="title text-center">결제 요청까지 성공했어요.</h2>
+      <h4 class="text-center description">결제 승인하고 완료해보세요.</h4>
+    </div>
+    <div class="w-100">
+      <button id="confirmPaymentButton" class="btn primary w-100">결제 승인하기</button>
+    </div>
+  </div>
+
+  <!-- 결제 완료 섹션 -->
+  <div class="flex-column align-center confirm-success w-100 max-w-540">
+    <img src="https://static.toss.im/illusts/check-blue-spot-ending-frame.png" width="120" height="120" alt="성공">
+    <h2 class="title">결제를 완료했어요! 🎉</h2>
+
+    <div class="response-section w-100">
+      <div class="flex justify-between">
+        <span class="response-label">결제 금액</span>
+        <span id="amount" class="response-text"></span>
+      </div>
+      <div class="flex justify-between">
+        <span class="response-label">주문번호</span>
+        <span id="orderId" class="response-text"></span>
+      </div>
+      <div class="flex justify-between">
+        <span class="response-label">결제키</span>
+        <span id="paymentKey" class="response-text"></span>
+      </div>
+    </div>
+
+    <div class="w-100 button-group">
+      <div class="flex" style="gap: 16px;">
+        <a class="btn w-100" href="/">홈으로 돌아가기</a>
+        <a class="btn primary w-100" href="/myorders">주문 내역 확인</a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- JavaScript -->
+<script>
+  // URL 파라미터에서 결제 정보 추출
+  const urlParams = new URLSearchParams(window.location.search);
+  const paymentKey = urlParams.get("paymentKey");
+  const orderId = urlParams.get("orderId");
+  const amount = urlParams.get("amount");
+
+  // 화면 요소들
+  const paymentKeyElement = document.getElementById("paymentKey");
+  const orderIdElement = document.getElementById("orderId");
+  const amountElement = document.getElementById("amount");
+  const confirmLoadingSection = document.querySelector('.confirm-loading');
+  const confirmSuccessSection = document.querySelector('.confirm-success');
+
+  // 화면에 결제 정보 표시
+  if (paymentKeyElement) paymentKeyElement.textContent = paymentKey;
+  if (orderIdElement) orderIdElement.textContent = orderId;
+  if (amountElement) amountElement.textContent = `${parseInt(amount).toLocaleString()}원`;
+
+  // 결제 승인 함수
+  async function confirmPayment() {
+      try {
+          // CSRF 토큰 가져오기
+          const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+          const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+
+          // 헤더 설정
+          const headers = {
+              'Content-Type': 'application/json',
+          };
+
+          // CSRF 토큰이 있으면 헤더에 추가
+          if (csrfToken && csrfHeader) {
+              headers[csrfHeader] = csrfToken;
+          }
+
+          // Spring Boot API 호출
+          const response = await fetch('/payment/api/toss/confirm', {
+              method: 'POST',
+              headers: headers,
+              body: JSON.stringify({
+                  paymentKey: paymentKey,
+                  orderId: orderId,
+                  amount: parseInt(amount)
+              }),
+          });
+
+          if (response.ok) {
+              // 결제 승인 성공
+              const responseData = await response.json();
+              console.log('결제 승인 성공:', responseData);
+
+              // 로딩 화면 숨기고 성공 화면 표시
+              if (confirmLoadingSection) {
+                  confirmLoadingSection.style.display = 'none';
+              }
+              if (confirmSuccessSection) {
+                  confirmSuccessSection.style.display = 'flex';
+              }
+
+          } else {
+              // 결제 승인 실패
+              const errorData = await response.json();
+              console.error('결제 승인 실패:', errorData);
+
+              throw new Error(errorData.message || '결제 승인에 실패했습니다.');
+          }
+
+      } catch (error) {
+          console.error('결제 승인 중 오류:', error);
+
+          // 사용자에게 에러 메시지 표시
+          alert('결제 승인 중 오류가 발생했습니다: ' + error.message);
+
+          // 결제 실패 페이지로 이동
+          window.location.href = `/payment/toss/fail?code=CONFIRM_ERROR&message=${encodeURIComponent(error.message)}`;
+      }
+  }
+
+  // 결제 승인 버튼 이벤트 리스너
+  const confirmPaymentButton = document.getElementById('confirmPaymentButton');
+  if (confirmPaymentButton) {
+      confirmPaymentButton.addEventListener('click', confirmPayment);
+  }
+
+  // 페이지 로드 시 유효성 검사
+  document.addEventListener('DOMContentLoaded', () => {
+      // 필수 파라미터 확인
+      if (!paymentKey || !orderId || !amount) {
+          console.error('필수 결제 정보가 누락되었습니다:', { paymentKey, orderId, amount });
+          alert('결제 정보가 올바르지 않습니다.');
+          window.location.href = '/cart';
+          return;
+      }
+
+      console.log('결제 성공 페이지 로드 완료:', { paymentKey, orderId, amount });
+  });
+</script>
+</body>
+</html>

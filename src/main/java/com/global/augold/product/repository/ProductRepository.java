@@ -4,6 +4,7 @@ import com.global.augold.product.entity.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 상품 정보를 위한 JPA 리포지토리 인터페이스
@@ -19,4 +20,5 @@ public interface ProductRepository extends JpaRepository<Product, String> {
     List<Product> findByProductNameContaining(String keyword);
     List<Product> findByProductGroup(String productGroup);
 
+    Optional<Product> findByProductId(String productId);
 }
