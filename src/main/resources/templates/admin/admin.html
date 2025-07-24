@@ -648,14 +648,6 @@
               loadingMsg.style.display = 'none';
               plotDivs.forEach(id => document.getElementById(id).style.display = 'block');
 
-              // 1. 전체 매출 예측 그래프 (salesForecastPlot)
-              const forecastData = data.main_forecast;
-              Plotly.newPlot('salesForecastPlot', [
-                  { x: forecastData.map(d => d.ds), y: forecastData.map(d => d.yhat_upper), mode: 'lines', line: { width: 0 }, showlegend: false },
-                  { x: forecastData.map(d => d.ds), y: forecastData.map(d => d.yhat_lower), mode: 'lines', line: { width: 0 }, fill: 'tonexty', fillcolor: 'rgba(65, 105, 225, 0.2)', showlegend: false },
-                  { x: forecastData.map(d => d.ds), y: forecastData.map(d => d.y), mode: 'markers', type: 'scatter', name: '실제 매출', marker: { color: 'black', size: 4 } },
-                  { x: forecastData.map(d => d.ds), y: forecastData.map(d => d.yhat), mode: 'lines', type: 'scatter', name: '예측 매출', line: { color: 'royalblue' } }
-              ], { title: '총 매출 예측 (향후 90일)', xaxis: { title: '날짜' }, yaxis: { title: '매출액 (원)', tickformat: ',.0f' } });
 
               // 2. 요일별 매출 트렌드 그래프 (salesWeeklyPlot)
               const weeklyData = data.weekly_seasonality;
