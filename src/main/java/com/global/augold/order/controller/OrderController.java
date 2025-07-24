@@ -4,6 +4,7 @@ import com.global.augold.cart.dto.CartDTO;
 import com.global.augold.cart.service.CartService;
 import com.global.augold.member.entity.Customer;
 import com.global.augold.order.entity.Order;
+import com.global.augold.order.entity.OrderItem;
 import com.global.augold.order.service.OrderService;
 import com.global.augold.order.dto.OrderCreateRequest;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.ArrayList;
 
 import jakarta.servlet.http.HttpSession;
 import java.util.List;
@@ -55,9 +57,15 @@ public class OrderController {
                     .mapToDouble(item -> item.getFinalPrice() * item.getQuantity())
                     .sum();
 
+            // === 총 수량 계산 추가 ===
+            int totalQuantity = cartItems.stream()
+                    .mapToInt(CartDTO::getQuantity)
+                    .sum();
+
             // 주문 페이지에 필요한 데이터 설정
             model.addAttribute("cartItems", cartItems);
             model.addAttribute("totalAmount", totalAmount);
+            model.addAttribute("totalQuantity", totalQuantity);  // ← 이 줄 추가
             model.addAttribute("customerName", loginUser.getCstmName());
             model.addAttribute("customerPhone", loginUser.getCstmPhone());
             model.addAttribute("customerAddr", loginUser.getCstmAddr());
@@ -82,35 +90,31 @@ public class OrderController {
                               HttpSession session,
                               Model model) {
         try {
-            // 세션에서 고객 정보 가져오기
-            Customer loginUser = (Customer) session.getAttribute("loginUser");
-            if (loginUser == null) {
-                log.warn("로그인되지 않은 사용자의 주문 생성 요청");
-                return "redirect:/login?returnUrl=/cart";
-            }
 
+            Customer loginUser = (Customer) session.getAttribute("loginUser");
             String cstmNumber = loginUser.getCstmNumber();
             orderRequest.setCstmNumber(cstmNumber);
-
-            // 주문 생성
             String orderNumber = orderService.createOrderFromCart(orderRequest, cstmNumber);
+            String redirectUrl = "redirect:/payment/request?orderNumber=" + orderNumber;
+            return redirectUrl;
 
-            // 결제 페이지로 리다이렉트
-            return "redirect:/payment/request?orderNumber=" + orderNumber;
-
-        } catch (IllegalArgumentException e) {
-            model.addAttribute("errorMessage", e.getMessage());
-            return orderPage(session, model); // 주문 페이지로 돌아가기
+        } catch (OrderService.StockShortageException e) {
+            log.error("❌ StockShortageException: {}", e.getMessage());
+            // ... 기존 코드
+            return "redirect:/order?stockShortage=true&productName=" +
+                    java.net.URLEncoder.encode(e.getProductName(), java.nio.charset.StandardCharsets.UTF_8);
 
         } catch (Exception e) {
-            model.addAttribute("errorMessage", "주문 처리 중 오류가 발생했습니다.");
-            return orderPage(session, model);
+            log.error("❌ 예상치 못한 예외: {}", e.getMessage(), e);
+
+            // 🔥 직접 리다이렉트로 변경 (orderPage 호출 안 함)
+            return "redirect:/order?error=system";
         }
     }
 
-
-     // 주문 상세 조회 API (JSON 반환)
-
+    /**
+     * 주문 상세 조회 API (JSON 반환) - 수정된 버전
+     */
     @GetMapping("/api/{orderNumber}")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> getOrderDetailApi(@PathVariable String orderNumber,
@@ -125,11 +129,41 @@ public class OrderController {
                 return ResponseEntity.status(401).body(response);
             }
 
-            // 주문 상세 정보 조회 (기존 메서드 활용)
+            // 주문 상세 정보 조회
             Order order = orderService.getOrderDetail(orderNumber, loginUser.getCstmNumber());
 
+            // 안전한 JSON 구조로 변환
+            Map<String, Object> orderData = new HashMap<>();
+            orderData.put("orderNumber", order.getOrderNumber());
+            orderData.put("orderDate", order.getOrderDate().toString());
+            orderData.put("orderStatus", Map.of(
+                    "name", order.getOrderStatus().name(),
+                    "description", order.getOrderStatus().getDescription()
+            ));
+            orderData.put("totalAmount", order.getTotalAmount());
+            orderData.put("finalAmount", order.getFinalAmount());
+            orderData.put("deliveryAddr", order.getDeliveryAddr());
+            orderData.put("deliveryPhone", order.getDeliveryPhone());
+
+            // OrderItem 정보를 안전한 형태로 변환
+            List<Map<String, Object>> orderItemsData = new ArrayList<>();
+            if (order.getOrderItems() != null) {
+                for (OrderItem item : order.getOrderItems()) {
+                    Map<String, Object> itemData = new HashMap<>();
+                    itemData.put("productId", item.getProductId());
+                    itemData.put("productName", item.getProductName() != null ? item.getProductName() : "상품명 없음");
+                    itemData.put("imageUrl", item.getImageUrl());
+                    itemData.put("quantity", item.getQuantity());
+                    itemData.put("unitPrice", item.getUnitPrice());
+                    itemData.put("finalAmount", item.getFinalAmount());
+
+                    orderItemsData.add(itemData);
+                }
+            }
+            orderData.put("orderItems", orderItemsData);
+
             response.put("success", true);
-            response.put("order", order);
+            response.put("order", orderData);
 
             log.info("주문 상세 API 조회: 주문번호={}, 고객={}", orderNumber, loginUser.getCstmNumber());
             return ResponseEntity.ok(response);
@@ -180,10 +214,6 @@ public class OrderController {
         }
     }
 
-
-
-
-
     /**
      * 주문 취소
      * URL: POST /order/{orderNumber}/cancel
@@ -232,13 +262,12 @@ public class OrderController {
             List<Order> orders = orderService.getCustomerOrders(loginUser.getCstmNumber());
             model.addAttribute("orders", orders);
 
-            log.info("고객 주문 목록 조회: 고객={}, 주문수={}",
-                    loginUser.getCstmNumber(), orders.size());
+            model.addAttribute("customerName", loginUser.getCstmName());
 
             return "order/myorders"; // templates/order/myorders.html
 
         } catch (Exception e) {
-            log.error("주문 목록 조회 실패: {}", e.getMessage(), e);
+
             model.addAttribute("errorMessage", "주문 목록을 불러오는 중 오류가 발생했습니다.");
             return "order/myorders";
         }
@@ -272,6 +301,4 @@ public class OrderController {
             return "redirect:/order/" + orderNumber + "?error=update";
         }
     }
-
-
 }

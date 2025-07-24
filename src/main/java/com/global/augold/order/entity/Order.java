@@ -11,6 +11,8 @@ import lombok.AllArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 
 @Entity
 @Table(name = "ORDERS") // 기존 테이블명과 동일
@@ -49,6 +51,7 @@ public class Order {
 
     // Order  : OrderItem 일 대 다 관계
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference  // 순환참조 방지
     private List<OrderItem> orderItems;
 
     // Order : Payment 일 대 일 관계

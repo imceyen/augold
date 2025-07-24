@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import java.math.BigDecimal;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "ORDER_ITEM") // 기존 테이블명과 동일
@@ -44,6 +45,7 @@ public class OrderItem {
     @ManyToOne(fetch = FetchType.LAZY) // 여러개의 OrderItem 이 한개의 Order에 속한다 라는 뜻.
     // LAZY의 역할 :  Order 조회할 때는 OrderItem 안 가져옴 (1단계), order.getOrderItems() 호출할 때만 OrderItem 조회 (2단계)
     @JoinColumn(name = "ORDER_NUMBER", insertable = false, updatable = false)
+    @JsonBackReference  // 순환참조 방지
     private Order order; // 현재 테이블(ORDER_ITEM)의 ORDER_NUMBER 컬럼으로 Order 테이블과 조인한다
 
 

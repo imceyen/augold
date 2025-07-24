@@ -330,11 +330,11 @@
 
     <!-- 주문 목록 -->
     <div th:if="${!#lists.isEmpty(orders)}" class="order-list">
-        <div th:each="order : ${orders}" class="order-card">
+        <div th:each="order, iterStat : ${orders}" class="order-card">
             <!-- 주문 헤더 -->
             <div class="order-header">
                 <div>
-                    <div class="order-number" th:text="${order.orderNumber}">ORD-2025-001</div>
+                    <div class="order-number" th:text="${iterStat.count}">1</div>
                     <div class="order-date" th:text="${#temporals.format(order.orderDate, 'yyyy.MM.dd HH:mm')}">2025.01.22 15:30</div>
                 </div>
                 <div th:switch="${order.orderStatus.name()}">
@@ -349,15 +349,27 @@
             </div>
 
             <!-- 주문 내용 -->
+            <!-- 주문 내용 부분 수정 -->
             <div class="order-content">
-                <div class="product-image">💎</div>
+                <!-- 이미지 표시 -->
+                <div class="product-image">
+        <span th:if="${order.orderItems != null and !#lists.isEmpty(order.orderItems) and order.orderItems[0].imageUrl != null}">
+            <img th:src="${order.orderItems[0].imageUrl}"
+                 th:alt="${order.orderItems[0].productName}"
+                 style="width: 100%; height: 100%; object-fit: cover;">
+        </span>
+                    <span th:unless="${order.orderItems != null and !#lists.isEmpty(order.orderItems) and order.orderItems[0].imageUrl != null}">💎</span>
+                </div>
+
                 <div class="order-details">
+                    <!-- 상품명 표시 (상품ID 대신) -->
                     <div class="product-name" th:if="${order.orderItems != null and #lists.size(order.orderItems) == 1}"
-                         th:text="${order.orderItems[0].productId}">18K 골드 반지</div>
+                         th:text="${order.orderItems[0].productName}">18K 골드 반지</div>
                     <div class="product-name" th:if="${order.orderItems != null and #lists.size(order.orderItems) > 1}"
-                         th:text="${order.orderItems[0].productId} + ' 외 ' + (${#lists.size(order.orderItems)} - 1) + '종'">18K 골드 반지 외 2종</div>
+                         th:text="${order.orderItems[0].productName} + ' 외 ' + (${#lists.size(order.orderItems)} - 1) + '종'">18K 골드 반지 외 2종</div>
                     <div class="product-summary" th:text="'총 ' + ${order.totalItemCount} + '개 상품'">총 3개 상품</div>
                 </div>
+
                 <div class="order-price">
                     <div class="price-amount" th:text="'₩' + ${#numbers.formatInteger(order.finalAmount, 3, 'COMMA')}">₩1,250,000</div>
                 </div>
@@ -374,9 +386,6 @@
                             class="btn btn-danger"
                             th:data-order-number="${order.orderNumber}"
                             onclick="cancelOrder(this.dataset.orderNumber)">주문 취소</button>
-                </div>d
-                <div>
-                    <span th:if="${order.orderStatus.name() == 'DELIVERED'}" class="btn btn-secondary">리뷰 작성</span>
                 </div>
                 <div>
                     <span th:if="${order.orderStatus.name() == 'DELIVERED'}" class="btn btn-secondary">리뷰 작성</span>
