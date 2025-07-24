@@ -4,26 +4,29 @@ from statsmodels.tsa.holtwinters import ExponentialSmoothing
 from datetime import timedelta
 import platform
 import matplotlib.font_manager as fm
+import matplotlib.pyplot as plt
+import os
 
+# 한글 폰트 설정 (Windows)
 if platform.system() == 'Windows':
     font_path = 'C:/Windows/Fonts/malgun.ttf'  # 맑은 고딕
     font_name = fm.FontProperties(fname=font_path).get_name()
-    import matplotlib.pyplot as plt
     plt.rc('font', family=font_name)
 
-file_path = r"C:\ncsGlobal\FinalProject\augold\python\data\gold_sales_data.csv"
+# 데이터 로드
+file_path = "/mnt/data/gold_sales_data.csv"
 df = pd.read_csv(file_path)
 df['Order_Date'] = pd.to_datetime(df['Order_Date'])
 
+# 계산 필드 추가
 df['Revenue'] = df['Total_Price']
 df['Cost'] = df['Purchase_Price'] * df['Quantity']
 df['Profit'] = (df['Sale_Price'] - df['Purchase_Price']) * df['Quantity']
 
+# 리샘플 및 예측 함수
 def aggregate_and_forecast(df, freq, label):
-    # freq 수정 (M->ME, Y->YE)
     freq_map = {'M': 'ME', 'Y': 'YE'}
-    freq_for_resample = freq_map.get(freq, freq)  # 변경 없으면 그대로
-
+    freq_for_resample = freq_map.get(freq, freq)
     agg_df = df.resample(freq_for_resample, on='Order_Date')[['Revenue', 'Cost', 'Profit']].sum()
 
     try:
@@ -52,6 +55,7 @@ def aggregate_and_forecast(df, freq, label):
         'next_date': next_date
     }
 
+# 일/주/월/연 데이터 생성
 results = {
     'D': aggregate_and_forecast(df, 'D', '일별'),
     'W': aggregate_and_forecast(df, 'W', '주별'),
@@ -59,6 +63,7 @@ results = {
     'Y': aggregate_and_forecast(df, 'Y', '연별'),
 }
 
+# JSON 저장 함수
 def save_json(period='D', filename=None):
     data = results[period]
     df_agg = data['agg']
@@ -84,9 +89,11 @@ def save_json(period='D', filename=None):
     }
 
     if filename is None:
-        filename = f'chart_data_{period}.json'
+        filename = f'C:/ncsGlobal/FinalProject/augold/python/data/chart_data_{period}.json'
 
     with open(filename, 'w', encoding='utf-8') as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
 
-save_json('D')
+# 모든 주기별 JSON 저장
+for p in ['D', 'W', 'M', 'Y']:
+    save_json(p)

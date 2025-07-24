@@ -1,12 +1,13 @@
 package com.global.augold.product.controller;
 
+import com.global.augold.detailPage.dto.DetailPageDTO;
+import com.global.augold.detailPage.service.DetailPageService;
 import com.global.augold.product.dto.ProductDTO;
 import com.global.augold.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -14,52 +15,46 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
-/**
- * 상품 관련 API를 처리하는 컨트롤러
- */
 @RestController
 @RequestMapping("/api/products")
 @RequiredArgsConstructor
 public class ProductController {
 
-    private final ProductService productService;
 
-    /**
-     * 전체 상품 목록 조회
-     */
+    private final ProductService productService;
+    private final DetailPageService detailPageService;
+
     @GetMapping
     public List<ProductDTO> getAllProducts() {
         return productService.getAllProducts();
     }
 
-    /**
-     * 상품 ID로 단일 조회
-     */
     @GetMapping("/{id}")
     public ProductDTO getProductById(@PathVariable String id) {
         return productService.getProductById(id);
     }
 
-    /**
-     * 상품 등록
-     */
     @PostMapping
     public ProductDTO createProduct(@RequestBody ProductDTO productDTO) {
         return productService.saveProduct(productDTO);
     }
 
-    /**
-     * 상품 삭제
-     */
     @DeleteMapping("/{id}")
     public void deleteProduct(@PathVariable String id) {
         productService.deleteProduct(id);
+
+
     }
 
+    /**
+     * 상품 등록 (파일 업로드 포함, 상세 이미지 3장 각각 따로 받음)
+     */
     @PostMapping("/upload")
     public String uploadProduct(
             @RequestParam("imageFile") MultipartFile imageFile,
-            @RequestParam("detailImages") List<MultipartFile> detailImages,
+            @RequestParam(value = "detailImage1", required = false) MultipartFile detailImage1,
+            @RequestParam(value = "detailImage2", required = false) MultipartFile detailImage2,
+            @RequestParam(value = "detailImage3", required = false) MultipartFile detailImage3,
             @RequestParam Map<String, String> formData
     ) {
         try {
@@ -73,14 +68,28 @@ public class ProductController {
             Path imagePath = Paths.get(uploadDir + imageFileName);
             Files.write(imagePath, imageFile.getBytes());
 
-            // 상세 이미지 최대 3장 저장
-            List<String> detailUrls = new ArrayList<>();
-            for (int i = 0; i < Math.min(3, detailImages.size()); i++) {
-                MultipartFile file = detailImages.get(i);
-                String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+            // 상세 이미지 저장 및 URL 변수에 저장
+            String detailUrl1 = null;
+            String detailUrl2 = null;
+            String detailUrl3 = null;
+
+            if (detailImage1 != null && !detailImage1.isEmpty()) {
+                String fileName = UUID.randomUUID() + "_" + detailImage1.getOriginalFilename();
                 Path path = Paths.get(uploadDir + fileName);
-                Files.write(path, file.getBytes());
-                detailUrls.add("/upload/" + fileName);
+                Files.write(path, detailImage1.getBytes());
+                detailUrl1 = "/upload/" + fileName;
+            }
+            if (detailImage2 != null && !detailImage2.isEmpty()) {
+                String fileName = UUID.randomUUID() + "_" + detailImage2.getOriginalFilename();
+                Path path = Paths.get(uploadDir + fileName);
+                Files.write(path, detailImage2.getBytes());
+                detailUrl2 = "/upload/" + fileName;
+            }
+            if (detailImage3 != null && !detailImage3.isEmpty()) {
+                String fileName = UUID.randomUUID() + "_" + detailImage3.getOriginalFilename();
+                Path path = Paths.get(uploadDir + fileName);
+                Files.write(path, detailImage3.getBytes());
+                detailUrl3 = "/upload/" + fileName;
             }
 
             // DTO 구성
@@ -95,11 +104,25 @@ public class ProductController {
             dto.setFinalPrice(Double.parseDouble(formData.get("finalPrice")));
             dto.setDescription(formData.get("description"));
             dto.setImageUrl("/upload/" + imageFileName);
-            if (detailUrls.size() > 0) dto.setImageUrl1(detailUrls.get(0));
-            if (detailUrls.size() > 1) dto.setImageUrl2(detailUrls.get(1));
-            if (detailUrls.size() > 2) dto.setImageUrl3(detailUrls.get(2));
 
-            productService.saveProduct(dto);
+            // DTO에 상세 이미지 URL 넣기
+            dto.setImageUrl1(detailUrl1);
+            dto.setImageUrl2(detailUrl2);
+            dto.setImageUrl3(detailUrl3);
+
+            // 상품 저장
+            ProductDTO savedProduct = productService.saveProduct(dto); // 저장 후 반환값에서 productId 받기
+
+            // 상세 이미지 별도 테이블 저장
+            DetailPageDTO detailDTO = DetailPageDTO.builder()
+                    .productId(savedProduct.getProductId()) // 저장된 productId 사용
+                    .imageUrl1(detailUrl1)
+                    .imageUrl2(detailUrl2)
+                    .imageUrl3(detailUrl3)
+                    .build();
+
+            detailPageService.saveDetailImages(detailDTO);
+
             return "등록 성공";
 
         } catch (IOException e) {
@@ -108,15 +131,10 @@ public class ProductController {
         }
     }
 
-    /**
-     * productId 자동생성
-     */
     @GetMapping("/next-id")
     public String generateProductId(@RequestParam String subCtgr) {
         return productService.generateNextProductId(subCtgr);
     }
-
-
 
 
 }

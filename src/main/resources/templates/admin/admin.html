@@ -174,8 +174,14 @@
         <label>대표 이미지:
           <input type="file" name="imageFile" accept="image/*" required>
         </label><br><br>
-        <label>상세 이미지 (최대 3장):
-          <input type="file" name="detailImages" accept="image/*" multiple>
+        <label>상세 이미지 1:
+          <input type="file" name="detailImage1" accept="image/*">
+        </label><br><br>
+        <label>상세 이미지 2:
+          <input type="file" name="detailImage2" accept="image/*">
+        </label><br><br>
+        <label>상세 이미지 3:
+          <input type="file" name="detailImage3" accept="image/*">
         </label><br><br>
         <button type="submit">상품 저장</button>
         <button type="button" class="delete-btn" onclick="deleteProduct()" style="display: none;">상품 삭제</button>
@@ -230,7 +236,7 @@
       <div id="sexAgeLoading" style="text-align: center; padding: 40px; font-size: 1.1em;">
         데이터를 불러오는 중입니다...
       </div>
-      <!-- ✅ 이곳에 Plotly 차트가 출력됩니다 -->
+      <!-- 이곳에 Plotly 차트가 출력됩니다 -->
       <div style="display: flex; gap: 30px; justify-content: center;">
         <div id="genderAgeChartPlotMale" style="flex:1; min-width:350px; max-width:600px;"></div>
         <div id="genderAgeChartPlotFemale" style="flex:1; min-width:350px; max-width:600px;"></div>
@@ -970,5 +976,5 @@
 
 
 
-</body>
+  </body>
 </html>

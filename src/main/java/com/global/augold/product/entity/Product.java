@@ -50,4 +50,13 @@ public class Product {
     public String getSubCtgr() {
         return subCtgr;
     }
+
+    @Transient
+    private String imageUrl1;
+
+    @Transient
+    private String imageUrl2;
+
+    @Transient
+    private String imageUrl3;
 }
