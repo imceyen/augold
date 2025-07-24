@@ -6,7 +6,7 @@ from datetime import datetime
 import os
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
-csv_path = os.path.join(script_dir, 'gold_sales_data_final.csv')
+csv_path = os.path.join(script_dir, 'gold_sales_data_final_fixed.csv')
 
 def main(output_file_path):
     # --- 1. 데이터 읽어오기 및 전처리 ---

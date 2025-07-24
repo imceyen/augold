@@ -15,10 +15,10 @@ public class OrderItem {
 
     @Id
     @Column(name = "ORDER_ITEM_ID") // 기존 컬럼명과 동일
-    private String orderItemId; // 주문상세ID (PK)
+    private String orderItemId; // 주문상세ID (PK) - DB 트리거에서 자동 생성
 
     @Column(name = "ORDER_NUMBER", nullable = false)
-    private String orderNumber; // 주문번호
+    private String orderNumber; // 주문번호 - DB에서 생성된 값 저장
 
     @Column(name = "PRODUCT_ID", nullable = false)
     private String productId; // 상품번호
@@ -33,6 +33,12 @@ public class OrderItem {
     private BigDecimal finalAmount; // 최종금액 (단가 × 수량)
 
 
+    @Transient
+    private String productName;  // 상품명
+
+    @Transient
+    private String imageUrl;     // 상품 이미지 URL
+
 
     // OrderItem Order 다 대 일 관계
     @ManyToOne(fetch = FetchType.LAZY) // 여러개의 OrderItem 이 한개의 Order에 속한다 라는 뜻.
@@ -41,13 +47,14 @@ public class OrderItem {
     private Order order; // 현재 테이블(ORDER_ITEM)의 ORDER_NUMBER 컬럼으로 Order 테이블과 조인한다
 
 
+    // 비즈니스 메서드
 
-
-    // 엔티티 생성 시 기본값 설정
+    //  엔티티 생성 시 기본값 설정
 
     @PrePersist
     protected void onCreate() {
-        // orderItemId는 DB 트리거에서 자동 생성됨
+
+
         if (quantity == null) {
             quantity = 1; // 0개면 아예 안쓰니 상관없음
         }
@@ -56,7 +63,7 @@ public class OrderItem {
     }
 
 
-    // 엔티티 수정 시 최종금액 재계산
+    //  엔티티 수정 시 최종금액 재계산
 
     @PreUpdate
     protected void onUpdate() {
@@ -74,7 +81,6 @@ public class OrderItem {
 
 
      // 생성자 - Cart에서 OrderItem으로 변환할 때 사용
-
     public OrderItem(String orderNumber, String productId, Integer quantity, BigDecimal unitPrice) {
         this.orderNumber = orderNumber;
         this.productId = productId;
@@ -95,7 +101,7 @@ public class OrderItem {
     }
 
 
-    // 단가 변경 메서드
+    //  단가 변경 메서드
 
     public void updateUnitPrice(BigDecimal newUnitPrice) {
         if (newUnitPrice != null && newUnitPrice.compareTo(BigDecimal.ZERO) > 0) {
@@ -126,11 +132,47 @@ public class OrderItem {
     }
 
 
-    // 주문상품 정보 요약 문자열
+     // 재고 검증을 위한 정보 제공
+
+    public boolean isValidForStock(int availableStock) {
+        return quantity != null && quantity <= availableStock;
+    }
+
+
+     // 재고 부족 시 수량 조정
+
+    public int adjustQuantityForStock(int availableStock) {
+        if (quantity == null || availableStock <= 0) {
+            return 0; // 주문 불가
+        }
+
+        if (quantity > availableStock) {
+            int originalQuantity = quantity;
+            this.quantity = availableStock;
+            calculateFinalAmount();
+            return originalQuantity - availableStock; // 장바구니에 남길 수량
+        }
+
+        return 0; // 조정 불필요
+    }
+
+
+    //  주문 아이템 유효성 검증
+
+    public boolean isValid() {
+        return orderNumber != null && !orderNumber.trim().isEmpty()
+                && productId != null && !productId.trim().isEmpty()
+                && quantity != null && quantity > 0
+                && unitPrice != null && unitPrice.compareTo(BigDecimal.ZERO) > 0;
+    }
+
+
+     //  주문상품 정보 요약 문자열
 
     @Override
     public String toString() {
-        return String.format("OrderItem{orderItemId='%s', productId='%s', quantity=%d, unitPrice=%s, finalAmount=%s}",
-                orderItemId, productId, quantity, unitPrice, finalAmount);
+        return String.format("OrderItem{orderItemId='%s', orderNumber='%s', productId='%s', quantity=%d, unitPrice=%s, finalAmount=%s}",
+                orderItemId, orderNumber, productId, quantity, unitPrice, finalAmount);
     }
+
 }

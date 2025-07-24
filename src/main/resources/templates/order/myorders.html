@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>주문 내역 | AuGold</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap');
+
+        body {
+          font-family: 'Nunito', sans-serif;
+          background-color: #f9fafb;
+          color: #333;
+          margin: 0;
+          padding: 20px;
+        }
+
+        header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding-bottom: 12px;
+          border-bottom: 1px solid #ddd;
+          margin-bottom: 30px;
+        }
+
+        header h1 a {
+          text-decoration: none;
+          color: #2c3e50;
+          font-weight: 700;
+          font-size: 1.8rem;
+        }
+
+        nav a {
+          color: #4a4a4a;
+          margin-left: 20px;
+          font-weight: 600;
+          text-decoration: none;
+          transition: color 0.3s ease;
+        }
+
+        nav a:hover {
+          color: #3498db;
+        }
+
+        .container {
+          max-width: 1000px;
+          margin: 0 auto;
+        }
+
+        .page-header {
+          background: #fff;
+          padding: 30px 40px;
+          border-radius: 8px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+          margin-bottom: 30px;
+        }
+
+        .page-header h2 {
+          font-weight: 700;
+          font-size: 2rem;
+          margin: 0;
+          color: #2c3e50;
+        }
+
+        .page-header p {
+          margin: 8px 0 0 0;
+          color: #666;
+        }
+
+        .order-list {
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
+        }
+
+        .order-card {
+          background: #fff;
+          border-radius: 8px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+          overflow: hidden;
+          transition: transform 0.2s ease;
+        }
+
+        .order-card:hover {
+          transform: translateY(-2px);
+        }
+
+        .order-header {
+          padding: 20px 30px;
+          border-bottom: 1px solid #eee;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .order-number {
+          font-weight: 700;
+          color: #2c3e50;
+          font-size: 1.1rem;
+        }
+
+        .order-date {
+          color: #666;
+          font-size: 0.9rem;
+        }
+
+        .order-status {
+          padding: 4px 12px;
+          border-radius: 12px;
+          font-size: 0.8rem;
+          font-weight: 600;
+        }
+
+        .status-paid { background: #d1fae5; color: #065f46; }
+        .status-preparing { background: #dbeafe; color: #1e40af; }
+        .status-shipped { background: #e0e7ff; color: #5b21b6; }
+        .status-delivered { background: #dcfce7; color: #166534; }
+        .status-cancelled { background: #fee2e2; color: #991b1b; }
+
+        .order-content {
+          padding: 20px 30px;
+          display: flex;
+          align-items: center;
+          gap: 20px;
+        }
+
+        .product-image {
+          width: 80px;
+          height: 80px;
+          border-radius: 8px;
+          object-fit: cover;
+          background: #f3f4f6;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 2rem;
+        }
+
+        .order-details {
+          flex: 1;
+        }
+
+        .product-name {
+          font-weight: 600;
+          color: #2c3e50;
+          margin-bottom: 4px;
+        }
+
+        .product-summary {
+          color: #666;
+          font-size: 0.9rem;
+        }
+
+        .order-price {
+          text-align: right;
+        }
+
+        .price-amount {
+          font-weight: 700;
+          font-size: 1.3rem;
+          color: #2c3e50;
+        }
+
+        .order-actions {
+          padding: 20px 30px;
+          border-top: 1px solid #eee;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .btn {
+          padding: 8px 16px;
+          border-radius: 5px;
+          font-weight: 600;
+          font-size: 0.9rem;
+          text-decoration: none;
+          border: none;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+          background-color: #3498db;
+          color: white;
+        }
+
+        .btn-primary:hover {
+          background-color: #2980b9;
+        }
+
+        .btn-danger {
+          background-color: #e74c3c;
+          color: white;
+        }
+
+        .btn-danger:hover {
+          background-color: #c0392b;
+        }
+
+        .btn-secondary {
+          background-color: #95a5a6;
+          color: white;
+        }
+
+        .empty-state {
+          text-align: center;
+          padding: 60px 20px;
+          background: #fff;
+          border-radius: 8px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .empty-state img {
+          width: 120px;
+          opacity: 0.6;
+          margin-bottom: 20px;
+        }
+
+        /* 모달 스타일 */
+        .modal {
+          display: none;
+          position: fixed;
+          z-index: 1000;
+          left: 0;
+          top: 0;
+          width: 100%;
+          height: 100%;
+          background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+          background-color: #fff;
+          margin: 5% auto;
+          padding: 30px;
+          border-radius: 8px;
+          width: 90%;
+          max-width: 800px;
+          max-height: 80vh;
+          overflow-y: auto;
+        }
+
+        .modal-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 20px;
+          padding-bottom: 15px;
+          border-bottom: 1px solid #eee;
+        }
+
+        .close {
+          color: #aaa;
+          font-size: 28px;
+          font-weight: bold;
+          cursor: pointer;
+        }
+
+        .close:hover {
+          color: #000;
+        }
+
+        .detail-item {
+          display: flex;
+          align-items: center;
+          padding: 15px 0;
+          border-bottom: 1px solid #f0f0f0;
+        }
+
+        .detail-item:last-child {
+          border-bottom: none;
+        }
+
+        .detail-image {
+          width: 60px;
+          height: 60px;
+          border-radius: 6px;
+          object-fit: cover;
+          background: #f3f4f6;
+          margin-right: 15px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .detail-info {
+          flex: 1;
+        }
+
+        .detail-price {
+          text-align: right;
+          font-weight: 600;
+        }
+
+        .total-price {
+          font-size: 1.2rem;
+          font-weight: 700;
+          color: #2c3e50;
+          text-align: right;
+          padding-top: 15px;
+          border-top: 2px solid #eee;
+          margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h1><a href="/">AuGold</a></h1>
+    <nav>
+        <a href="/">메인</a>
+        <a href="/mypage">마이페이지</a>
+        <a href="/cart">장바구니</a>
+        <a href="/logout">로그아웃</a>
+    </nav>
+</header>
+
+<div class="container">
+    <div class="page-header">
+        <h2>주문 내역</h2>
+        <p th:text="${customerName} + '님의 주문 내역입니다'">고객님의 주문 내역입니다</p>
+    </div>
+
+    <!-- 주문이 없는 경우 -->
+    <div th:if="${#lists.isEmpty(orders)}" class="empty-state">
+        <div style="font-size: 4rem; margin-bottom: 20px;">📦</div>
+        <h3>아직 주문한 상품이 없습니다</h3>
+        <p>AuGold의 프리미엄 골드 제품을 둘러보세요!</p>
+        <a href="/product/list" class="btn btn-primary" style="margin-top: 20px;">상품 둘러보기</a>
+    </div>
+
+    <!-- 주문 목록 -->
+    <div th:if="${!#lists.isEmpty(orders)}" class="order-list">
+        <div th:each="order : ${orders}" class="order-card">
+            <!-- 주문 헤더 -->
+            <div class="order-header">
+                <div>
+                    <div class="order-number" th:text="${order.orderNumber}">ORD-2025-001</div>
+                    <div class="order-date" th:text="${#temporals.format(order.orderDate, 'yyyy.MM.dd HH:mm')}">2025.01.22 15:30</div>
+                </div>
+                <div th:switch="${order.orderStatus.name()}">
+                    <span th:case="'PAID'" class="order-status status-paid" th:text="${order.orderStatus.description}">결제완료</span>
+                    <span th:case="'PREPARING'" class="order-status status-preparing" th:text="${order.orderStatus.description}">상품준비중</span>
+                    <span th:case="'SHIPPED'" class="order-status status-shipped" th:text="${order.orderStatus.description}">배송중</span>
+                    <span th:case="'DELIVERED'" class="order-status status-delivered" th:text="${order.orderStatus.description}">배송완료</span>
+                    <span th:case="'CANCELLED'" class="order-status status-cancelled" th:text="${order.orderStatus.description}">취소</span>
+                    <span th:case="'REFUNDED'" class="order-status status-cancelled" th:text="${order.orderStatus.description}">환불완료</span>
+                    <span th:case="*" class="order-status" th:text="${order.orderStatus.description}">기타</span>
+                </div>
+            </div>
+
+            <!-- 주문 내용 -->
+            <div class="order-content">
+                <div class="product-image">💎</div>
+                <div class="order-details">
+                    <div class="product-name" th:if="${order.orderItems != null and #lists.size(order.orderItems) == 1}"
+                         th:text="${order.orderItems[0].productId}">18K 골드 반지</div>
+                    <div class="product-name" th:if="${order.orderItems != null and #lists.size(order.orderItems) > 1}"
+                         th:text="${order.orderItems[0].productId} + ' 외 ' + (${#lists.size(order.orderItems)} - 1) + '종'">18K 골드 반지 외 2종</div>
+                    <div class="product-summary" th:text="'총 ' + ${order.totalItemCount} + '개 상품'">총 3개 상품</div>
+                </div>
+                <div class="order-price">
+                    <div class="price-amount" th:text="'₩' + ${#numbers.formatInteger(order.finalAmount, 3, 'COMMA')}">₩1,250,000</div>
+                </div>
+            </div>
+
+            <!-- 주문 액션 -->
+            <div class="order-actions">
+                <div>
+                    <button class="btn btn-primary"
+                            th:data-order-number="${order.orderNumber}"
+                            onclick="showOrderDetail(this.dataset.orderNumber)">상세보기</button>
+
+                    <button th:if="${order.isCancellable()}"
+                            class="btn btn-danger"
+                            th:data-order-number="${order.orderNumber}"
+                            onclick="cancelOrder(this.dataset.orderNumber)">주문 취소</button>
+                </div>d
+                <div>
+                    <span th:if="${order.orderStatus.name() == 'DELIVERED'}" class="btn btn-secondary">리뷰 작성</span>
+                </div>
+                <div>
+                    <span th:if="${order.orderStatus.name() == 'DELIVERED'}" class="btn btn-secondary">리뷰 작성</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 주문 상세 모달 -->
+<div id="orderDetailModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>주문 상세 정보</h2>
+            <span class="close">&times;</span>
+        </div>
+        <div id="orderDetailContent">
+            <!-- 상세 내용이 동적으로 로드됩니다 -->
+        </div>
+    </div>
+</div>
+
+<script>
+    // 주문 상세보기 - 수정된 버전
+function showOrderDetail(orderNumber) {
+    // JSON API 호출
+    fetch(`/order/api/${orderNumber}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // 실제 주문 데이터로 모달 내용 생성
+                const order = data.order;
+                let orderItemsHtml = '';
+
+                // 주문 상품들 HTML 생성
+                if (order.orderItems && order.orderItems.length > 0) {
+                    order.orderItems.forEach(item => {
+                        // 실제 상품 이미지 처리
+                        let imageHtml;
+                        if (item.imageUrl) {
+                            imageHtml = `<img src="${item.imageUrl}" alt="${item.productName}" style="width: 100%; height: 100%; object-fit: cover;">`;
+                        } else {
+                            imageHtml = '💎'; // 이미지가 없는 경우 기본 이모지
+                        }
+
+                        orderItemsHtml += `
+                            <div class="detail-item">
+                                <div class="detail-image">${imageHtml}</div>
+                                <div class="detail-info">
+                                    <div><strong>${item.productName || '상품명 없음'}</strong></div>
+                                    <div>수량: ${item.quantity}개</div>
+                                    <div>단가: ₩${item.unitPrice.toLocaleString()}</div>
+                                </div>
+                                <div class="detail-price">₩${item.finalAmount.toLocaleString()}</div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    orderItemsHtml = '<div class="detail-item">주문 상품 정보를 찾을 수 없습니다.</div>';
+                }
+
+                // 모달 내용 설정
+                document.getElementById('orderDetailContent').innerHTML = `
+                    <div style="padding: 20px;">
+                        <div style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #eee;">
+                            <h3>주문번호: ${order.orderNumber}</h3>
+                            <p>주문일시: ${new Date(order.orderDate).toLocaleString('ko-KR')}</p>
+                            <p>주문상태: <span class="order-status">${order.orderStatus.description}</span></p>
+                            <p>배송주소: ${order.deliveryAddr}</p>
+                            <p>배송연락처: ${order.deliveryPhone}</p>
+                        </div>
+
+                        <div style="margin-bottom: 20px;">
+                            <h4>주문 상품</h4>
+                            ${orderItemsHtml}
+                        </div>
+
+                        <div class="total-price">
+                            <div>총 주문금액: ₩${order.totalAmount.toLocaleString()}</div>
+                            <div style="font-size: 1.2rem; margin-top: 5px;">
+                                <strong>최종 결제금액: ₩${order.finalAmount.toLocaleString()}</strong>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // 모달 표시
+                document.getElementById('orderDetailModal').style.display = 'block';
+
+            } else {
+                alert(data.message || '주문 정보를 불러올 수 없습니다.');
+            }
+        })
+        .catch(error => {
+            console.error('주문 상세 조회 오류:', error);
+            alert('주문 상세 정보를 불러오는 중 오류가 발생했습니다.');
+        });
+}
+
+    // 주문 취소
+    function cancelOrder(orderNumber) {
+        if (confirm('정말로 이 주문을 취소하시겠습니까?')) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/order/${orderNumber}/cancel`;
+
+            const reasonInput = document.createElement('input');
+            reasonInput.type = 'hidden';
+            reasonInput.name = 'cancelReason';
+            reasonInput.value = '고객 요청';
+            form.appendChild(reasonInput);
+
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+
+    // 모달 닫기
+    document.getElementsByClassName('close')[0].onclick = function() {
+        document.getElementById('orderDetailModal').style.display = 'none';
+    }
+
+    window.onclick = function(event) {
+        const modal = document.getElementById('orderDetailModal');
+        if (event.target == modal) {
+            modal.style.display = 'none';
+        }
+    }
+</script>
+</body>
+</html>
