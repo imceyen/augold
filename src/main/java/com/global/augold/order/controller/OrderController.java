@@ -59,19 +59,21 @@ public class OrderController {
             // 🔥 선택된 상품만 필터링
             List<CartDTO> cartItems;
             if (selectedProducts != null && !selectedProducts.isEmpty()) {
-                // 선택된 상품 ID 목록
-                List<String> selectedProductIds = Arrays.asList(selectedProducts.split(","));
+                // 선택된 상품 ID:K값 목록
+                List<String> selectedProductKeys = Arrays.asList(selectedProducts.split(","));
 
-                // 선택된 상품만 필터링
+                // 선택된 상품만 필터링 (productId + karatCode 조합으로)
                 cartItems = allCartItems.stream()
-                        .filter(item -> selectedProductIds.contains(item.getProductId()))
+                        .filter(item -> {
+                            String itemKey = item.getProductId() + ":" + item.getKaratName();
+                            return selectedProductKeys.contains(itemKey);
+                        })
                         .collect(Collectors.toList());
 
                 log.info("선택된 상품으로 주문: 전체={}, 선택={}", allCartItems.size(), cartItems.size());
             } else {
                 // 파라미터가 없으면 전체 장바구니
                 cartItems = allCartItems;
-                log.info("전체 상품으로 주문: {}", cartItems.size());
             }
 
             // 🔥 필터링 후 빈 상품 체크
@@ -117,7 +119,8 @@ public class OrderController {
     public String createOrder(@ModelAttribute OrderCreateRequest orderRequest,
                               HttpSession session,
                               Model model,
-                              @RequestParam(required = false) String selectedProducts) {
+                              @RequestParam(required = false) String selectedProducts,
+                              @RequestParam(required = false) String directBuy) {  // 🔥 추가
         try {
             Customer loginUser = (Customer) session.getAttribute("loginUser");
 
@@ -130,6 +133,13 @@ public class OrderController {
 
             if (selectedProducts != null && !selectedProducts.isEmpty()) {
                 orderRequest.setSelectedProductIds(selectedProducts);
+            }
+
+            // 🔥 바로구매인 경우 기본 배송정보 설정
+            if ("true".equals(directBuy)) {
+                // 고객 정보에서 기본 배송정보 가져오기
+                orderRequest.setDeliveryAddr(loginUser.getCstmAddr() != null ? loginUser.getCstmAddr() : "배송지 정보 없음");
+                orderRequest.setDeliveryPhone(loginUser.getCstmPhone() != null ? loginUser.getCstmPhone() : "연락처 정보 없음");
             }
 
             String orderNumber = orderService.createOrderFromCart(orderRequest, cstmNumber);
