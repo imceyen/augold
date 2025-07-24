@@ -16,6 +16,8 @@ import org.springframework.http.ResponseEntity;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import jakarta.servlet.http.HttpSession;
 import java.util.List;
@@ -34,7 +36,9 @@ public class OrderController {
      * URL: GET /order
      */
     @GetMapping("")
-    public String orderPage(HttpSession session, Model model) {
+    public String orderPage(HttpSession session,
+                            Model model,
+                            @RequestParam(required = false) String selectedProducts) {
         try {
             // 세션에서 고객 정보 가져오기
             Customer loginUser = (Customer) session.getAttribute("loginUser");
@@ -45,19 +49,43 @@ public class OrderController {
 
             String cstmNumber = loginUser.getCstmNumber();
 
-            // 장바구니에서 상품 목록 가져오기
-            List<CartDTO> cartItems = cartService.getCartList(cstmNumber);
-            if (cartItems.isEmpty()) {
+            // 🔥 전체 장바구니에서 상품 목록 가져오기
+            List<CartDTO> allCartItems = cartService.getCartList(cstmNumber);
+            if (allCartItems.isEmpty()) {
                 log.warn("장바구니가 비어있는 상태에서 주문 요청: {}", cstmNumber);
                 return "redirect:/cart?error=empty";
             }
 
-            // 총 금액 계산
+            // 🔥 선택된 상품만 필터링
+            List<CartDTO> cartItems;
+            if (selectedProducts != null && !selectedProducts.isEmpty()) {
+                // 선택된 상품 ID 목록
+                List<String> selectedProductIds = Arrays.asList(selectedProducts.split(","));
+
+                // 선택된 상품만 필터링
+                cartItems = allCartItems.stream()
+                        .filter(item -> selectedProductIds.contains(item.getProductId()))
+                        .collect(Collectors.toList());
+
+                log.info("선택된 상품으로 주문: 전체={}, 선택={}", allCartItems.size(), cartItems.size());
+            } else {
+                // 파라미터가 없으면 전체 장바구니
+                cartItems = allCartItems;
+                log.info("전체 상품으로 주문: {}", cartItems.size());
+            }
+
+            // 🔥 필터링 후 빈 상품 체크
+            if (cartItems.isEmpty()) {
+                log.warn("선택된 상품이 없음: {}", cstmNumber);
+                return "redirect:/cart?error=empty";
+            }
+
+            // 🔥 선택된 상품들로 총 금액 계산
             double totalAmount = cartItems.stream()
                     .mapToDouble(item -> item.getFinalPrice() * item.getQuantity())
                     .sum();
 
-            // === 총 수량 계산 추가 ===
+            // 🔥 선택된 상품들로 총 수량 계산
             int totalQuantity = cartItems.stream()
                     .mapToInt(CartDTO::getQuantity)
                     .sum();
@@ -65,7 +93,7 @@ public class OrderController {
             // 주문 페이지에 필요한 데이터 설정
             model.addAttribute("cartItems", cartItems);
             model.addAttribute("totalAmount", totalAmount);
-            model.addAttribute("totalQuantity", totalQuantity);  // ← 이 줄 추가
+            model.addAttribute("totalQuantity", totalQuantity);
             model.addAttribute("customerName", loginUser.getCstmName());
             model.addAttribute("customerPhone", loginUser.getCstmPhone());
             model.addAttribute("customerAddr", loginUser.getCstmAddr());
@@ -73,7 +101,7 @@ public class OrderController {
             log.info("주문 페이지 요청 처리: 고객={}, 상품수={}, 총금액={}",
                     cstmNumber, cartItems.size(), totalAmount);
 
-            return "order/order"; // templates/order/order-form.html
+            return "order/order";
 
         } catch (Exception e) {
             log.error("주문 페이지 요청 처리 실패: {}", e.getMessage(), e);
@@ -88,26 +116,32 @@ public class OrderController {
     @PostMapping("/create")
     public String createOrder(@ModelAttribute OrderCreateRequest orderRequest,
                               HttpSession session,
-                              Model model) {
+                              Model model,
+                              @RequestParam(required = false) String selectedProducts) {
         try {
-
             Customer loginUser = (Customer) session.getAttribute("loginUser");
+
+            if (loginUser == null) {
+                return "redirect:/login?returnUrl=/cart";
+            }
+
             String cstmNumber = loginUser.getCstmNumber();
             orderRequest.setCstmNumber(cstmNumber);
+
+            if (selectedProducts != null && !selectedProducts.isEmpty()) {
+                orderRequest.setSelectedProductIds(selectedProducts);
+            }
+
             String orderNumber = orderService.createOrderFromCart(orderRequest, cstmNumber);
-            String redirectUrl = "redirect:/payment/request?orderNumber=" + orderNumber;
-            return redirectUrl;
+            return "redirect:/payment/request?orderNumber=" + orderNumber;  // 👈 원래처럼 간결하게
 
         } catch (OrderService.StockShortageException e) {
             log.error("❌ StockShortageException: {}", e.getMessage());
-            // ... 기존 코드
             return "redirect:/order?stockShortage=true&productName=" +
                     java.net.URLEncoder.encode(e.getProductName(), java.nio.charset.StandardCharsets.UTF_8);
 
         } catch (Exception e) {
             log.error("❌ 예상치 못한 예외: {}", e.getMessage(), e);
-
-            // 🔥 직접 리다이렉트로 변경 (orderPage 호출 안 함)
             return "redirect:/order?error=system";
         }
     }

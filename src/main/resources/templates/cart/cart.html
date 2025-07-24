@@ -554,6 +554,12 @@
             border-radius: 8px !important;
             font-weight: 600 !important;
         }
+
+        /* 선택된 상품 개수 표시 */
+        .selected-count {
+            color: #d97706;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
@@ -616,7 +622,7 @@
                         <div class="checkbox-group">
                             <label class="checkbox-label">
                                 <input type="checkbox" id="selectAll">
-                                <span>전체선택</span>
+                                <span>전체선택 (<span id="selectedCount" class="selected-count">0</span>개)</span>
                             </label>
                         </div>
                         <div class="action-buttons">
@@ -680,11 +686,11 @@
 
             <!-- 주문 요약 -->
             <div class="order-summary">
-                <h3 class="summary-title">주문 요약</h3>
+                <h3 class="summary-title">주문 요약 (선택된 상품)</h3>
 
                 <div class="summary-details">
                     <div class="summary-row">
-                        <span>상품 금액</span>
+                        <span>선택된 상품 금액</span>
                         <span class="subtotal-price">₩0</span>
                     </div>
                     <div class="summary-row">
@@ -700,7 +706,7 @@
 
                 <div class="action-group">
                     <a href="/" class="btn-secondary">쇼핑 계속하기</a>
-                    <button type="button" onclick="orderProducts()" class="btn-primary">주문하기</button>
+                    <button type="button" onclick="orderProducts()" class="btn-primary">선택상품 주문하기</button>
                 </div>
             </div>
         </div>
@@ -765,9 +771,41 @@
             });
     }
 
-    // 페이지 로드 시 장바구니 개수 조회
+    // 선택된 상품 개수 업데이트
+    function updateSelectedCount() {
+        const checkedBoxes = document.querySelectorAll('.product-checkbox:checked');
+        const selectedCountElement = document.getElementById('selectedCount');
+        selectedCountElement.textContent = checkedBoxes.length;
+    }
+
+    // 총 금액 재계산 - 선택된 상품만 계산
+    function updateTotalPrice() {
+        let totalPrice = 0;
+
+        // 체크박스 선택된 상품만 계산
+        const checkedBoxes = document.querySelectorAll('.product-checkbox:checked');
+        checkedBoxes.forEach(checkbox => {
+            const productItem = checkbox.closest('.product-item');
+            const priceElement = productItem.querySelector('.product-price');
+            const priceText = priceElement.textContent.replace(/[^\d]/g, '');
+            totalPrice += parseInt(priceText) || 0;
+        });
+
+        const formattedPrice = new Intl.NumberFormat('ko-KR', {
+            style: 'currency',
+            currency: 'KRW'
+        }).format(totalPrice);
+
+        const totalPriceElements = document.querySelectorAll('.total-price, .subtotal-price');
+        totalPriceElements.forEach(element => {
+            element.textContent = formattedPrice;
+        });
+    }
+
+    // 페이지 로드 시 초기화
     document.addEventListener('DOMContentLoaded', function() {
         updateCartCount();
+        updateSelectedCount();
         updateTotalPrice();
     });
 
@@ -777,6 +815,10 @@
         productCheckboxes.forEach(checkbox => {
             checkbox.checked = this.checked;
         });
+
+        // 선택 개수 및 가격 업데이트
+        updateSelectedCount();
+        updateTotalPrice();
     });
 
     // 개별 체크박스 변경 시 전체 선택 상태 업데이트
@@ -788,6 +830,10 @@
 
             selectAllCheckbox.checked = allCheckboxes.length === checkedCheckboxes.length;
             selectAllCheckbox.indeterminate = checkedCheckboxes.length > 0 && checkedCheckboxes.length < allCheckboxes.length;
+
+            // 선택 개수 및 가격 업데이트
+            updateSelectedCount();
+            updateTotalPrice();
         });
     });
 
@@ -943,23 +989,19 @@
         });
     }
 
-    // 총 금액 재계산
-    function updateTotalPrice() {
-        let totalPrice = 0;
-        document.querySelectorAll('.product-price').forEach(priceElement => {
+    // 선택된 상품의 총 금액 계산
+    function calculateSelectedTotal() {
+        let total = 0;
+        const checkedBoxes = document.querySelectorAll('.product-checkbox:checked');
+
+        checkedBoxes.forEach(checkbox => {
+            const productItem = checkbox.closest('.product-item');
+            const priceElement = productItem.querySelector('.product-price');
             const priceText = priceElement.textContent.replace(/[^\d]/g, '');
-            totalPrice += parseInt(priceText) || 0;
+            total += parseInt(priceText) || 0;
         });
 
-        const formattedPrice = new Intl.NumberFormat('ko-KR', {
-            style: 'currency',
-            currency: 'KRW'
-        }).format(totalPrice);
-
-        const totalPriceElements = document.querySelectorAll('.total-price, .subtotal-price');
-        totalPriceElements.forEach(element => {
-            element.textContent = formattedPrice;
-        });
+        return total;
     }
 
     // 주문하기 (SweetAlert2 적용)
@@ -993,11 +1035,12 @@
         const totalItems = document.querySelectorAll('.product-checkbox').length;
         const selectedItems = checkedBoxes.length;
 
+        // 부분 선택도 허용하되, 확인만 받기
         if (selectedItems < totalItems) {
             Swal.fire({
                 icon: 'question',
                 title: '부분 주문 확인',
-                html: `전체 <strong>${totalItems}개</strong> 상품 중 <strong>${selectedItems}개</strong>만 선택되었습니다.<br>선택된 상품만 주문하시겠습니까?`,
+                html: `전체 <strong>${totalItems}개의</strong> 상품 중 <strong>${selectedItems}개</strong>를 주문하시겠습니까?`,
                 showCancelButton: true,
                 confirmButtonText: '선택상품 주문',
                 cancelButtonText: '취소',
@@ -1009,13 +1052,28 @@
                 }
             });
         } else {
+            // 전체 선택인 경우 바로 진행
             proceedToOrder(selectedItems, totalAmount);
         }
     }
 
-    // 주문 진행 함수 (SweetAlert2 적용)
+        // 주문 진행 함수 수정
     function proceedToOrder(selectedItems, totalAmount) {
-        const totalItems = document.querySelectorAll('.product-checkbox').length;
+        // 선택된 상품 ID 목록 수집
+        const selectedProductIds = [];
+        let totalQuantity = 0; // 🔥 총 수량 계산 추가
+
+        const checkedBoxes = document.querySelectorAll('.product-checkbox:checked');
+        checkedBoxes.forEach(checkbox => {
+            selectedProductIds.push(checkbox.value);
+
+            // 🔥 각 상품의 수량 합계 계산
+            const productItem = checkbox.closest('.product-item');
+            const quantityDisplay = productItem.querySelector('.quantity-display');
+            const quantity = parseInt(quantityDisplay.textContent) || 0;
+            totalQuantity += quantity;
+        });
+
         const formattedAmount = new Intl.NumberFormat('ko-KR', {
             style: 'currency',
             currency: 'KRW'
@@ -1026,7 +1084,8 @@
             title: '주문 확인',
             html: `
                 <div style="font-size: 16px; line-height: 1.6;">
-                    <p><strong>주문 상품:</strong> ${selectedItems}개</p>
+                    <p><strong>선택 상품:</strong> ${selectedItems}종류</p>
+                    <p><strong>총 수량:</strong> ${totalQuantity}개</p>
                     <p><strong>총 금액:</strong> <span style="color: #d97706; font-weight: bold;">${formattedAmount}</span></p>
                     <br>
                     <p>확인을 누르면 주문서 작성 페이지로 이동합니다.</p>
@@ -1039,26 +1098,10 @@
             cancelButtonColor: '#6b7280'
         }).then((result) => {
             if (result.isConfirmed) {
-                // 부분 선택인 경우 알림
-                if (selectedItems < totalItems) {
-                    Swal.fire({
-                        icon: 'info',
-                        title: '알림',
-                        text: '현재는 전체 상품 주문만 지원됩니다.\n전체 선택 후 주문해주세요.',
-                        confirmButtonText: '확인',
-                        confirmButtonColor: '#f59e0b'
-                    });
-                    return;
-                }
-
-                // 전체 선택인 경우 주문 페이지로 이동
                 try {
-                    // 세션 스토리지에 주문 정보 임시 저장
-                    sessionStorage.setItem('orderFromCart', 'true');
-                    sessionStorage.setItem('orderItemCount', selectedItems);
-                    sessionStorage.setItem('orderTotalAmount', totalAmount);
+                    // 선택된 상품 ID들을 URL 파라미터로 전달
+                    const productIds = selectedProductIds.join(',');
 
-                    // 주문 성공 알림 후 페이지 이동
                     Swal.fire({
                         icon: 'success',
                         title: '주문 페이지로 이동합니다',
@@ -1067,7 +1110,8 @@
                         showConfirmButton: false,
                         timerProgressBar: true
                     }).then(() => {
-                        window.location.href = '/order';
+                        // 선택된 상품 ID를 URL에 포함
+                        window.location.href = `/order?selectedProducts=${encodeURIComponent(productIds)}`;
                     });
 
                 } catch (error) {
@@ -1083,49 +1127,6 @@
             }
         });
     }
-
-    // 선택된 상품의 총 금액 계산
-    function calculateSelectedTotal() {
-        let total = 0;
-        const checkedBoxes = document.querySelectorAll('.product-checkbox:checked');
-
-        checkedBoxes.forEach(checkbox => {
-            const productItem = checkbox.closest('.product-item');
-            const priceElement = productItem.querySelector('.product-price');
-            const priceText = priceElement.textContent.replace(/[^\d]/g, '');
-            total += parseInt(priceText) || 0;
-        });
-
-        return total;
-    }
-
-    // 선택된 상품 개수 표시
-    function updateSelectedCount() {
-        const checkedBoxes = document.querySelectorAll('.product-checkbox:checked');
-        const totalItems = document.querySelectorAll('.product-checkbox').length;
-        console.log(`선택됨: ${checkedBoxes.length}/${totalItems}`);
-    }
-
-    // 체크박스 변경 시 선택 개수 업데이트
-    document.addEventListener('DOMContentLoaded', function() {
-        updateCartCount();
-        updateTotalPrice();
-
-        // 체크박스 변경 시 선택 개수 업데이트
-        document.querySelectorAll('.product-checkbox').forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
-                updateSelectedCount();
-
-                // 기존 코드
-                const allCheckboxes = document.querySelectorAll('.product-checkbox');
-                const checkedCheckboxes = document.querySelectorAll('.product-checkbox:checked');
-                const selectAllCheckbox = document.getElementById('selectAll');
-
-                selectAllCheckbox.checked = allCheckboxes.length === checkedCheckboxes.length;
-                selectAllCheckbox.indeterminate = checkedCheckboxes.length > 0 && checkedCheckboxes.length < allCheckboxes.length;
-            });
-        });
-    });
 </script>
 </body>
 </html>

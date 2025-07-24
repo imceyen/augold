@@ -105,6 +105,7 @@
 
     <!-- ✅ OrderCreateRequest DTO로 전송하는 폼 -->
     <form action="/order/create" method="post" id="orderForm">
+        <input type="hidden" name="selectedProducts" id="selectedProductsInput" value="">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <!-- 주문 상품 정보 -->
             <div class="lg:col-span-2 space-y-6">
@@ -239,6 +240,16 @@
 </main>
 
 <script>
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const selectedProducts = urlParams.get('selectedProducts');
+
+        if (selectedProducts) {
+            document.getElementById('selectedProductsInput').value = selectedProducts;
+            console.log('선택된 상품:', selectedProducts);
+        }
+    });
     // 이전으로 버튼 (SweetAlert2 적용)
     function goBack() {
         Swal.fire({

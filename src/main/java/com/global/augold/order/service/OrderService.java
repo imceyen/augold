@@ -19,6 +19,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 
 
@@ -68,14 +70,35 @@ public class OrderService {
      */
     public String createOrderFromCart(OrderCreateRequest orderRequest, String cstmNumber) {
         try {
-            // 1. 장바구니 상품 목록 조회
-            List<CartDTO> cartItems = cartService.getCartList(cstmNumber);
-            if (cartItems.isEmpty()) {
+            // 1. 전체 장바구니 상품 목록 조회
+            List<CartDTO> allCartItems = cartService.getCartList(cstmNumber);
+            if (allCartItems.isEmpty()) {
                 throw new IllegalArgumentException("장바구니가 비어있습니다.");
             }
 
-            // 2. 재고 검증
+            // 🔥 2. 선택된 상품만 필터링
+            List<CartDTO> cartItems;
+            String selectedProductIds = orderRequest.getSelectedProductIds();
+
+            if (selectedProductIds != null && !selectedProductIds.isEmpty()) {
+                List<String> selectedIds = Arrays.asList(selectedProductIds.split(","));
+                cartItems = allCartItems.stream()
+                        .filter(item -> selectedIds.contains(item.getProductId()))
+                        .collect(Collectors.toList());
+
+                log.info("선택된 상품으로 주문 생성: 전체={}, 선택={}", allCartItems.size(), cartItems.size());
+            } else {
+                cartItems = allCartItems;
+                log.info("전체 상품으로 주문 생성: {}", cartItems.size());
+            }
+
+            if (cartItems.isEmpty()) {
+                throw new IllegalArgumentException("선택된 상품이 없습니다.");
+            }
+
+            // 2. 재고 검증 (선택된 상품만)
             validateStock(cartItems);
+
 
             // 3. 주문 생성
             Order order = createOrder(orderRequest, cstmNumber, cartItems);
@@ -91,8 +114,6 @@ public class OrderService {
 
             // 4. 주문 상품 생성
             createOrderItems(actualOrderNumber, cartItems);
-
-
 
             return actualOrderNumber;
 

@@ -17,6 +17,7 @@ public class OrderCreateRequest {
     private String deliveryAddr;    // 배송주소
     private String deliveryPhone;   // 배송 연락처
     private String orderMemo;       // 주문 메모 (선택사항)
+    private String selectedProductIds; // 쉼표로 구분된 선택된 상품 ID들
 
     // 생성자 (필수 필드만)
     public OrderCreateRequest(String deliveryAddr, String deliveryPhone) {
