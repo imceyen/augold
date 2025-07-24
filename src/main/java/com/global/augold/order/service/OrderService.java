@@ -13,10 +13,16 @@ import com.global.augold.order.repository.OrderRepository;
 import com.global.augold.order.repository.OrderItemRepository;
 import com.global.augold.product.entity.Product;
 import com.global.augold.product.repository.ProductRepository;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
+
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -33,19 +39,66 @@ public class OrderService {
     private final ProductRepository productRepository;
     private final CartService cartService;
 
+    @Autowired  // 🔥 이 줄 추가
+    private EntityManager entityManager;
+
+    // 재고 부족 예외 클래스
+
+    public static class StockShortageException extends IllegalArgumentException {
+        private final String productName;
+        private final int requestedQuantity;
+        private final int availableStock;
+        private final String productId;
+
+        public StockShortageException(String productName, String productId, int requestedQuantity, int availableStock) {
+            super(String.format("%s의 재고가 부족합니다. 요청: %d개, 재고: %d개", productName, requestedQuantity, availableStock));
+            this.productName = productName;
+            this.productId = productId;
+            this.requestedQuantity = requestedQuantity;
+            this.availableStock = availableStock;
+        }
+
+        // getter 메서드들
+        public String getProductName() { return productName; }
+        public String getProductId() { return productId; }
+        public int getRequestedQuantity() { return requestedQuantity; }
+        public int getAvailableStock() { return availableStock; }
+    }
+
     /**
      * 장바구니에서 주문 생성
      */
     public String createOrderFromCart(OrderCreateRequest orderRequest, String cstmNumber) {
         try {
-            // 1. 장바구니 상품 목록 조회
-            List<CartDTO> cartItems = cartService.getCartList(cstmNumber);
-            if (cartItems.isEmpty()) {
+            // 1. 전체 장바구니 상품 목록 조회
+            List<CartDTO> allCartItems = cartService.getCartList(cstmNumber);
+            if (allCartItems.isEmpty()) {
                 throw new IllegalArgumentException("장바구니가 비어있습니다.");
             }
 
-            // 2. 재고 검증
+            // 🔥 2. 선택된 상품만 필터링
+            List<CartDTO> cartItems;
+            String selectedProductIds = orderRequest.getSelectedProductIds();
+
+            if (selectedProductIds != null && !selectedProductIds.isEmpty()) {
+                List<String> selectedIds = Arrays.asList(selectedProductIds.split(","));
+                cartItems = allCartItems.stream()
+                        .filter(item -> selectedIds.contains(item.getProductId()))
+                        .collect(Collectors.toList());
+
+                log.info("선택된 상품으로 주문 생성: 전체={}, 선택={}", allCartItems.size(), cartItems.size());
+            } else {
+                cartItems = allCartItems;
+                log.info("전체 상품으로 주문 생성: {}", cartItems.size());
+            }
+
+            if (cartItems.isEmpty()) {
+                throw new IllegalArgumentException("선택된 상품이 없습니다.");
+            }
+
+            // 2. 재고 검증 (선택된 상품만)
             validateStock(cartItems);
+
 
             // 3. 주문 생성
             Order order = createOrder(orderRequest, cstmNumber, cartItems);
@@ -62,9 +115,6 @@ public class OrderService {
             // 4. 주문 상품 생성
             createOrderItems(actualOrderNumber, cartItems);
 
-            log.info("주문 생성 완료: 주문번호={}, 고객={}, 상품수={}",
-                    actualOrderNumber, cstmNumber, cartItems.size());
-
             return actualOrderNumber;
 
         } catch (Exception e) {
@@ -73,22 +123,20 @@ public class OrderService {
         }
     }
 
-    /**
-     * 재고 검증
-     */
+    // 재고 검증
     private void validateStock(List<CartDTO> cartItems) {
         for (CartDTO cartItem : cartItems) {
             Product product = productRepository.findByProductId(cartItem.getProductId())
                     .orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다: " + cartItem.getProductId()));
 
             if (product.getProductInventory() < cartItem.getQuantity()) {
-                throw new IllegalArgumentException(
-                        String.format("재고가 부족합니다. 상품: %s, 주문수량: %d, 현재재고: %d",
-                                product.getProductName(), cartItem.getQuantity(), product.getProductInventory()));
-            }
-
-            if (product.getProductInventory() == 0) {
-                throw new IllegalArgumentException("품절된 상품입니다: " + product.getProductName());
+                if (product.getProductInventory() == 0) {
+                    throw new StockShortageException(product.getProductName(), product.getProductId(),
+                            cartItem.getQuantity(), 0);
+                } else {
+                    throw new StockShortageException(product.getProductName(), product.getProductId(),
+                            cartItem.getQuantity(), product.getProductInventory());
+                }
             }
         }
     }
@@ -136,6 +184,12 @@ public class OrderService {
             orderItem.setOrderItemId("");
 
             orderItemRepository.save(orderItem);
+            entityManager.flush();  // DB 즉시 반영 (트리거 실행)
+            entityManager.clear();  // 영속성 컨텍스트 비우기
+
+
+
+
         }
     }
 
@@ -206,8 +260,9 @@ public class OrderService {
     }
 
 
-     // 주문 상세 조회 (상품 정보 포함)
-
+    /**
+     * 주문 상세 조회 (상품 정보 포함)
+     */
     public Order getOrderDetail(String orderNumber, String cstmNumber) {
         Order order = orderRepository.findByOrderNumber(orderNumber)
                 .orElseThrow(() -> new IllegalArgumentException("주문을 찾을 수 없습니다: " + orderNumber));
@@ -218,6 +273,30 @@ public class OrderService {
         }
 
         // 주문 상품들에 Product 정보 설정
+        enrichOrderItemsWithProductInfo(order);
+
+        return order;
+    }
+
+    /**
+     * 고객의 주문 목록 조회 (상품 정보 포함)
+     */
+    public List<Order> getCustomerOrders(String cstmNumber) {
+        List<Order> orders = orderRepository.findByCstmNumberAndOrderStatusNotOrderByOrderDateDesc(
+                cstmNumber, Order.OrderStatus.PENDING);
+
+        // 각 주문의 OrderItem에 Product 정보 설정
+        for (Order order : orders) {
+            enrichOrderItemsWithProductInfo(order);
+        }
+
+        return orders;
+    }
+
+    /**
+     * OrderItem에 Product 정보 추가하는 헬퍼 메서드
+     */
+    private void enrichOrderItemsWithProductInfo(Order order) {
         if (order.getOrderItems() != null) {
             for (OrderItem orderItem : order.getOrderItems()) {
                 // Product 테이블에서 상품 정보 조회
@@ -240,17 +319,8 @@ public class OrderService {
                 }
             }
         }
-
-        return order;
     }
 
-    /**
-     * 고객의 주문 목록 조회
-     */
-    public List<Order> getCustomerOrders(String cstmNumber) {
-        return orderRepository.findByCstmNumberAndOrderStatusNotOrderByOrderDateDesc(
-                cstmNumber, Order.OrderStatus.PENDING);
-    }
 
     /**
      * 주문 상태 업데이트
@@ -264,4 +334,7 @@ public class OrderService {
 
         log.info("주문 상태 업데이트: 주문번호={}, 상태={}", orderNumber, newStatus);
     }
+
+
+
 }

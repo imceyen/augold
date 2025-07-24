@@ -34,5 +34,10 @@ public class ProductDTO {
     private String imageUrl2;
     private String imageUrl3;
 
+    private MultipartFile imageFile;     // 대표 이미지 파일
+    private MultipartFile detailImage1;  // 상세 이미지 1
+    private MultipartFile detailImage2;  // 상세 이미지 2
+    private MultipartFile detailImage3;  // 상세 이미지 3
+
 
 }

@@ -1,5 +1,7 @@
 package com.global.augold.product.controller;
 
+import com.global.augold.detailPage.dto.DetailPageDTO;
+import com.global.augold.detailPage.service.DetailPageService;
 import com.global.augold.product.dto.ProductDTO;
 import com.global.augold.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
@@ -21,12 +23,12 @@ import java.util.UUID;
 /**
  * 상품 관련 API를 처리하는 컨트롤러 (최종 수정 버전)
  */
+
 @RestController
 @RequestMapping("/api/products")
 @RequiredArgsConstructor
 public class ProductController {
 
-    private final ProductService productService;
 
     // ✅ 파일 업로드 경로를 상수로 관리하여 일관성을 유지합니다.
     private final String UPLOAD_DIR = "src/main/resources/static/upload/";
@@ -34,14 +36,15 @@ public class ProductController {
     /**
      * 전체 상품 목록 조회
      */
+
+    private final ProductService productService;
+    private final DetailPageService detailPageService;
+
     @GetMapping
     public List<ProductDTO> getAllProducts() {
         return productService.getAllProducts();
     }
 
-    /**
-     * 상품 ID로 단일 조회
-     */
     @GetMapping("/{id}")
     public ProductDTO getProductById(@PathVariable String id) {
         return productService.getProductById(id);
@@ -104,12 +107,11 @@ public class ProductController {
         }
     }
 
-    /**
-     * 상품 삭제
-     */
     @DeleteMapping("/{id}")
     public void deleteProduct(@PathVariable String id) {
         productService.deleteProduct(id);
+
+
     }
 
     /**

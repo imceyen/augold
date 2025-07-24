@@ -113,14 +113,24 @@ public class AdminStatisticsController {
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.configure(JsonReadFeature.ALLOW_NON_NUMERIC_NUMBERS.mappedFeature(), true);
 
+            BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+            String line;
+            System.err.println("=== Python Error Output ===");
+            while ((line = errorReader.readLine()) != null) {
+                System.err.println(line);
+            }
+
             Map<String, Object> data = objectMapper.readValue(jsonData, new TypeReference<>() {});
             return ResponseEntity.ok(data);
+
 
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     Map.of("error", "데이터 분석 중 오류가 발생했습니다: " + e.getMessage())
             );
+
+
         }
     }
 }
