@@ -39,10 +39,6 @@ public class AdminStatisticsController {
     @Value("${graph.sexage.script.path}")
     private String sexAgeScriptPath;
 
-
-
-
-
     // ✅ 관리자 페이지 렌더링
     @GetMapping("/admin/main")
     public String adminMainPage() {
