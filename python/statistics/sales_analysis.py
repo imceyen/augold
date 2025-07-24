@@ -77,6 +77,7 @@ def aggregate_and_forecast(df, freq, label):
     except Exception as e:
         print(f"Forecasting failed for freq={freq}: {e}")
         forecast = None
+<<<<<<< Updated upstream
 
     next_date = None
     if not agg_df.empty:
@@ -104,6 +105,30 @@ def aggregate_and_forecast(df, freq, label):
         future = df[['ds']].copy()
 
     forecast = model.predict(future)
+=======
+
+    next_date = None
+    if not agg_df.empty:
+        if freq == 'D':
+            next_date = agg_df.index[-1] + timedelta(days=1)
+        elif freq == 'W':
+            next_date = agg_df.index[-1] + timedelta(weeks=1)
+        elif freq == 'M':
+            next_date = agg_df.index[-1] + pd.offsets.MonthEnd(1)
+        elif freq == 'Y':
+            next_date = agg_df.index[-1] + pd.offsets.YearEnd(1)
+
+    return {'label': label, 'agg': agg_df, 'forecast': forecast, 'next_date': next_date}
+
+
+
+results = {
+    'D': aggregate_and_forecast(df, 'D', '일별'),
+    'W': aggregate_and_forecast(df, 'W', '주별'),
+    'M': aggregate_and_forecast(df, 'M', '월별'),
+    'Y': aggregate_and_forecast(df, 'Y', '연별'),
+}
+>>>>>>> Stashed changes
 
     # 역변환
     forecast['yhat'] = np.expm1(forecast['yhat'])
@@ -143,6 +168,7 @@ def save_json(period='D', filename=None):
     full_data['ds'] = full_data['ds'].dt.strftime('%Y-%m-%d')
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     # NaN 처리
     full_data = full_data.where(pd.notnull(full_data), None)
     full_data = full_data.replace({np.nan: None})
@@ -157,6 +183,10 @@ if __name__ == '__main__':
     freq = sys.argv[1] if len(sys.argv) > 1 else 'M'
     predict = sys.argv[2].lower() == 'true' if len(sys.argv) > 2 else True
     main(freq, predict)
+=======
+for period in ['D', 'W', 'M', 'Y']:
+    save_json(period)
+>>>>>>> Stashed changes
 =======
 for period in ['D', 'W', 'M', 'Y']:
     save_json(period)

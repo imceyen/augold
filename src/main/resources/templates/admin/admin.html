@@ -225,6 +225,7 @@
 
     <div id="salesAnalysis" class="stats-subtab-content">
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
       <h3>매출 분석 및 예측</h3>
 
       <!-- 단위 선택 -->
@@ -246,6 +247,8 @@
       <!-- 차트 출력 -->
       <canvas id="salesChart" width="800" height="400"></canvas>
 =======
+=======
+>>>>>>> Stashed changes
       <!-- 기간 선택용 라디오 버튼 -->
       <div id="periodSelector" style="margin-bottom:10px; text-align:center;">
         <label><input type="radio" name="period" value="year"> 연간</label>
@@ -266,6 +269,9 @@
 
       <!-- 차트 표시 영역 -->
       <div id="salesForecastPlot" class="plot-container" style="width: 90%; max-width: 1000px; margin: 20px auto; display: none;"></div>
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
     </div>
 
@@ -842,15 +848,115 @@
 </script>
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
   let salesChartInstance = null;
 =======
+=======
+>>>>>>> Stashed changes
   <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
   <script>
     // 기본 상태
     let currentPeriod = 'month';
     let showForecast = true;
+<<<<<<< Updated upstream
+=======
+
+    // 차트 초기화
+    function drawSalesAnalysisChart(data) {
+      const plotDiv = document.getElementById('salesForecastPlot');
+      if (!plotDiv) return;
+
+      if (!data || data.length === 0) {
+        plotDiv.style.display = 'none';
+        document.getElementById('orderTrendsLoading').innerText = '데이터가 없습니다.';
+        return;
+      }
+
+      // 예시 데이터 형태 가정: [{date:'2025-07', sales:1000, forecast:1100}, ...]
+      const x = data.map(item => item.date);
+      const ySales = data.map(item => item.sales);
+      const yForecast = showForecast ? data.map(item => item.forecast) : [];
+
+      const traces = [
+        {
+          x,
+          y: ySales,
+          mode: 'lines+markers',
+          name: '실제 매출',
+          line: {color: 'blue'}
+        }
+      ];
+
+      if(showForecast){
+        traces.push({
+          x,
+          y: yForecast,
+          mode: 'lines+markers',
+          name: '예측 매출',
+          line: {color: 'red', dash: 'dot'}
+        });
+      }
+
+      Plotly.newPlot(plotDiv, traces, {
+        title: `매출 분석 (${currentPeriod} 단위)`,
+        xaxis: {title: '기간'},
+        yaxis: {title: '매출액'},
+        margin: { t: 40, b: 50 }
+      });
+
+      plotDiv.style.display = 'block';
+      document.getElementById('orderTrendsLoading').style.display = 'none';
+    }
+
+    // 기간 변경 이벤트
+    document.querySelectorAll('input[name="period"]').forEach(radio => {
+      radio.addEventListener('change', e => {
+        currentPeriod = e.target.value;
+        fetchAndDrawChart();
+      });
+    });
+
+    // 예측 표시 on/off 체크박스 이벤트
+    document.getElementById('toggleForecast').addEventListener('change', e => {
+      showForecast = e.target.checked;
+      fetchAndDrawChart();
+    });
+
+    // 서버에서 데이터 받아와서 차트 그리기 (예: /api/sales-analysis?period=month)
+    function fetchAndDrawChart(){
+      const loadingDiv = document.getElementById('orderTrendsLoading');
+      const plotDiv = document.getElementById('salesForecastPlot');
+
+      loadingDiv.style.display = 'block';
+      loadingDiv.innerText = '데이터를 불러오는 중입니다...';
+      plotDiv.style.display = 'none';
+
+      fetch(`/api/sales-analysis?period=${currentPeriod}`)
+        .then(res => res.json())
+        .then(data => {
+          if(!data || data.length === 0){
+            loadingDiv.innerText = '데이터가 없습니다.';
+            plotDiv.style.display = 'none';
+            return;
+          }
+          drawSalesAnalysisChart(data);
+        })
+        .catch(err => {
+          loadingDiv.innerText = '데이터 로딩 중 오류가 발생했습니다.';
+          console.error(err);
+        });
+    }
+
+    // 초기 실행
+    fetchAndDrawChart();
+  </script>
+
+
+  <script> // 영업이익률 차트
+    let categoryProfitLoaded = false;
+>>>>>>> Stashed changes
 
     // 차트 초기화
     function drawSalesAnalysisChart(data) {
@@ -1121,8 +1227,12 @@
 
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 
   </body>
+=======
+    </body>
+>>>>>>> Stashed changes
 =======
     </body>
 >>>>>>> Stashed changes
