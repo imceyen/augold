@@ -13,8 +13,10 @@ import com.global.augold.order.repository.OrderRepository;
 import com.global.augold.order.repository.OrderItemRepository;
 import com.global.augold.product.entity.Product;
 import com.global.augold.product.repository.ProductRepository;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +36,9 @@ public class OrderService {
     private final OrderItemRepository orderItemRepository;
     private final ProductRepository productRepository;
     private final CartService cartService;
+
+    @Autowired  // 🔥 이 줄 추가
+    private EntityManager entityManager;
 
     // 재고 부족 예외 클래스
 
@@ -157,9 +162,13 @@ public class OrderService {
 
             orderItem.setOrderItemId("");
 
-            orderItemRepository.saveAndFlush(orderItem);
-
             orderItemRepository.save(orderItem);
+            entityManager.flush();  // DB 즉시 반영 (트리거 실행)
+            entityManager.clear();  // 영속성 컨텍스트 비우기
+
+
+
+
         }
     }
 
@@ -304,4 +313,7 @@ public class OrderService {
 
         log.info("주문 상태 업데이트: 주문번호={}, 상태={}", orderNumber, newStatus);
     }
+
+
+
 }
