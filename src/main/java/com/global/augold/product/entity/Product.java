@@ -34,7 +34,7 @@ public class Product {
     private Double finalPrice;
 
     @Column(name = "image_url")
-    private String imageUrl;  // 대표 이미지
+    private String imageUrl;
 
     @Column(name = "description")
     private String description;
@@ -42,12 +42,13 @@ public class Product {
     @Column(name = "sub_ctgr")
     private String subCtgr;
 
+    @Column(name = "product_group") // ✅ 컬럼 이름 명시
     private String productGroup;
 
     @Column(name = "product_inventory")
     private Integer productInventory;
 
-    public String getSubCtgr() {
-        return subCtgr;
-    }
+    // ✅ DB 테이블에 있는 stock_quantity 컬럼과 매핑될 필드를 추가합니다.
+    @Column(name = "stock_quantity")
+    private Integer stockQuantity;
 }

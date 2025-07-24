@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>주문서 작성 | AuGold</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
         .gold-gradient {
@@ -40,6 +41,33 @@
 
         .btn-secondary:hover {
             background: #e5e7eb;
+        }
+
+        /* SweetAlert2 커스텀 스타일 */
+        .swal2-popup {
+            border-radius: 12px !important;
+        }
+
+        .swal2-confirm {
+            background: linear-gradient(135deg, #facc15, #f59e0b) !important;
+            border: none !important;
+            border-radius: 8px !important;
+            font-weight: 600 !important;
+        }
+
+        .swal2-cancel {
+            background: #f3f4f6 !important;
+            color: #374151 !important;
+            border: none !important;
+            border-radius: 8px !important;
+            font-weight: 600 !important;
+        }
+
+        .swal2-deny {
+            background: #6b7280 !important;
+            border: none !important;
+            border-radius: 8px !important;
+            font-weight: 600 !important;
         }
     </style>
 </head>
@@ -77,6 +105,7 @@
 
     <!-- ✅ OrderCreateRequest DTO로 전송하는 폼 -->
     <form action="/order/create" method="post" id="orderForm">
+        <input type="hidden" name="selectedProducts" id="selectedProductsInput" value="">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <!-- 주문 상품 정보 -->
             <div class="lg:col-span-2 space-y-6">
@@ -171,7 +200,7 @@
                     <div class="space-y-3 mb-6">
                         <div class="flex justify-between text-sm">
                             <span>상품 개수</span>
-                            <span th:text="${#lists.size(cartItems)} + '개'">3개</span>
+                            <span th:text="${totalQuantity} + '개'">7개</span>
                         </div>
                         <div class="flex justify-between text-sm">
                             <span>상품 금액</span>
@@ -211,43 +240,139 @@
 </main>
 
 <script>
-    // 이전으로 버튼
-    function goBack() {
-        if (confirm('작성 중인 내용이 사라집니다. 장바구니로 돌아가시겠습니까?')) {
-            window.location.href = '/cart';
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const selectedProducts = urlParams.get('selectedProducts');
+
+        if (selectedProducts) {
+            document.getElementById('selectedProductsInput').value = selectedProducts;
+            console.log('선택된 상품:', selectedProducts);
         }
+    });
+    // 이전으로 버튼 (SweetAlert2 적용)
+    function goBack() {
+        Swal.fire({
+            icon: 'warning',
+            title: '주문서 작성 취소',
+            html: '작성 중인 내용이 사라집니다.<br>장바구니로 돌아가시겠습니까?',
+            showCancelButton: true,
+            confirmButtonText: '장바구니로 이동',
+            cancelButtonText: '계속 작성',
+            confirmButtonColor: '#f59e0b',
+            cancelButtonColor: '#6b7280'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = '/cart';
+            }
+        });
     }
 
-    // 폼 유효성 검사
+    // 폼 유효성 검사 (SweetAlert2 적용)
     document.getElementById('orderForm').addEventListener('submit', function(e) {
+        e.preventDefault(); // 기본 제출 방지
+
         const deliveryAddr = document.getElementById('deliveryAddr').value.trim();
         const deliveryPhone = document.getElementById('deliveryPhone').value.trim();
 
+        // 배송 주소 검증
         if (!deliveryAddr) {
-            alert('배송 주소를 입력해주세요.');
-            e.preventDefault();
+            Swal.fire({
+                icon: 'warning',
+                title: '배송 주소 입력 필요',
+                text: '배송 주소를 입력해주세요.',
+                confirmButtonText: '확인',
+                confirmButtonColor: '#f59e0b'
+            }).then(() => {
+                document.getElementById('deliveryAddr').focus();
+            });
             return;
         }
 
+        // 연락처 검증
         if (!deliveryPhone) {
-            alert('연락처를 입력해주세요.');
-            e.preventDefault();
+            Swal.fire({
+                icon: 'warning',
+                title: '연락처 입력 필요',
+                text: '연락처를 입력해주세요.',
+                confirmButtonText: '확인',
+                confirmButtonColor: '#f59e0b'
+            }).then(() => {
+                document.getElementById('deliveryPhone').focus();
+            });
             return;
         }
 
         // 전화번호 형식 검증
         const phoneRegex = /^01[0-9]-?[0-9]{3,4}-?[0-9]{4}$/;
         if (!phoneRegex.test(deliveryPhone.replace(/-/g, ''))) {
-            alert('올바른 전화번호 형식을 입력해주세요. (예: 010-0000-0000)');
-            e.preventDefault();
+            Swal.fire({
+                icon: 'error',
+                title: '전화번호 형식 오류',
+                html: '올바른 전화번호 형식을 입력해주세요.<br><span style="color: #6b7280; font-size: 14px;">예: 010-0000-0000</span>',
+                confirmButtonText: '수정하기',
+                confirmButtonColor: '#f59e0b'
+            }).then(() => {
+                document.getElementById('deliveryPhone').focus();
+            });
             return;
         }
 
-        // 최종 확인
-        if (!confirm('입력한 정보로 주문을 진행하시겠습니까?')) {
-            e.preventDefault();
-            return;
-        }
+        // 최종 확인 (SweetAlert2 적용)
+        // DOM에서 금액 찾기
+        const totalAmountElement = document.querySelector('.text-lg.font-bold span:last-child') ||
+                                  document.querySelector('.border-t span:last-child');
+        const totalAmount = totalAmountElement ? totalAmountElement.textContent.trim() : '₩0';
+
+        Swal.fire({
+            icon: 'question',
+            title: '주문 최종 확인',
+            html: `
+                <div style="text-align: left; padding: 10px;">
+                    <div style="margin-bottom: 15px;">
+                        <strong>📍 배송 주소:</strong><br>
+                        <span style="color: #374151; font-size: 14px;">${deliveryAddr}</span>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <strong>📞 연락처:</strong><br>
+                        <span style="color: #374151; font-size: 14px;">${deliveryPhone}</span>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <strong>💰 결제 금액:</strong><br>
+                        <span style="color: #d97706; font-size: 18px; font-weight: bold;">${totalAmount}</span>
+                    </div>
+                    <hr style="margin: 15px 0; border: none; border-top: 1px solid #e5e7eb;">
+                    <p style="color: #6b7280; font-size: 14px; text-align: center;">
+                        입력한 정보로 주문을 진행하시겠습니까?<br>
+                        주문 후 결제 페이지로 이동합니다.
+                    </p>
+                </div>
+            `,
+            showCancelButton: true,
+            confirmButtonText: '주문 진행',
+            cancelButtonText: '수정하기',
+            confirmButtonColor: '#f59e0b',
+            cancelButtonColor: '#6b7280',
+            customClass: {
+                popup: 'swal2-popup-wide'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // 로딩 표시
+                Swal.fire({
+                    icon: 'info',
+                    title: '주문 처리 중...',
+                    text: '잠시만 기다려주세요.',
+                    timer: 1500,
+                    showConfirmButton: false,
+                    timerProgressBar: true,
+                    allowOutsideClick: false
+                }).then(() => {
+                    // 실제 폼 제출
+                    document.getElementById('orderForm').submit();
+                });
+            }
+        });
     });
 
     // 전화번호 자동 하이픈 추가
@@ -263,5 +388,71 @@
         e.target.value = value;
     });
 </script>
+
+<!-- 재고 부족/품절 처리 스크립트 -->
+<script th:if="${stockShortage}">
+    document.addEventListener('DOMContentLoaded', function() {
+        const productName = /*[[${shortageProductName}]]*/ '';
+        const productId = /*[[${shortageProductId}]]*/ '';
+        const requestedQuantity = /*[[${requestedQuantity}]]*/ 0;
+        const availableStock = /*[[${availableStock}]]*/ 0;
+
+        if (availableStock === 0) {
+            // 품절인 경우
+            Swal.fire({
+                icon: 'error',
+                title: '품절 상품',
+                html: `
+                    <div style="text-align: center;">
+                        <h3 style="color: #e74c3c; margin-bottom: 15px;">${productName}</h3>
+                        <p style="font-size: 16px; margin-bottom: 10px;">죄송합니다. 해당 상품이 품절되었습니다.</p>
+                        <p style="color: #666; font-size: 14px;">장바구니에서 해당 상품을 제거해주세요.</p>
+                    </div>
+                `,
+                confirmButtonText: '장바구니로 이동',
+                confirmButtonColor: '#e74c3c',
+                allowOutsideClick: false
+            }).then(() => {
+                window.location.href = '/cart';
+            });
+        } else {
+            // 재고 부족인 경우
+            Swal.fire({
+                icon: 'warning',
+                title: '재고 부족',
+                html: `
+                    <div style="text-align: center;">
+                        <h3 style="color: #f39c12; margin-bottom: 15px;">${productName}</h3>
+                        <div style="background: #fff3cd; border-radius: 8px; padding: 15px; margin: 15px 0;">
+                            <p style="margin: 5px 0;"><strong>요청 수량:</strong> <span style="color: #e74c3c;">${requestedQuantity}개</span></p>
+                            <p style="margin: 5px 0;"><strong>현재 재고:</strong> <span style="color: #27ae60;">${availableStock}개</span></p>
+                        </div>
+                        <p style="font-size: 16px; margin-top: 15px;">
+                            장바구니에서 수량을 <strong style="color: #e74c3c;">${availableStock}개 이하</strong>로 조정해주세요.
+                        </p>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: '장바구니에서 수정',
+                cancelButtonText: '주문 취소',
+                confirmButtonColor: '#3498db',
+                cancelButtonColor: '#95a5a6',
+                allowOutsideClick: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '/cart';
+                }
+            });
+        }
+    });
+</script>
+
+<style>
+    /* SweetAlert2 팝업 크기 조정 */
+    .swal2-popup-wide {
+        width: 500px !important;
+        max-width: 90vw !important;
+    }
+</style>
 </body>
 </html>

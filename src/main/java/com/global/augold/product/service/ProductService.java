@@ -5,9 +5,7 @@ import com.global.augold.product.entity.Product;
 import com.global.augold.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -65,15 +63,14 @@ public class ProductService {
                 .basePrice(product.getBasePrice())
                 .goldWeight(product.getGoldWeight())
                 .finalPrice(product.getFinalPrice())
-                .imageUrl(product.getImageUrl())
+                .imageUrl(product.getImageUrl()) // 대표 이미지 하나만
                 .description(product.getDescription())
                 .subCtgr(product.getSubCtgr())
+                .productInventory(product.getProductInventory())
+                .stockQuantity(product.getStockQuantity()) // ✅ 추가
                 .build();
     }
 
-    /**
-     * DTO → Entity 변환
-     */
     private Product toEntity(ProductDTO dto) {
         return Product.builder()
                 .productId(dto.getProductId())
@@ -83,26 +80,21 @@ public class ProductService {
                 .basePrice(dto.getBasePrice())
                 .goldWeight(dto.getGoldWeight())
                 .finalPrice(dto.getFinalPrice())
-                .imageUrl(dto.getImageUrl())
+                .imageUrl(dto.getImageUrl())  // 대표 이미지 하나만
                 .description(dto.getDescription())
                 .subCtgr(dto.getSubCtgr())
+                .productInventory(dto.getProductInventory())
+                .stockQuantity(dto.getStockQuantity()) // ✅ 추가
                 .build();
     }
+
 
 
     /**
      * subCtgr 값에 따라 productId 자동 생성
      */
     public String generateNextProductId(String subCtgr) {
-        String prefix;
-        switch (subCtgr) {
-            case "귀걸이": prefix = "PROD-E"; break;
-            case "반지":   prefix = "PROD-R"; break;
-            case "목걸이": prefix = "PROD-N"; break;
-            case "골드바": prefix = "PROD-G"; break;
-            case "감사패", "돌반지", "카네이션 기념품": prefix = "PROD-S"; break;
-            default: prefix = "PROD-X"; break;
-        }
+        String prefix = getPrefixBySubCategory(subCtgr);
 
         // 해당 prefix로 시작하는 모든 상품 ID 조회
         List<Product> products = productRepository.findByProductIdStartingWith(prefix);
@@ -119,6 +111,27 @@ public class ProductService {
         return String.format("%s%05d", prefix, nextNumber);
     }
 
+    /**
+     * 서브 카테고리에 따라 prefix 매핑
+     */
+    private String getPrefixBySubCategory(String subCtgr) {
+        if (subCtgr == null) return "PROD-X";
 
-
+        switch (subCtgr.trim()) {
+            case "귀걸이":
+                return "PROD-E";
+            case "반지":
+                return "PROD-R";
+            case "목걸이":
+                return "PROD-N";
+            case "골드바":
+                return "PROD-G";
+            case "감사패":
+            case "돌반지":
+            case "카네이션 기념품":
+                return "PROD-S";
+            default:
+                return "PROD-X";
+        }
+    }
 }

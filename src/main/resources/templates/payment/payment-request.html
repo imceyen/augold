@@ -58,6 +58,10 @@
             .wrapper { padding: 16px; }
             .max-w-540 { max-width: 100%; }
         }
+
+
+
+
     </style>
 </head>
 <body class="bg-gray-50">
@@ -80,6 +84,16 @@
 </header>
 
 <main class="max-w-4xl mx-auto px-6 py-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">주문서 작성</h1>
+        <div class="flex items-center space-x-2 text-sm text-gray-600">
+            <span>장바구니</span>
+            <span>→</span>
+            <span>주문서 작성</span>
+            <span>→</span>
+            <span class="text-yellow-600 font-semibold">결제</span>
+        </div>
+    </div>
     <!-- 주문 정보 섹션 -->
     <div class="bg-white rounded-xl shadow-sm border p-6 mb-6">
         <h2 class="text-2xl font-bold mb-6 text-gray-900">주문 정보</h2>
@@ -211,6 +225,9 @@
 
     // DOM 로드 완료 후 실행
     document.addEventListener('DOMContentLoaded', main);
+
+
+
 
 </script>
 </body>
