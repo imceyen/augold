@@ -223,33 +223,38 @@
       <button class="stats-subtab-btn" onclick="showStatsSubTab('categoryProfit', event)">카테고리별 이익률 분석/예측</button>
     </div>
 
-      <div id="salesAnalysis" class="stats-subtab-content">
-        <h3>매출 분석 및 예측</h3>
+    <div id="salesAnalysis" class="stats-subtab-content active">
+      <h3>매출 분석 및 예측</h3>
 
-        <!-- 분석 단위 선택 -->
-        <label for="unit">분석 단위:</label>
-        <select id="unit">
-          <option value="year">연</option>
-          <option value="month" selected>월</option>
-          <option value="week">주</option>
-          <option value="day">일</option>
-        </select>
-
-        <!-- 예측 포함 여부 -->
-        <label for="predictToggle">예측 포함:</label>
-        <input type="checkbox" id="predictToggle" checked onchange="togglePredictionVisibility()">
-
-        <!-- 분석 실행 -->
-        <button onclick="loadSalesAnalysis()">분석 실행</button>
-
-        <!-- 예측선 표시 ON/OFF -->
-        <div style="margin-top: 10px; margin-bottom: 10px;">
-          <label><input type="checkbox" id="toggleForecast" checked onchange="togglePredictionVisibility()"> 예측값 표시</label>
+      <!-- 컨트롤 영역: 옵션 변경 시 loadSalesAnalysis() 자동 호출 -->
+      <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 20px;">
+        <div>
+          <label for="unit">분석 단위:</label>
+          <select id="unit" onchange="loadSalesAnalysis()">
+            <option value="day">일</option>
+            <option value="week">주</option>
+            <option value="month" selected>월</option>
+            <option value="year">연</option>
+          </select>
         </div>
-
-        <!-- 차트 -->
-        <canvas id="salesChart" width="800" height="400"></canvas>
+        <div>
+          <label>
+            <input type="checkbox" id="toggleForecast" onchange="loadSalesAnalysis()" checked> 예측값 표시
+          </label>
+        </div>
       </div>
+
+      <!-- 로딩 메시지 -->
+      <div id="salesAnalysisLoading" style="text-align: center; padding: 40px; font-size: 1.1em; display: none;">
+        데이터를 불러오는 중입니다...
+      </div>
+
+      <!-- Chart.js 차트가 그려질 영역 (반응형 대응) -->
+      <div style="position: relative; height:450px; width:100%;">
+        <canvas id="salesChart"></canvas>
+      </div>
+    </div>
+
 
     <div id="orderTrends" class="stats-subtab-content active">
       <h3>판매날짜 기반 주문 트렌드 분석</h3>
@@ -1058,177 +1063,144 @@
     // 초기 실행
     fetchAndDrawChart();
 </script>
-<!-- Chart.js CDN -->
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
   let salesChartInstance = null;
-  let originalData = [];
 
-  // 데이터 로드 및 차트 그리기
-  function loadSalesAnalysis() {
-    const unit = document.getElementById("unit").value;
-    const predict = document.getElementById("predictToggle").checked;
+/**
+ * 서버에서 매출 분석 데이터를 가져와 차트를 그리는 메인 함수
+ * (HTML의 onchange 이벤트가 이 함수를 호출합니다)
+ */
+function loadSalesAnalysis() {
+  const unit = document.getElementById('unit').value;
+  const showForecast = document.getElementById('toggleForecast').checked;
+  const loadingDiv = document.getElementById('salesAnalysisLoading');
+  const chartCanvas = document.getElementById('salesChart');
 
-    document.getElementById("orderTrendsLoading").style.display = "block";
+  // [수정] '연' 단위일 때 체크박스를 비활성화하는 로직을 제거합니다.
+  // 이제 모든 단위에서 예측 체크박스를 사용자가 직접 제어할 수 있습니다.
+  document.getElementById('toggleForecast').disabled = false;
 
-    fetch(`/api/statistics/sales-analysis?unit=${unit}&predict=${predict}`)
-      .then(res => {
-        if (!res.ok) throw new Error("응답 오류");
-        return res.json();
-      })
-      .then(data => {
-        document.getElementById("orderTrendsLoading").style.display = "none";
+  // [수정] API 요청 시 항상 체크박스의 현재 상태를 존중하여 predict 파라미터를 보냅니다.
+  const predictParam = showForecast;
 
-        if (!Array.isArray(data)) {
-          alert("데이터 형식 오류");
-          return;
-        }
+  loadingDiv.style.display = 'block';
+  chartCanvas.style.display = 'none';
 
-        originalData = data; // 원본 데이터 저장
+  // API 호출
+  fetch(`/api/statistics/sales-analysis?unit=${unit}&predict=${predictParam}`)
+    .then(res => {
+      if (!res.ok) throw new Error(`서버 응답 오류 (${res.status})`);
+      return res.text().then(text => JSON.parse(text));
+    })
+    .then(data => {
+      if (data.error) throw new Error(data.error);
 
-        drawChart(unit, document.getElementById("toggleForecast").checked);
-      })
-      .catch(err => {
-        document.getElementById("orderTrendsLoading").style.display = "none";
-        alert("서버 요청 실패: " + err.message);
-      });
+      loadingDiv.style.display = 'none';
+      chartCanvas.style.display = 'block';
+
+      drawSalesChart(data); // 수신된 데이터로 차트를 그립니다.
+    })
+    .catch(err => {
+      loadingDiv.style.display = 'block';
+      loadingDiv.innerText = `데이터 로딩 실패: ${err.message}`;
+      loadingDiv.style.color = 'red';
+      console.error('매출 분석 데이터 로딩 실패:', err);
+    });
+}
+
+/**
+ * 데이터를 받아 Chart.js 차트를 그리는 함수
+ * @param {Array} data - 백엔드에서 받은 데이터 배열 (e.g., [{ds, y, yhat}, ...])
+ */
+function drawSalesChart(data) {
+  const showForecast = document.getElementById('toggleForecast').checked;
+  const unit = document.getElementById('unit').value;
+
+  // 기존 차트가 있으면 완전히 파괴하여 중첩 오류 방지
+  if (salesChartInstance) {
+    salesChartInstance.destroy();
   }
 
-  // 차트 그리기 함수 (예측 포함 여부에 따라 데이터 필터링)
-  function drawChart(unit, showPrediction) {
-    // 연도 단위면 예측값 없으므로 강제로 false
-    if (unit === 'year') showPrediction = false;
+  // 1. 차트에 맞게 데이터 가공
+  const labels = data.map(d => d.ds);
+  const actualData = data.map(d => d.y);
+  // 예측 데이터는 yhat 값이 있을 때만 값을 넣고, 나머지는 null로 채워 선이 끊어지게 함
+  const forecastData = data.map(d => (d.yhat !== undefined && d.yhat !== null) ? d.yhat : null);
 
-    let filteredData = originalData;
+  // 2. 차트 데이터셋 구성
+  const datasets = [
+    {
+      label: "실제 매출",
+      data: actualData,
+      borderColor: "rgba(54, 162, 235, 1)",
+      backgroundColor: "rgba(54, 162, 235, 0.5)",
+      type: 'bar', // 실제 매출은 막대 그래프
+      order: 2     // 막대 그래프를 뒤에 배치
+    },
+  ];
 
-    if (!showPrediction) {
-      // 예측값이 있는 데이터 제외 (실제 데이터만)
-      filteredData = originalData.filter(row => row.yhat === null || row.yhat === undefined);
-    }
+  // '예측값 표시'가 켜져 있고, 예측 데이터가 실제로 존재할 때만 데이터셋을 추가
+  if (showForecast && forecastData.some(d => d !== null)) {
+    datasets.push({
+      label: "예측 매출",
+      data: forecastData,
+      borderColor: "rgba(255, 99, 132, 1)",
+      backgroundColor: "rgba(255, 99, 132, 0)", // 선 그래프의 배경은 투명하게
+      type: 'line', // 예측 매출은 선 그래프
+      fill: false,
+      tension: 0.1, // 선을 약간 부드럽게
+      order: 1      // 선 그래프를 앞에 배치
+    });
+  }
 
-    const labels = filteredData.map(row => row.ds);
-    const actual = filteredData.map(row => row.y ?? null);
-
-    const predicted = showPrediction
-      ? filteredData.map(row => row.yhat ?? null)
-      : [];
-
-    const maxY = calculateMaxY(actual, predicted, showPrediction);
-
-    const ctx = document.getElementById("salesChart").getContext("2d");
-
-    if (salesChartInstance) {
-      salesChartInstance.destroy();
-    }
-
-    salesChartInstance = new Chart(ctx, {
-      type: unit === 'day' ? 'bar' : 'line',
-      data: {
-        labels: labels,
-        datasets: [
-          {
-            label: "실제 매출",
-            data: actual,
-            backgroundColor: "rgba(54, 162, 235, 0.5)",
-            borderColor: "rgba(54, 162, 235, 1)",
-            fill: unit !== 'day',
-            type: unit === 'day' ? 'bar' : 'line',
-            order: 1
-          },
-          {
-            label: "예측 매출",
-            data: predicted,
-            borderColor: "orange",
-            backgroundColor: "rgba(255, 165, 0, 0.3)",
-            fill: false,
-            type: 'line',
-            hidden: !showPrediction,
-            order: 2
+  // 3. 차트 생성
+  const ctx = document.getElementById('salesChart').getContext('2d');
+  salesChartInstance = new Chart(ctx, {
+    type: 'bar', // 기본 타입은 bar, 데이터셋에서 개별 타입 지정
+    data: {
+      labels: labels,
+      datasets: datasets
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            // y축 단위를 '원'으로 표시
+            callback: function(value) { return value.toLocaleString() + '원'; }
           }
-        ]
+        }
       },
-      options: {
-        responsive: true,
-        scales: {
-          x: {
-            ticks: {
-              maxRotation: 45,
-              autoSkip: true,
-              maxTicksLimit: 15
-            }
-          },
-          y: {
-            beginAtZero: true,
-            ticks: {
-              callback: function(value) {
-                return value.toLocaleString();
-              }
-            },
-            max: maxY
-          }
+      plugins: {
+        tooltip: {
+          mode: 'index',
+          intersect: false
         },
-        plugins: {
-          tooltip: {
-            mode: 'index',
-            intersect: false
-          },
-          legend: {
-            display: true
-          }
+        title: {
+          display: true,
+          font: { size: 16 },
+          text: `매출 분석 및 예측 (${{year:'연',month:'월',week:'주',day:'일'}[unit]} 단위)`
         }
       }
-    });
-  }
-
-  // y축 최대값 계산
-  function calculateMaxY(actual, predicted, showPrediction) {
-    let values = actual.filter(v => typeof v === 'number');
-    if (showPrediction) {
-      values = values.concat(predicted.filter(v => typeof v === 'number'));
     }
-    return values.length ? Math.ceil(Math.max(...values) * 1.1) : undefined;
-  }
-
-  // 예측선 표시 ON/OFF 토글 이벤트
-  function togglePredictionVisibility() {
-    if (!salesChartInstance) return;
-
-    const showPrediction = document.getElementById("toggleForecast").checked;
-    const unit = document.getElementById("unit").value;
-
-    drawChart(unit, showPrediction);
-  }
-
-  // 분석 단위 변경 시 예측 체크박스 활성/비활성 제어
-  function onUnitChange() {
-    const unit = document.getElementById('unit').value;
-    const predictToggle = document.getElementById('predictToggle');
-    const toggleForecast = document.getElementById('toggleForecast');
-
-    if (unit === 'year') {
-      predictToggle.checked = false;
-      predictToggle.disabled = true;
-      toggleForecast.checked = false;
-      toggleForecast.disabled = true;
-    } else {
-      predictToggle.disabled = false;
-      toggleForecast.disabled = false;
-    }
-  }
-
-  // 페이지 로드 시 초기 설정 및 이벤트 바인딩
-  window.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('unit').addEventListener('change', () => {
-      onUnitChange();
-      loadSalesAnalysis();
-    });
-
-    document.getElementById('toggleForecast').addEventListener('change', togglePredictionVisibility);
-
-    onUnitChange();
-    loadSalesAnalysis();
   });
+}
+
+// 페이지 로드 시 또는 탭 클릭 시 최초 한 번 차트를 로드해주는 로직이 필요합니다.
+// 예: DOMContentLoaded 이벤트 리스너 내에서 loadSalesAnalysis(); 호출
+document.addEventListener('DOMContentLoaded', () => {
+    // 다른 초기화 로직...
+
+    // 매출 분석 탭이 활성화 상태일 때 기본 차트 로드
+    if(document.getElementById('salesAnalysis').classList.contains('active')){
+        loadSalesAnalysis();
+    }
+});
 </script>
 
 
