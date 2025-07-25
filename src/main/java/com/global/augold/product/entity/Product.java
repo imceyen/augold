@@ -48,7 +48,4 @@ public class Product {
     @Column(name = "product_inventory")
     private Integer productInventory;
 
-    // ✅ DB 테이블에 있는 stock_quantity 컬럼과 매핑될 필드를 추가합니다.
-    @Column(name = "stock_quantity")
-    private Integer stockQuantity;
 }
