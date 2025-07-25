@@ -106,21 +106,18 @@ public class DetailPageController {
             default -> 99;
         }));
 
+
         if ("CTGR-00002".equals(dto.getCtgrId())) {
-            double marketPrice = detailPageService.getLatestGoldPrice();
-            double goldPricePerGram = marketPrice * 1.1;
+            // 🔥 골드바: 스케줄러가 업데이트한 DB 값 그대로 사용
+            // dto.setFinalPrice()는 호출하지 않음 (이미 DB에서 올바른 값 가져옴)
 
-            if (dto.getGoldWeight() != null) {
-                double newPrice = dto.getGoldWeight() * goldPricePerGram;
-                dto.setFinalPrice(newPrice);
-                System.out.println("✅ 골드바 실시간 계산 가격: " + newPrice);
-            }
-
+            // 재고 정보만 업데이트
             dto.setProductInventory(productRepository.findById(productId)
                     .map(Product::getProductInventory)
                     .orElse(0));
 
         } else {
+            // 🔥 주얼리: 기존 로직 (14K 기본으로 옵션에서 찾기)
             DetailPageDTO baseOption = options.stream()
                     .filter(opt -> "14K".equals(opt.getKaratCode()))
                     .findFirst()
