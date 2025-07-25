@@ -410,7 +410,7 @@
         const addToCartBtn = document.getElementById('addToCartBtn');
         const cleanUrl = window.location.pathname;
         window.history.replaceState({}, document.title, cleanUrl);
-        let unitPrice = parseInt(priceText?.dataset.price) || 0;
+        let unitPrice = Math.round(parseFloat(priceText?.dataset.price)) || 0;
 
         const urlParams = new URLSearchParams(window.location.search);
         const error = urlParams.get('error');
@@ -916,12 +916,12 @@
             let selectedPrice = unitPrice;
 
             if (karatSelect && karatSelect.selectedOptions.length > 0 && karatSelect.value) {
-                const karatPrice = parseInt(karatSelect.selectedOptions[0].dataset.price);
+                const karatPrice = Math.round(parseFloat(karatSelect.selectedOptions[0].dataset.price));
                 if (!isNaN(karatPrice)) selectedPrice = karatPrice;
             }
 
             if (weightSelect && weightSelect.selectedOptions.length > 0 && weightSelect.value) {
-                const weightPrice = parseInt(weightSelect.selectedOptions[0].dataset.price);
+                const weightPrice = Math.round(parseFloat(weightSelect.selectedOptions[0].dataset.price));
                 if (!isNaN(weightPrice)) selectedPrice = weightPrice;
             }
 

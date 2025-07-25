@@ -27,23 +27,13 @@ public class MainPageController {
 
     @GetMapping("/")
     public String showMainPage(Model model, HttpSession session) {
-        // 1. 상품 목록 가져오기
+        // 1. 상품 목록 가져오기 (스케줄러가 이미 골드바 가격 업데이트 완료)
         List<MainPageInfoDTO> products = mainPageService.getMainPageProducts();
 
-        // 2. 금 시세 가져오기
+        // 2. 금 시세 가져오기 (엑셀에서)
         GoldPriceDTO todayPrice = goldPriceService.getTodayGoldPrice();
-        double goldPricePerGram = todayPrice.getPricePerGram() * 1.1;
 
-        // ✅ 3. 골드바 상품에 한해 가격 갱신
-        products = products.stream()
-                .map(p -> {
-                    if ("CTGR-00002".equals(p.getCtgrId()) && p.getGoldWeight() != null) {
-                        double newPrice = p.getGoldWeight() * goldPricePerGram;
-                        p.setFinalPrice(newPrice);
-                    }
-                    return p;
-                })
-                .collect(Collectors.toList());
+        // 🔥 3. 골드바 중복 계산 부분 삭제 (스케줄러가 이미 처리)
 
         // 4. 금 시세 히스토리 (최근 5일 → 오래된순)
         GoldPriceDTO[] history = goldPriceService.getGoldPriceHistory();
@@ -61,10 +51,18 @@ public class MainPageController {
                 .map(p -> p.getPricePerGram() * 3.75 * 1.1) // 기준 중량 3.75g
                 .collect(Collectors.toList());
 
-        // 5. 14K, 18K 기준 가격 계산
-        double basePrice = todayPrice.getPricePerGram() * 3.75 * 1.1;
-        double price18k = basePrice * 0.75 * 0.83;
-        double price14k = basePrice * 0.585 * 0.83;
+        // 5. 살때/팔때 가격 계산
+        double basePrice = todayPrice.getPricePerGram() * 3.75 * 1.1; // 순금 살때 가격
+
+        // 🔥 새로 추가: 팔때 가격들
+        double sellPrice24k = basePrice * 0.85;  // 순금 팔때 (15% 할인)
+
+        // 18K, 14K 살때/팔때 가격
+        double buyPrice18k = basePrice * 0.75;  // 18K 살때
+        double sellPrice18k = buyPrice18k * 0.83; // 18K 팔때
+
+        double buyPrice14k = basePrice * 0.585; // 14K 살때
+        double sellPrice14k = buyPrice14k * 0.83; // 14K 팔때
 
         // 6. 로그인 사용자 정보 전달 (고객만)
         Object loginUserObj = session.getAttribute("loginUser");
@@ -77,8 +75,14 @@ public class MainPageController {
         model.addAttribute("todayPrice", todayPrice);
         model.addAttribute("chartLabels", chartLabels);
         model.addAttribute("chartData", chartData);
-        model.addAttribute("price18k", price18k);
-        model.addAttribute("price14k", price14k);
+
+        // 🔥 살때/팔때 가격들
+        model.addAttribute("buyPrice24k", basePrice);
+        model.addAttribute("sellPrice24k", sellPrice24k);
+        model.addAttribute("buyPrice18k", buyPrice18k);
+        model.addAttribute("sellPrice18k", sellPrice18k);
+        model.addAttribute("buyPrice14k", buyPrice14k);
+        model.addAttribute("sellPrice14k", sellPrice14k);
 
         return "main";
     }
