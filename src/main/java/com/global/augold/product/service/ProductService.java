@@ -67,7 +67,6 @@ public class ProductService {
                 .description(product.getDescription())
                 .subCtgr(product.getSubCtgr())
                 .productInventory(product.getProductInventory())
-                .stockQuantity(product.getStockQuantity()) // ✅ 추가
                 .build();
     }
 
@@ -84,7 +83,6 @@ public class ProductService {
                 .description(dto.getDescription())
                 .subCtgr(dto.getSubCtgr())
                 .productInventory(dto.getProductInventory())
-                .stockQuantity(dto.getStockQuantity()) // ✅ 추가
                 .build();
     }
 
