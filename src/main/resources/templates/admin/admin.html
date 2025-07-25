@@ -100,7 +100,11 @@
         margin-left: 10px;
     }
   </style>
+
+  <!-- 🔷 Plotly.js 추가 -->
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
+
 <body>
 
 <header>
@@ -134,9 +138,9 @@
         <label>카테고리:
           <select name="ctgrId" required>
             <option value="">선택</option>
-            <option value="0001">0001 [주얼리]</option>
-            <option value="0002">0002 [골드바]</option>
-            <option value="0003">0003 [기념품]</option>
+            <option value="CTGR-00001">CTGR-00001 [주얼리]</option>
+            <option value="CTGR-00002">CTGR-00002 [골드바]</option>
+            <option value="CTGR-00003">CTGR-00003 [기념품]</option>
           </select>
         </label><br><br>
         <label>서브 카테고리:
@@ -183,6 +187,12 @@
         <label>상세 이미지 3:
           <input type="file" name="detailImage3" accept="image/*">
         </label><br><br>
+        <label>상품 재고 (Inventory):
+          <input type="number" name="productInventory" required>
+        </label><br><br>
+        <label>초기 재고량 (Stock Quantity):
+          <input type="number" name="stockQuantity" value="10" required> <!-- 기본값 10으로 설정 -->
+        </label><br><br>
         <button type="submit">상품 저장</button>
         <button type="button" class="delete-btn" onclick="deleteProduct()" style="display: none;">상품 삭제</button>
       </form>
@@ -213,10 +223,50 @@
       <button class="stats-subtab-btn" onclick="showStatsSubTab('categoryProfit', event)">카테고리별 이익률 분석/예측</button>
     </div>
 
-    <!-- 하위 탭 컨텐츠 -->
     <div id="salesAnalysis" class="stats-subtab-content">
-      <p>매출 분석 및 예측 데이터를 보여주는 영역입니다. (추후 구현 예정)</p>
+      <h3>매출 분석 및 예측</h3>
+
+      <!-- 단위 선택 -->
+      <label for="unit">분석 단위:</label>
+      <select id="unit">
+        <option value="year">연</option>
+        <option value="month" selected>월</option>
+        <option value="week">주</option>
+        <option value="day">일</option>
+      </select>
+
+      <!-- 예측 포함 여부 -->
+      <label for="predictToggle">예측 포함:</label>
+      <input type="checkbox" id="predictToggle" checked onchange="togglePredictionVisibility()">
+
+      <!-- 분석 실행 버튼 -->
+      <button onclick="loadSalesAnalysis()">분석 실행</button>
+
+      <!-- 차트 출력 -->
+      <canvas id="salesChart" width="800" height="400"></canvas>
+
+      <!-- 기간 선택용 라디오 버튼 -->
+      <div id="periodSelector" style="margin-bottom:10px; text-align:center;">
+        <label><input type="radio" name="period" value="year"> 연간</label>
+        <label><input type="radio" name="period" value="month" checked> 월간</label>
+        <label><input type="radio" name="period" value="week"> 주간</label>
+        <label><input type="radio" name="period" value="day"> 일간</label>
+      </div>
+
+      <!-- 예측값 표시 on/off 체크박스 -->
+      <div style="margin-bottom:20px; text-align:center;">
+        <label><input type="checkbox" id="toggleForecast" checked> 예측값 표시</label>
+      </div>
+
+      <!-- 차트 로딩 메시지 -->
+      <div id="orderTrendsLoading" style="text-align: center; padding: 50px; font-size: 1.2em;">
+        데이터를 불러오는 중입니다...
+      </div>
+
+      <!-- 차트 표시 영역 -->
+      <div id="salesForecastPlot" class="plot-container" style="width: 90%; max-width: 1000px; margin: 20px auto; display: none;"></div>
     </div>
+
 
     <div id="goldPrice" class="stats-subtab-content active">
       <!-- Plotly.js CDN 추가 -->
@@ -243,18 +293,6 @@
       </div>
     </div>
 
-
-    <div id="orderTrends" class="stats-subtab-content active">
-      <div id="orderTrendsLoading" style="text-align: center; padding: 50px; font-size: 1.2em;">
-        데이터를 불러오는 중입니다...
-      </div>
-      <div id="salesForecastPlot" class="plot-container" style="width: 90%; max-width: 1000px; margin: 20px auto; display: none;"></div>
-      <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
-        <div id="salesWeeklyPlot" class="plot-container" style="width: 90%; max-width: 480px; margin: 20px auto; display: none;"></div>
-        <div id="salesYearlyPlot" class="plot-container" style="width: 90%; max-width: 480px; margin: 20px auto; display: none;"></div>
-      </div>
-    </div>
-
     <div id="categoryProfit" class="stats-subtab-content">
       <p>카테고리별 이익률 분석 및 예측 데이터를 보여주는 영역입니다.</p>
       <!-- 🔽 로딩 메시지 -->
@@ -264,9 +302,9 @@
       <!-- 🔽 Plotly 그래프 -->
       <div id="categoryProfitPlot" class="plot-container" style="width: 90%; max-width: 900px; margin: 20px auto; display: none;"></div>
     </div>
+  </div>
 
-
-    <div id="receiptTab" class="tab-content">
+  <div id="receiptTab" class="tab-content">
     <h3>영수증 등록</h3>
     <form id="receiptForm" enctype="multipart/form-data" onsubmit="uploadReceipt(event)">
       <h4>영수증 이미지 업로드</h4>
@@ -277,7 +315,7 @@
     <div id="ocrResult" style="margin-top: 20px;"></div>
   </div>
 
-  <div id="inquiryTab" class="tab-content active">
+  <div id="inquiryTab" class="tab-content">
     <h3>문의 답변</h3>
 
     <table id="inquiryTable">
@@ -297,9 +335,7 @@
   </div>
 
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      fetchInquiries();
-    });
+
 
     /**
      * 문의 목록을 서버에서 가져와 표에 채운다
@@ -363,6 +399,9 @@
       });
       fetchProducts();
 
+      // 문의 관리 초기화
+      fetchInquiries();
+
       // 기본 탭 설정 (여기서는 상품 관리 탭이 기본으로 활성화됨)
       // 만약 다른 탭을 기본으로 하고 싶다면 이 부분을 수정할 수 있습니다.
   });
@@ -412,28 +451,30 @@
         });
   }
 
-  function submitProduct(event) {
+ function submitProduct(event) {
     event.preventDefault();
     const form = event.target;
     const formData = new FormData(form);
-    const method = editing ? 'PUT' : 'POST';
-    const url = editing ? `/api/products/${editProductId}` : '/api/products';
+    // const url = editing ? `/api/products/${editProductId}` : '/api/products';
+    const url = '/api/products';
 
-    fetch(url, { method: method, body: formData })
-      .then(res => {
-        if (res.ok) {
-            alert(editing ? "수정 완료!" : "상품이 등록되었습니다!");
-            form.reset();
-            toggleForm(false);
-            fetchProducts();
-            editing = false;
-            editProductId = null;
-            form.querySelector("button[type='submit']").innerText = "상품 저장";
-            form.querySelector(".delete-btn").style.display = "none";
-        } else {
-            alert("저장 실패");
-        }
-    });
+    // fetch 요청의 method는 항상 'POST'가 됩니다.
+    fetch(url, { method: 'POST', body: formData })
+        .then(res => {
+            if (res.ok) {
+                alert("상품이 등록되었습니다!");
+                form.reset();
+                toggleForm(false);
+                fetchProducts();
+            } else {
+                // 서버에서 오는 에러 메시지를 보여주면 더 좋습니다.
+                res.text().then(text => alert("저장 실패: " + text));
+            }
+        })
+        .catch(err => {
+            console.error("Fetch Error:", err);
+            alert("요청 중 오류가 발생했습니다.");
+        });
   }
 
   function deleteProduct() {
@@ -459,6 +500,34 @@
   }
 
   // 문의 관리 함수
+  function fetchInquiries() {
+      fetch('/api/inquiries')
+        .then(res => {
+          if (!res.ok) throw new Error("문의 목록을 불러오지 못했습니다.");
+          return res.json();
+        })
+        .then(data => {
+          const tbody = document.querySelector("#inquiryTable tbody");
+          tbody.innerHTML = "";
+          data.forEach((inq, index) => {
+            const row = `
+              <tr>
+                <td>${index + 1}</td>
+                <td>${inq.cstmNumber}</td>
+                <td><a href="/admin/inquiry/${inq.inqNumber}">${inq.inqTitle}</a></td>
+                <td>${inq.inqStatus}</td>
+                <td>${new Date(inq.inqDate).toLocaleString()}</td>
+              </tr>
+            `;
+            tbody.insertAdjacentHTML("beforeend", row);
+          });
+        })
+        .catch(err => {
+          console.error(err);
+          alert(err.message);
+        });
+  }
+
   // 영수증 관리 함수
   function uploadReceipt(event) {
       event.preventDefault();
@@ -611,14 +680,6 @@
               loadingMsg.style.display = 'none';
               plotDivs.forEach(id => document.getElementById(id).style.display = 'block');
 
-              // 1. 전체 매출 예측 그래프 (salesForecastPlot)
-              const forecastData = data.main_forecast;
-              Plotly.newPlot('salesForecastPlot', [
-                  { x: forecastData.map(d => d.ds), y: forecastData.map(d => d.yhat_upper), mode: 'lines', line: { width: 0 }, showlegend: false },
-                  { x: forecastData.map(d => d.ds), y: forecastData.map(d => d.yhat_lower), mode: 'lines', line: { width: 0 }, fill: 'tonexty', fillcolor: 'rgba(65, 105, 225, 0.2)', showlegend: false },
-                  { x: forecastData.map(d => d.ds), y: forecastData.map(d => d.y), mode: 'markers', type: 'scatter', name: '실제 매출', marker: { color: 'black', size: 4 } },
-                  { x: forecastData.map(d => d.ds), y: forecastData.map(d => d.yhat), mode: 'lines', type: 'scatter', name: '예측 매출', line: { color: 'royalblue' } }
-              ], { title: '총 매출 예측 (향후 90일)', xaxis: { title: '날짜' }, yaxis: { title: '매출액 (원)', tickformat: ',.0f' } });
 
               // 2. 요일별 매출 트렌드 그래프 (salesWeeklyPlot)
               const weeklyData = data.weekly_seasonality;
@@ -670,7 +731,7 @@
               const forecast = data.forecast;
 
               loadingDiv.style.display = "none";
-             
+              plotDiv.style.display = "block";
 
               Plotly.newPlot("categoryProfitPlot", [
                   {
@@ -778,97 +839,305 @@
   }
 </script>
 
-  <script> // 영업이익률 차트
-    function showStatsSubTab(subTabId, event) {
-        document.querySelectorAll('.stats-subtab-bar button').forEach(btn => btn.classList.remove('active'));
-        document.querySelectorAll('.stats-subtab-content').forEach(content => content.classList.remove('active'));
+<script>
+  // 기본 상태
+  let currentPeriod = 'month';
+  let showForecast = true;
+<<<<<<< Updated upstream
+=======
 
-        // null 체크 추가
-        const subTabDiv = document.getElementById(subTabId);
-        if (!subTabDiv) {
-            console.error(`[showStatsSubTab] id="${subTabId}"인 div가 없습니다.`);
-            return;
-        }
+  // 차트 초기화
+  function drawSalesAnalysisChart(data) {
+    const plotDiv = document.getElementById('salesForecastPlot');
+    if (!plotDiv) return;
 
-        if (event && event.currentTarget) {
-            event.currentTarget.classList.add('active');
-        }
-        subTabDiv.classList.add('active');
-
-        // ✅ 이익률 데이터 불러오기
-        if (subTabId === 'categoryProfit') {
-            loadCategoryProfit();
-        }
+    if (!data || data.length === 0) {
+      plotDiv.style.display = 'none';
+      document.getElementById('orderTrendsLoading').innerText = '데이터가 없습니다.';
+      return;
     }
 
-    function loadCategoryProfit() {
-        const plotDiv = document.getElementById("categoryProfitPlot");
-        const loadingDiv = document.getElementById("categoryProfitLoading");
-        if (!plotDiv || !loadingDiv) {
-            console.error("[categoryProfit] 필요한 div가 없습니다.");
-            return;
-        }
-        plotDiv.style.display = "none";
-        loadingDiv.style.display = "block";
+    // 예시 데이터 형태 가정: [{date:'2025-07', sales:1000, forecast:1100}, ...]
+    const x = data.map(item => item.date);
+    const ySales = data.map(item => item.sales);
+    const yForecast = showForecast ? data.map(item => item.forecast) : [];
 
-        fetch('/api/statistics/category-profit')
-            .then(res => res.json())
-            .then(data => {
-                if (!data || !data.monthly || !data.forecast) {
-                    loadingDiv.innerText = "데이터가 없습니다.";
-                    return;
+    const traces = [
+      {
+        x,
+        y: ySales,
+        mode: 'lines+markers',
+        name: '실제 매출',
+        line: {color: 'blue'}
+      }
+    ];
+
+    if(showForecast){
+      traces.push({
+        x,
+        y: yForecast,
+        mode: 'lines+markers',
+        name: '예측 매출',
+        line: {color: 'red', dash: 'dot'}
+      });
+    }
+
+    Plotly.newPlot(plotDiv, traces, {
+      title: `매출 분석 (${currentPeriod} 단위)`,
+      xaxis: {title: '기간'},
+      yaxis: {title: '매출액'},
+      margin: { t: 40, b: 50 }
+    });
+
+    plotDiv.style.display = 'block';
+    document.getElementById('orderTrendsLoading').style.display = 'none';
+  }
+
+  // 기간 변경 이벤트
+  document.querySelectorAll('input[name="period"]').forEach(radio => {
+    radio.addEventListener('change', e => {
+      currentPeriod = e.target.value;
+      fetchAndDrawChart();
+    });
+  });
+
+  // 예측 표시 on/off 체크박스 이벤트
+  document.getElementById('toggleForecast').addEventListener('change', e => {
+    showForecast = e.target.checked;
+    fetchAndDrawChart();
+  });
+
+  // 서버에서 데이터 받아와서 차트 그리기 (예: /api/sales-analysis?period=month)
+  function fetchAndDrawChart(){
+    const loadingDiv = document.getElementById('orderTrendsLoading');
+    const plotDiv = document.getElementById('salesForecastPlot');
+
+    loadingDiv.style.display = 'block';
+    loadingDiv.innerText = '데이터를 불러오는 중입니다...';
+    plotDiv.style.display = 'none';
+
+    fetch(`/api/sales-analysis?period=${currentPeriod}`)
+      .then(res => res.json())
+      .then(data => {
+        if(!data || data.length === 0){
+          loadingDiv.innerText = '데이터가 없습니다.';
+          plotDiv.style.display = 'none';
+          return;
+        }
+        drawSalesAnalysisChart(data);
+      })
+      .catch(err => {
+        loadingDiv.innerText = '데이터 로딩 중 오류가 발생했습니다.';
+        console.error(err);
+      });
+  }
+
+  // 초기 실행
+  fetchAndDrawChart();
+</script>
+
+
+<script> // 영업이익률 차트
+    let categoryProfitLoaded = false;
+>>>>>>> Stashed changes
+
+    // 차트 초기화
+    function drawSalesAnalysisChart(data) {
+      const plotDiv = document.getElementById('salesForecastPlot');
+      if (!plotDiv) return;
+
+      if (!data || data.length === 0) {
+        plotDiv.style.display = 'none';
+        document.getElementById('orderTrendsLoading').innerText = '데이터가 없습니다.';
+        return;
+      }
+
+      // 예시 데이터 형태 가정: [{date:'2025-07', sales:1000, forecast:1100}, ...]
+      const x = data.map(item => item.date);
+      const ySales = data.map(item => item.sales);
+      const yForecast = showForecast ? data.map(item => item.forecast) : [];
+
+      const traces = [
+        {
+          x,
+          y: ySales,
+          mode: 'lines+markers',
+          name: '실제 매출',
+          line: {color: 'blue'}
+        }
+      ];
+
+      if(showForecast){
+        traces.push({
+          x,
+          y: yForecast,
+          mode: 'lines+markers',
+          name: '예측 매출',
+          line: {color: 'red', dash: 'dot'}
+        });
+      }
+
+      Plotly.newPlot(plotDiv, traces, {
+        title: `매출 분석 (${currentPeriod} 단위)`,
+        xaxis: {title: '기간'},
+        yaxis: {title: '매출액'},
+        margin: { t: 40, b: 50 }
+      });
+
+      plotDiv.style.display = 'block';
+      document.getElementById('orderTrendsLoading').style.display = 'none';
+    }
+
+    // 기간 변경 이벤트
+    document.querySelectorAll('input[name="period"]').forEach(radio => {
+      radio.addEventListener('change', e => {
+        currentPeriod = e.target.value;
+        fetchAndDrawChart();
+      });
+    });
+
+    // 예측 표시 on/off 체크박스 이벤트
+    document.getElementById('toggleForecast').addEventListener('change', e => {
+      showForecast = e.target.checked;
+      fetchAndDrawChart();
+    });
+
+    // 서버에서 데이터 받아와서 차트 그리기 (예: /api/sales-analysis?period=month)
+    function fetchAndDrawChart(){
+      const loadingDiv = document.getElementById('orderTrendsLoading');
+      const plotDiv = document.getElementById('salesForecastPlot');
+
+      loadingDiv.style.display = 'block';
+      loadingDiv.innerText = '데이터를 불러오는 중입니다...';
+      plotDiv.style.display = 'none';
+
+      fetch(`/api/sales-analysis?period=${currentPeriod}`)
+        .then(res => res.json())
+        .then(data => {
+          if(!data || data.length === 0){
+            loadingDiv.innerText = '데이터가 없습니다.';
+            plotDiv.style.display = 'none';
+            return;
+          }
+          drawSalesAnalysisChart(data);
+        })
+        .catch(err => {
+          loadingDiv.innerText = '데이터 로딩 중 오류가 발생했습니다.';
+          console.error(err);
+        });
+    }
+
+    // 초기 실행
+    fetchAndDrawChart();
+</script>
+
+
+<script> // 영업이익률 차트
+   let categoryProfitLoaded = false;
+    
+  function loadSalesAnalysis() {
+    const unit = document.getElementById("unit").value;
+    const predict = document.getElementById("predictToggle").checked;
+
+    fetch(`/api/statistics/sales-analysis?unit=${unit}&predict=${predict}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) {
+          alert("오류 발생: " + data.error);
+          return;
+        }
+
+        const labels = data.map(row => row.ds);
+        const actual = data.map(row => row.y);
+        const predicted = data.map(row => row.yhat);
+
+        const ctx = document.getElementById("salesChart").getContext("2d");
+
+        if (salesChartInstance) {
+          salesChartInstance.destroy();
+        }
+
+        salesChartInstance = new Chart(ctx, {
+          type: unit === 'day' ? 'bar' : 'line',
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: "실제 매출",
+                data: actual,
+                backgroundColor: unit === 'day' ? "rgba(54, 162, 235, 0.6)" : undefined,
+                borderColor: unit === 'day' ? "rgba(54, 162, 235, 1)" : "blue",
+                fill: unit !== 'day',
+                type: unit === 'day' ? 'bar' : 'line',
+                hidden: false
+              },
+              {
+                label: "예측 매출",
+                data: predicted,
+                borderColor: "orange",
+                backgroundColor: "rgba(255, 165, 0, 0.3)",
+                fill: false,
+                type: 'line',
+                hidden: !predict // 체크 해제 시 숨기기
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            scales: {
+              x: {
+                ticks: {
+                  maxRotation: unit === 'day' ? 45 : 30,
+                  autoSkip: true,
+                  maxTicksLimit: 15
                 }
-                const months = data.monthly.map(item => item.Month);
-                const margins = data.monthly.map(item => item.Profit_Margin);
-                const forecast = data.forecast;
+              },
+              y: {
+                beginAtZero: true
+              }
+            },
+            plugins: {
+              tooltip: {
+                mode: 'index',
+                intersect: false
+              }
+            }
+          }
+        });
+      })
+      .catch(err => {
+        alert("서버 요청 실패: " + err);
+      });
+  }
 
-                loadingDiv.style.display = "none";
-                plotDiv.style.display = "block";
+  // 체크박스 상태만 바꿔서 예측선 보여주기/숨기기
+  function togglePredictionVisibility() {
+    const predictCheckbox = document.getElementById("predictToggle");
+    if (!salesChartInstance) return;
 
-                Plotly.newPlot("categoryProfitPlot", [
-                    {
-                        x: months,
-                        y: margins,
-                        mode: 'lines+markers',
-                        name: '이익률',
-                        line: { color: 'green' }
-                    },
-                    {
-                        x: [forecast.month],
-                        y: [forecast.predicted_margin],
-                        mode: 'markers+text',
-                        name: '예측값',
-                        marker: { size: 10, color: 'red' },
-                        text: ['예측'],
-                        textposition: 'top center'
-                    }
-                ], {
-                    title: '카테고리별 이익률 분석 및 7월 예측',
-                    xaxis: { title: '월' },
-                    yaxis: { title: '이익률' }
-                });
-            })
-            .catch(err => {
-                loadingDiv.innerText = "데이터 로딩 중 오류가 발생했습니다.";
-                console.error('이익률 분석 불러오기 실패:', err);
-            });
+    const predDataset = salesChartInstance.data.datasets.find(ds => ds.label === "예측 매출");
+    if (predDataset) {
+      predDataset.hidden = !predictCheckbox.checked;
+      salesChartInstance.update();
     }
-  </script>
+  }
+</script>
 
-  <script>//성별 연령별 분석
+
+<script>//성별 연령별 분석
     document.addEventListener("DOMContentLoaded", function () {
       const loadingDiv = document.getElementById("sexAgeLoading");
       const plotDivMale = document.getElementById("genderAgeChartPlotMale");
       const plotDivFemale = document.getElementById("genderAgeChartPlotFemale");
       if (!loadingDiv || !plotDivMale || !plotDivFemale) {
-        console.error("[성별/연령대] 필요한 div가 없습니다.");
+        console.error("[\uC131\uBCC4/\uC5F0\uB839\uB300] \uD544\uC694\uD55C div\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4.");
         return;
       }
       fetch("/temp_output.json")
         .then(response => response.json())
         .then(data => {
           if (!data || !data.male || !data.female) {
-            loadingDiv.innerText = "데이터가 없습니다.";
+            loadingDiv.innerText = "\uB370\uC774\uD130\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4.";
             return;
           }
           const maleData = data.male;
@@ -877,7 +1146,15 @@
           const ageGroups = [...new Set([...maleData, ...femaleData].map(d => d.Age_Group))];
           const categories = [...new Set([...maleData, ...femaleData].map(d => d.Category))];
 
-          // 🔹 남성 데이터 시리즈 생성
+          // 특정 div 여부 확인 (이 부분 해결 수정)
+          const plotDiv = document.getElementById("categoryProfitPlot");
+
+          // 호출 위해 plotDiv 비시 보이게
+          if (plotDiv) {
+            plotDiv.style.display = "block";
+          }
+
+          // 할당 데이터 제조
           const maleSeries = categories.map(category => {
             return {
               x: ageGroups,
@@ -890,7 +1167,6 @@
             };
           });
 
-          // 🔹 여성 데이터 시리즈 생성
           const femaleSeries = categories.map(category => {
             return {
               x: ageGroups,
@@ -903,7 +1179,6 @@
             };
           });
 
-          // 🔹 공통 레이아웃
           const baseLayout = {
             barmode: 'group',
             xaxis: { title: '연령대' },
@@ -912,13 +1187,6 @@
             height: 450
           };
 
-          // 🔹 남성/여성 series를 모두 합쳐서 한 번에 그리기
-          const allSeries = [
-            ...maleSeries.map(s => ({ ...s, name: '남성-' + s.name })),
-            ...femaleSeries.map(s => ({ ...s, name: '여성-' + s.name }))
-          ];
-
-          // 🔹 남성/여성 각각의 차트로 나란히 출력
           Plotly.newPlot("genderAgeChartPlotMale", maleSeries, {
             ...baseLayout,
             title: '👨 남성 연령대별 · 카테고리별 매출'
@@ -928,7 +1196,6 @@
             title: '👩 여성 연령대별 · 카테고리별 매출'
           });
 
-          // 🔹 로딩 메시지 숨기고 차트 보여주기
           loadingDiv.style.display = "none";
         })
         .catch(error => {
@@ -936,10 +1203,10 @@
           console.error("❌ JSON 로딩 오류:", error);
         });
     });
-  </script>
+</script>
 
 
 
+</body>
 
-  </body>
 </html>

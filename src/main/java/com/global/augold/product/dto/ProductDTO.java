@@ -23,9 +23,16 @@ public class ProductDTO {
     private String description;   // 상품 설명
     private String subCtgr;       // 서브 카테고리 (ex. 귀걸이, 반지 등)
 
-    private String imageUrl1; // 상세 이미지 1
-    private String imageUrl2; // 상세 이미지 2
-    private String imageUrl3; // 상세 이미지 3
+    private String productGroup;
+    private Integer productInventory;
+
+    // ✅ 엔티티와 동일하게 필드 추가
+    private Integer stockQuantity;
+
+    // 상세 이미지 필드도 추가해주는 것이 좋습니다. (이전 컨트롤러 코드 호환)
+    private String imageUrl1;
+    private String imageUrl2;
+    private String imageUrl3;
 
     private MultipartFile imageFile;     // 대표 이미지 파일
     private MultipartFile detailImage1;  // 상세 이미지 1

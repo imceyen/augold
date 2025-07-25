@@ -66,6 +66,8 @@ public class ProductService {
                 .imageUrl(product.getImageUrl()) // 대표 이미지 하나만
                 .description(product.getDescription())
                 .subCtgr(product.getSubCtgr())
+                .productInventory(product.getProductInventory())
+                .stockQuantity(product.getStockQuantity()) // ✅ 추가
                 .build();
     }
 
@@ -81,6 +83,8 @@ public class ProductService {
                 .imageUrl(dto.getImageUrl())  // 대표 이미지 하나만
                 .description(dto.getDescription())
                 .subCtgr(dto.getSubCtgr())
+                .productInventory(dto.getProductInventory())
+                .stockQuantity(dto.getStockQuantity()) // ✅ 추가
                 .build();
     }
 

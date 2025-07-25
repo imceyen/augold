@@ -1,99 +1,88 @@
 import pandas as pd
+from prophet import Prophet
 import json
-from statsmodels.tsa.holtwinters import ExponentialSmoothing
-from datetime import timedelta
-import platform
-import matplotlib.font_manager as fm
-import matplotlib.pyplot as plt
+import sys
 import os
+import numpy as np
 
-# 한글 폰트 설정 (Windows)
-if platform.system() == 'Windows':
-    font_path = 'C:/Windows/Fonts/malgun.ttf'  # 맑은 고딕
-    font_name = fm.FontProperties(fname=font_path).get_name()
-    plt.rc('font', family=font_name)
+# --- output 디렉토리 설정 ---
+script_dir = os.path.dirname(os.path.abspath(__file__))
+output_dir = os.path.join(script_dir, 'output')
+os.makedirs(output_dir, exist_ok=True)
 
-# 데이터 로드
-file_path = "/mnt/data/gold_sales_data.csv"
-df = pd.read_csv(file_path)
-df['Order_Date'] = pd.to_datetime(df['Order_Date'])
+def get_output_path(freq):
+    filename = f"sales_analysis_{freq.upper()}.json"
+    return os.path.join(output_dir, filename)
 
-# 계산 필드 추가
-df['Revenue'] = df['Total_Price']
-df['Cost'] = df['Purchase_Price'] * df['Quantity']
-df['Profit'] = (df['Sale_Price'] - df['Purchase_Price']) * df['Quantity']
+def main(freq='M', include_predict=True):
+    csv_path = os.path.join(script_dir, 'gold_sales_data_final_fixed.csv')
 
-# 리샘플 및 예측 함수
-def aggregate_and_forecast(df, freq, label):
-    freq_map = {'M': 'ME', 'Y': 'YE'}
-    freq_for_resample = freq_map.get(freq, freq)
-    agg_df = df.resample(freq_for_resample, on='Order_Date')[['Revenue', 'Cost', 'Profit']].sum()
+    df_raw = pd.read_csv(csv_path)
+    df_raw['Order_Date'] = pd.to_datetime(df_raw['Order_Date'])
+    df_raw = df_raw.sort_values('Order_Date')
+    df_raw.set_index('Order_Date', inplace=True)
 
-    try:
-        model = ExponentialSmoothing(agg_df['Revenue'], trend='add', seasonal=None, damped_trend=True)
-        model_fit = model.fit()
-        forecast = model_fit.forecast(1)
-        forecast_value = forecast.values[0]
-    except Exception:
-        forecast_value = None
+    resample_rule = {
+        'Y': 'Y',
+        'M': 'M',
+        'W': 'W',
+        'D': 'D'
+    }.get(freq.upper(), 'M')
 
-    if freq == 'D':
-        next_date = agg_df.index[-1] + timedelta(days=1)
-    elif freq == 'W':
-        next_date = agg_df.index[-1] + timedelta(weeks=1)
-    elif freq == 'M':
-        next_date = agg_df.index[-1] + pd.offsets.MonthEnd()
-    elif freq == 'Y':
-        next_date = agg_df.index[-1] + pd.offsets.YearEnd()
+    df = df_raw['Total_Price'].resample(resample_rule).sum().reset_index()
+    df.rename(columns={'Order_Date': 'ds', 'Total_Price': 'y'}, inplace=True)
+
+    # 로그 변환
+    df['y'] = np.log1p(df['y'])
+
+    # Prophet 모델 생성
+    freq_upper = freq.upper()
+    if freq_upper == 'Y':
+        model = Prophet(yearly_seasonality=False, weekly_seasonality=False)
+    elif freq_upper == 'D':
+        model = Prophet(
+            yearly_seasonality=True,
+            weekly_seasonality=True,
+            daily_seasonality=True,
+            changepoint_prior_scale=0.05
+        )
     else:
-        next_date = None
+        model = Prophet(yearly_seasonality=True, weekly_seasonality=True)
 
-    return {
-        'label': label,
-        'agg': agg_df,
-        'forecast_value': forecast_value,
-        'next_date': next_date
-    }
+    model.fit(df)
 
-# 일/주/월/연 데이터 생성
-results = {
-    'D': aggregate_and_forecast(df, 'D', '일별'),
-    'W': aggregate_and_forecast(df, 'W', '주별'),
-    'M': aggregate_and_forecast(df, 'M', '월별'),
-    'Y': aggregate_and_forecast(df, 'Y', '연별'),
-}
+    periods = {'Y': 3, 'M': 12, 'W': 4, 'D': 14}
+    future_periods = periods.get(freq_upper, 6)
 
-# JSON 저장 함수
-def save_json(period='D', filename=None):
-    data = results[period]
-    df_agg = data['agg']
-    forecast = data['forecast_value']
-    next_date = data['next_date']
+    if include_predict:
+        future = model.make_future_dataframe(periods=future_periods, freq=resample_rule)
+    else:
+        future = df[['ds']].copy()
 
-    records = []
-    for idx, row in df_agg.iterrows():
-        records.append({
-            "date": idx.strftime('%Y-%m-%d'),
-            "revenue": round(row['Revenue']),
-            "cost": round(row['Cost']),
-            "profit": round(row['Profit'])
-        })
+    forecast = model.predict(future)
 
-    output = {
-        "period": period,
-        "data": records,
-        "forecast": {
-            "date": next_date.strftime('%Y-%m-%d') if next_date else None,
-            "revenue": round(forecast) if forecast else None
-        }
-    }
+    # 역변환
+    forecast['yhat'] = np.expm1(forecast['yhat'])
+    forecast['yhat_lower'] = np.expm1(forecast['yhat_lower'])
+    forecast['yhat_upper'] = np.expm1(forecast['yhat_upper'])
 
-    if filename is None:
-        filename = f'C:/ncsGlobal/FinalProject/augold/python/data/chart_data_{period}.json'
+    df['y'] = np.expm1(df['y'])
 
-    with open(filename, 'w', encoding='utf-8') as f:
-        json.dump(output, f, ensure_ascii=False, indent=2)
+    full_data = pd.merge(forecast, df, on='ds', how='left')
+    full_data = full_data[['ds', 'y', 'yhat', 'yhat_lower', 'yhat_upper', 'trend']]
+    full_data['ds'] = full_data['ds'].dt.strftime('%Y-%m-%d')
 
-# 모든 주기별 JSON 저장
-for p in ['D', 'W', 'M', 'Y']:
-    save_json(p)
+    # NaN 처리
+    full_data = full_data.where(pd.notnull(full_data), None)
+    full_data = full_data.replace({np.nan: None})
+
+    output_path = get_output_path(freq)
+    with open(output_path, 'w', encoding='utf-8') as f:
+        json.dump(full_data.to_dict(orient='records'), f, ensure_ascii=False, indent=4)
+
+    print(f"[OK] {freq_upper} 데이터 저장 완료: {output_path}")
+
+if __name__ == '__main__':
+    freq = sys.argv[1] if len(sys.argv) > 1 else 'M'
+    predict = sys.argv[2].lower() == 'true' if len(sys.argv) > 2 else True
+    main(freq, predict)
