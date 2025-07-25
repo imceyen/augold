@@ -283,30 +283,41 @@
                         </div>
                     </div>
 
-                    <!-- 로그인한 경우에만 장바구니 담기 버튼 표시 -->
+                    <!-- 로그인한 경우 -->
                     <th:block th:if="${!#strings.isEmpty(loginName)}">
+                        <!-- 장바구니 담기 버튼 -->
                         <button id="addToCartBtn" class="w-full bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 text-white font-bold py-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center space-x-2">
                             <i class="fas fa-shopping-cart"></i>
                             <span>장바구니 담기</span>
                         </button>
+
+                        <!-- 바로 구매하기 버튼 -->
+                        <button id="buyNowBtn" class="w-full border-2 border-yellow-500 text-yellow-700 hover:bg-yellow-50 font-bold py-4 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2">
+                            <i class="fas fa-credit-card"></i>
+                            <span>바로 구매하기</span>
+                        </button>
                     </th:block>
 
-                    <!-- 로그인하지 않은 경우 로그인 안내 버튼 -->
+                    <!-- 로그인하지 않은 경우 -->
                     <th:block th:if="${#strings.isEmpty(loginName)}">
-                        <form th:action="@{/login}" method="get" style="margin: 0;">
-                            <!--현재 상품 페이지 URL을 returnUrl로 전달-->
+                        <!-- 장바구니 담기 - 로그인 안내 -->
+                        <form th:action="@{/login}" method="get" style="margin: 0; margin-bottom: 12px;" >
                             <input type="hidden" name="returnUrl" th:value="@{'/product/' + ${product.productId}}">
                             <button type="submit" class="w-full bg-gray-400 hover:bg-gray-500 text-white font-bold py-4 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2">
-                                <i class="fas fa-sign-in-alt"></i>
-                                <span>로그인 후 구매 가능</span>
+                                <i class="fas fa-shopping-cart"></i>
+                                <span>로그인 후 장바구니 담기</span>
+                            </button>
+                        </form>
+
+                        <!-- 바로 구매하기 - 로그인 안내 -->
+                        <form th:action="@{/login}" method="get" style="margin: 0;">
+                            <input type="hidden" name="returnUrl" th:value="@{'/product/' + ${product.productId}}">
+                            <button type="submit" class="w-full border-2 border-gray-400 text-gray-600 hover:bg-gray-50 font-bold py-4 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2">
+                                <i class="fas fa-credit-card"></i>
+                                <span>로그인 후 바로 구매</span>
                             </button>
                         </form>
                     </th:block>
-
-                    <button id="buyNowBtn" class="w-full border-2 border-yellow-500 text-yellow-700 hover:bg-yellow-50 font-bold py-4 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2">
-                        <i class="fas fa-credit-card"></i>
-                        <span>바로 구매하기</span>
-                    </button>
                 </div>
             </div>
         </div>
@@ -509,18 +520,18 @@
                 if (weightSelect && weightSelect.value && weightSelect.selectedOptions[0]) {
                     const selectedOption = weightSelect.selectedOptions[0];
                     productId = selectedOption.dataset.productId;
-                    console.log('✅ 중량 선택된 productId:', productId);
+
                 }
                 // 순도 선택이 있는 경우 (목걸이, 귀걸이 등)
                 else if (karatSelect && karatSelect.value && karatSelect.selectedOptions[0]) {
                     const selectedOption = karatSelect.selectedOptions[0];
                     productId = selectedOption.dataset.productId || window.location.pathname.split('/').pop();
-                    console.log('✅ 순도 선택된 productId:', productId);
+
                 }
                 // 옵션 선택이 없는 경우 (기본 상품)
                 else {
                     productId = window.location.pathname.split('/').pop();
-                    console.log('✅ 기본 productId:', productId);
+
                 }
 
                 if (!productId) {
@@ -630,6 +641,179 @@
                     });
                 });
             });
+        }
+
+        // 🔥 바로 구매하기 버튼 이벤트 - 수정된 부분
+        document.getElementById('buyNowBtn')?.addEventListener('click', function() {
+            const quantity = parseInt(document.getElementById('quantityInput').value);
+            let productId;
+
+            // 옵션 선택 강제 (돌반지의 경우)
+            if (weightSelect && !weightSelect.value) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: '옵션 선택 필요',
+                    text: '중량을 선택해주세요.',
+                    confirmButtonColor: '#f59e0b'
+                });
+                return;
+            }
+
+            // 순도 선택 강제 (주얼리의 경우)
+            if (karatSelect && !karatSelect.value) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: '옵션 선택 필요',
+                    text: '순도를 선택해주세요.',
+                    confirmButtonColor: '#f59e0b'
+                });
+                return;
+            }
+
+            // productId 찾기 로직 (장바구니와 동일)
+            if (weightSelect && weightSelect.value && weightSelect.selectedOptions[0]) {
+                const selectedOption = weightSelect.selectedOptions[0];
+                productId = selectedOption.dataset.productId;
+            }
+            else if (karatSelect && karatSelect.value && karatSelect.selectedOptions[0]) {
+                const selectedOption = karatSelect.selectedOptions[0];
+                productId = selectedOption.dataset.productId || window.location.pathname.split('/').pop();
+            }
+            else {
+                productId = window.location.pathname.split('/').pop();
+            }
+
+            if (!productId) {
+                Swal.fire({
+                    icon: 'error',
+                    title: '상품 선택 오류',
+                    text: '상품을 선택해주세요.',
+                    confirmButtonColor: '#ef4444'
+                });
+                return;
+            }
+
+            // 재고 확인 (장바구니와 동일한 로직)
+            const currentPrice = getSelectedPrice();
+            let isOutOfStock = false;
+
+            if (karatSelect && karatSelect.value) {
+                const selectedOption = karatSelect.selectedOptions[0];
+                const inventory = parseInt(selectedOption.dataset.inventory);
+                isOutOfStock = inventory === 0;
+                if (quantity > inventory) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: '재고 부족',
+                        text: `요청 수량(${quantity}개)이 재고(${inventory}개)를 초과합니다.`,
+                        confirmButtonColor: '#f59e0b'
+                    });
+                    return;
+                }
+            } else if (weightSelect && weightSelect.value) {
+                const selectedOption = weightSelect.selectedOptions[0];
+                const inventory = parseInt(selectedOption.dataset.inventory);
+                isOutOfStock = inventory === 0;
+                if (quantity > inventory) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: '재고 부족',
+                        text: `요청 수량(${quantity}개)이 재고(${inventory}개)를 초과합니다.`,
+                        confirmButtonColor: '#f59e0b'
+                    });
+                    return;
+                }
+            }
+
+            if (isOutOfStock) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: '품절 상품',
+                    text: '현재 품절된 상품입니다.',
+                    confirmButtonColor: '#ef4444'
+                });
+                return;
+            }
+
+            // 상품 정보
+            const productName = document.querySelector('h1.text-4xl')?.textContent || '상품';
+            const selectedKarat = karatSelect?.value || document.getElementById('materialValue')?.textContent?.trim() || '';
+
+            // 바로 구매 확인
+            Swal.fire({
+                icon: 'question',
+                title: '바로 구매하기',
+                html: `
+                    <div style="text-align: center;">
+                        <p style="margin-bottom: 15px;">이 상품을 바로 구매하시겠습니까?</p>
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                            <p><strong>상품:</strong> ${productName}${selectedKarat ? ` (${selectedKarat})` : ''}</p>
+                            <p><strong>수량:</strong> ${quantity}개</p>
+                            <p><strong>가격:</strong> ₩${(currentPrice * quantity).toLocaleString()}</p>
+                        </div>
+                        <p style="font-size: 14px; color: #666;">바로 주문서 작성 페이지로 이동합니다.</p>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: '바로 구매',
+                cancelButtonText: '취소',
+                confirmButtonColor: '#f59e0b',
+                cancelButtonColor: '#6b7280'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // 🔥 바로 구매 처리 - 장바구니 추가 → 즉시 주문 생성
+                    processDirectBuy(productId, quantity);
+                }
+            });
+        });
+
+        // 🔥 바로 구매 처리 함수 - 새로 추가
+        function processDirectBuy(productId, quantity) {
+            // 1단계: 장바구니에 추가
+            const formData = new FormData();
+            formData.append('productId', productId);
+            formData.append('quantity', quantity);
+            formData.append('finalPrice', getSelectedPrice());
+
+            if (karatSelect?.value) {
+                formData.append('karatCode', karatSelect.value);
+            }
+
+            fetch('/cart/add', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // 2단계: 바로 주문 생성 (해당 상품만 선택)
+                    createDirectOrder(productId);
+                }
+            });
+        }
+
+        // 🔥 바로 주문 생성 함수 - 새로 추가
+        function createDirectOrder(productId) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/order/create';
+
+            // 선택된 상품 ID만 전달
+            const selectedProductsInput = document.createElement('input');
+            selectedProductsInput.type = 'hidden';
+            selectedProductsInput.name = 'selectedProducts';
+            selectedProductsInput.value = productId;
+            form.appendChild(selectedProductsInput);
+
+            // 🔥 바로구매 플래그 (기본 배송정보 사용)
+            const directBuyInput = document.createElement('input');
+            directBuyInput.type = 'hidden';
+            directBuyInput.name = 'directBuy';
+            directBuyInput.value = 'true';
+            form.appendChild(directBuyInput);
+
+            document.body.appendChild(form);
+            form.submit();
         }
 
         // 장바구니 추가 성공 알림 함수

@@ -635,7 +635,9 @@
                     <div th:each="item : ${cartlist}" class="product-item"
                          th:data-karat-code="${item.karatName}"
                          th:data-final-price="${item.finalPrice}">
-                        <input type="checkbox" name="productIds" th:value="${item.productId}" class="product-checkbox">
+                        <input type="checkbox" name="productIds"
+                               th:value="${item.productId} + ':' + ${item.karatName}"
+                               class="product-checkbox">
 
                         <div class="product-image">
                             <img th:src="${item.imageUrl}" th:alt="${item.productName}"
