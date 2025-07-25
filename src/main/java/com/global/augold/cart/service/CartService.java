@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.global.augold.product.entity.Product;
+import com.global.augold.goldPrice.Service.GoldPriceService;
+import com.global.augold.product.entity.Product;
 
 
 // ✅ 필요한 import만 정리
@@ -22,6 +24,7 @@ import java.util.Optional;
 public class CartService {
     private final CartRepository cartRepository;
     private final ProductRepository productRepository;
+    private final GoldPriceService goldPriceService;
 
 
     public String addToCart(String cstmNumber, String productId, int quantity, String karatCode, double finalPrice) {
@@ -117,27 +120,37 @@ public class CartService {
     // 🔥 새로 추가할 메서드
     private double findCorrectPrice(String cartProductId, String karatCode) {
         try {
-            // 1. 먼저 Cart의 product_id로 기준 상품 찾기
             Optional<Product> baseProduct = productRepository.findById(cartProductId);
 
-            if (baseProduct.isPresent() && baseProduct.get().getProductGroup() != null) {
-                // 2. 같은 그룹에서 해당 K값 상품 찾기
-                List<Product> groupProducts = productRepository.findByProductGroup(baseProduct.get().getProductGroup());
+            if (baseProduct.isPresent()) { // Product 존재 확인
+                Product product = baseProduct.get(); // product 변수 선언
 
-                Optional<Product> correctProduct = groupProducts.stream()
-                        .filter(p -> karatCode.equals(p.getKaratCode()))
-                        .findFirst();
-
-                if (correctProduct.isPresent()) {
-                    return correctProduct.get().getFinalPrice(); // 🔥 올바른 K값 가격
+                // 🔥 골드바인 경우 실시간 가격 계산
+                if (goldPriceService.isGoldBar(product.getCtgrId())) {
+                    return goldPriceService.calculateGoldBarPrice(product.getGoldWeight());
                 }
+
+                // 🔥 주얼리인 경우 기존 로직
+                if (product.getProductGroup() != null) {
+                    List<Product> groupProducts = productRepository.findByProductGroup(product.getProductGroup());
+
+                    Optional<Product> correctProduct = groupProducts.stream()
+                            .filter(p -> karatCode.equals(p.getKaratCode()))
+                            .findFirst();
+
+                    if (correctProduct.isPresent()) {
+                        return correctProduct.get().getFinalPrice();
+                    }
+                }
+
+                // 🔥 기본값 반환
+                return product.getFinalPrice();
             }
 
-            // 3. 못 찾으면 기존 방식 (기본값)
-            return baseProduct.map(Product::getFinalPrice).orElse(0.0);
+            return 0.0; // Product가 없는 경우
 
         } catch (Exception e) {
-            return 0.0; // 오류 시 기본값
+            return 0.0;
         }
     }
 

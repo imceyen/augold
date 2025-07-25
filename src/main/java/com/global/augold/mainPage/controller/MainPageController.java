@@ -34,16 +34,7 @@ public class MainPageController {
         GoldPriceDTO todayPrice = goldPriceService.getTodayGoldPrice();
         double goldPricePerGram = todayPrice.getPricePerGram() * 1.1;
 
-        // ✅ 3. 골드바 상품에 한해 가격 갱신
-        products = products.stream()
-                .map(p -> {
-                    if ("CTGR-00002".equals(p.getCtgrId()) && p.getGoldWeight() != null) {
-                        double newPrice = p.getGoldWeight() * goldPricePerGram;
-                        p.setFinalPrice(newPrice);
-                    }
-                    return p;
-                })
-                .collect(Collectors.toList());
+        
 
         // 4. 금 시세 히스토리 (최근 5일 → 오래된순)
         GoldPriceDTO[] history = goldPriceService.getGoldPriceHistory();

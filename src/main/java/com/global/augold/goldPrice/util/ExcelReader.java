@@ -10,7 +10,7 @@ import java.util.*;
 public class ExcelReader {
     public static List<GoldPriceDTO> readGoldPriceExcel(String filePath) {
         List<GoldPriceDTO> list = new ArrayList<>();
-        System.out.println("엑셀에서 읽은 시세 수량: " + list.size());
+
 
         try (FileInputStream fis = new FileInputStream(filePath);
              Workbook workbook = new XSSFWorkbook(fis)) {
@@ -31,6 +31,7 @@ public class ExcelReader {
 
                 list.add(dto);
             }
+            System.out.println("엑셀에서 읽은 시세 수량: " + list.size());
         } catch (Exception e) {
             e.printStackTrace();
         }
