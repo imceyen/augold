@@ -33,6 +33,21 @@ public class CategoryPageController {
 
         List<MainPageInfoDTO> allProducts = mainPageService.getAllProducts();
 
+        MainPageInfoDTO s00005 = allProducts.stream()
+                .filter(p -> "PROD-S00005".equals(p.getProductId()))
+                .findFirst()
+                .orElse(null);
+
+        // 교체
+        allProducts = allProducts.stream()
+                .map(product -> {
+                    if ("PROD-S00004".equals(product.getProductId()) && s00005 != null) {
+                        return s00005;
+                    }
+                    return product;
+                })
+                .collect(Collectors.toList());
+
         // 골드바 (37.5g 제외)
         List<MainPageInfoDTO> goldbars = allProducts.stream()
                 .filter(p -> "CTGR-00002".equals(p.getCtgrId()))
