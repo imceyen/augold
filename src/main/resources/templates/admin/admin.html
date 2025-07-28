@@ -226,7 +226,7 @@
     <div id="salesAnalysis" class="stats-subtab-content active">
       <h3>매출 분석 및 예측</h3>
 
-      <!-- 컨트롤 영역: 옵션 변경 시 loadSalesAnalysis() 자동 호출 -->
+      <!-- 컨트롤 영역 -->
       <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 20px;">
         <div>
           <label for="unit">분석 단위:</label>
@@ -249,9 +249,30 @@
         데이터를 불러오는 중입니다...
       </div>
 
-      <!-- Chart.js 차트가 그려질 영역 (반응형 대응) -->
-      <div style="position: relative; height:450px; width:100%;">
-        <canvas id="salesChart"></canvas>
+      <!-- [신규] 표와 차트를 담는 Flex 컨테이너 -->
+      <div style="display: flex; gap: 20px; width: 100%;">
+
+        <!-- [신규] 왼쪽: 데이터 표 -->
+        <div id="salesTableContainer" style="flex: 1; max-height: 500px; overflow-y: auto; display: none;">
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+            <tr style="background-color: #f2f2f2;">
+              <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">기간</th>
+              <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">실제 매출</th>
+              <th id="forecastHeader" style="padding: 8px; border: 1px solid #ddd; text-align: left;">예측 매출</th>
+            </tr>
+            </thead>
+            <tbody id="salesTableBody">
+            <!-- 데이터가 여기에 동적으로 추가됩니다 -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 오른쪽: 차트 -->
+        <div style="flex: 2; position: relative; height:500px;">
+          <canvas id="salesChart"></canvas>
+        </div>
+
       </div>
     </div>
 
@@ -1064,13 +1085,14 @@
     fetchAndDrawChart();
 </script>
 
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<script>
+<script> //매출
   let salesChartInstance = null;
 
   /**
-   * 서버에서 매출 분석 데이터를 가져와 차트를 그리는 메인 함수
+   * 서버에서 매출 분석 데이터를 가져와 차트와 테이블을 그리는 메인 함수
    * (HTML의 onchange 이벤트가 이 함수를 호출합니다)
    */
   function loadSalesAnalysis() {
@@ -1078,48 +1100,70 @@
     const showForecast = document.getElementById('toggleForecast').checked;
     const loadingDiv = document.getElementById('salesAnalysisLoading');
     const chartCanvas = document.getElementById('salesChart');
+    const tableDiv = document.getElementById('salesTableContainer');
 
     document.getElementById('toggleForecast').disabled = false;
     const predictParam = showForecast;
 
     loadingDiv.style.display = 'block';
     chartCanvas.style.display = 'none';
+    tableDiv.style.display = 'none';
 
     fetch(`/api/statistics/sales-analysis?unit=${unit}&predict=${predictParam}`)
       .then(res => {
         if (!res.ok) throw new Error(`서버 응답 오류 (${res.status})`);
-        return res.text().then(text => JSON.parse(text));
+        return res.json();
       })
       .then(data => {
         if (data.error) throw new Error(data.error);
 
-        // 🔽 [핵심 수정] 여기서 데이터를 필터링합니다. 🔽
-        let filteredData = data;
-        const dataLength = data.length;
+        let processedData = data;
 
-        if (unit === 'week') {
-          // 주 단위일 경우, 최근 1년(53주)치 데이터만 사용합니다.
-          // 데이터가 53개보다 적으면 전부 사용합니다.
-          const weekCount = 53;
-          if (dataLength > weekCount) {
-            filteredData = data.slice(dataLength - weekCount);
-          }
-        } else if (unit === 'day') {
-          // 일 단위일 경우, 최근 한 달(31일)치 데이터만 사용합니다.
-          // 데이터가 31개보다 적으면 전부 사용합니다.
-          const dayCount = 31;
-          if (dataLength > dayCount) {
-            filteredData = data.slice(dataLength - dayCount);
+        // [1단계] 예측 기간 제한 로직 (단위별)
+        if (showForecast) {
+          const lastActualIndex = data.findLastIndex(d => d.y !== null && d.y !== undefined);
+          if (lastActualIndex !== -1) {
+            const predictionLengths = {
+              year: 2,
+              month: 2,
+              week: 2,
+              day: 5
+            };
+            const predictionCount = predictionLengths[unit];
+            const endIndex = lastActualIndex + 1 + predictionCount;
+            processedData = data.slice(0, endIndex);
           }
         }
-        // 'year'와 'month'는 필터링하지 않고 전체 데이터를 사용합니다.
+
+        // [2단계] 표시할 과거 데이터 기간 필터링
+        let filteredData = processedData;
+        const dataLength = processedData.length;
+
+        if (unit === 'week') {
+          const weekCount = 53; // 최근 1년
+          if (dataLength > weekCount) {
+            filteredData = processedData.slice(dataLength - weekCount);
+          }
+        } else if (unit === 'day') {
+          const dayCount = 31; // 최근 1달
+          if (dataLength > dayCount) {
+            filteredData = processedData.slice(dataLength - dayCount);
+          }
+        }
+        // 🔽 [핵심 수정] 월 단위 데이터 필터링 (2024년 이후) 🔽
+        else if (unit === 'month') {
+            // 'ds' 필드가 '2024-01' 보다 크거나 같은 데이터만 필터링
+            filteredData = processedData.filter(d => d.ds >= '2024-01');
+        }
         // 🔼 [핵심 수정] 필터링 로직 끝 🔼
+
 
         loadingDiv.style.display = 'none';
         chartCanvas.style.display = 'block';
+        tableDiv.style.display = 'block';
 
-        // 필터링된 데이터로 차트를 그립니다.
         drawSalesChart(filteredData);
+        drawSalesTable(filteredData);
       })
       .catch(err => {
         loadingDiv.style.display = 'block';
@@ -1145,16 +1189,14 @@
     const actualData = data.map(d => d.y);
     const forecastData = data.map(d => (d.yhat !== undefined && d.yhat !== null) ? d.yhat : null);
 
-    const datasets = [
-      {
-        label: "실제 매출",
-        data: actualData,
-        borderColor: "rgba(54, 162, 235, 1)",
-        backgroundColor: "rgba(54, 162, 235, 0.5)",
-        type: 'bar',
-        order: 2
-      },
-    ];
+    const datasets = [{
+      label: "실제 매출",
+      data: actualData,
+      borderColor: "rgba(54, 162, 235, 1)",
+      backgroundColor: "rgba(54, 162, 235, 0.5)",
+      type: 'bar',
+      order: 2
+    }];
 
     if (showForecast && forecastData.some(d => d !== null)) {
       datasets.push({
@@ -1183,7 +1225,9 @@
           y: {
             beginAtZero: true,
             ticks: {
-              callback: function(value) { return value.toLocaleString() + '원'; }
+              callback: function(value) {
+                return value.toLocaleString() + '원';
+              }
             }
           }
         },
@@ -1194,7 +1238,9 @@
           },
           title: {
             display: true,
-            font: { size: 16 },
+            font: {
+              size: 16
+            },
             text: `매출 분석 및 예측 (${{year:'연',month:'월',week:'주',day:'일'}[unit]} 단위)`
           }
         }
@@ -1202,10 +1248,43 @@
     });
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
-      if(document.getElementById('salesAnalysis').classList.contains('active')){
-          loadSalesAnalysis();
+  /**
+   * 데이터를 받아 HTML 테이블을 그리는 함수
+   * @param {Array} data - 필터링된 데이터 배열
+   */
+  function drawSalesTable(data) {
+    const tableBody = document.getElementById('salesTableBody');
+    const showForecast = document.getElementById('toggleForecast').checked;
+
+    tableBody.innerHTML = '';
+
+    const reversedData = [...data].reverse();
+
+    reversedData.forEach(d => {
+      const row = document.createElement('tr');
+      const yValue = d.y !== null && d.y !== undefined ? d.y.toLocaleString() + '원' : 'N/A';
+      let yhatValue = 'N/A';
+
+      if (showForecast) {
+        yhatValue = d.yhat !== null && d.yhat !== undefined ? d.yhat.toLocaleString() + '원' : '-';
       }
+
+      row.innerHTML = `
+        <td>${d.ds}</td>
+        <td>${yValue}</td>
+        ${showForecast ? `<td>${yhatValue}</td>` : ''}
+      `;
+      tableBody.appendChild(row);
+    });
+
+    document.getElementById('forecastHeader').style.display = showForecast ? '' : 'none';
+  }
+
+
+  document.addEventListener('DOMContentLoaded', () => {
+    if (document.getElementById('salesAnalysis').classList.contains('active')) {
+      loadSalesAnalysis();
+    }
   });
 </script>
 

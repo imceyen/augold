@@ -51,7 +51,7 @@ def main(freq='M', include_predict=True):
 
     model.fit(df)
 
-    periods = {'Y': 3, 'M': 12, 'W': 4, 'D': 14}
+    periods = {'Y': 2, 'M': 2, 'W': 2, 'D': 5}
     future_periods = periods.get(freq_upper, 6)
 
     if include_predict:
