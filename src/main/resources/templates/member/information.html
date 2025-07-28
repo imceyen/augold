@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AuGold - 내 정보</title>
+    <title>AuGold - 회원 정보 수정</title>
     <!-- Google Fonts & Icons -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <style>
@@ -91,6 +91,24 @@
             margin: 8px 0 0;
         }
 
+        /* [추가] 뒤로가기 버튼 스타일 */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            font-size: 16px;
+            font-weight: 500;
+            color: #5a6a7a;
+            margin-bottom: 16px;
+            transition: color 0.2s ease;
+        }
+        .back-link:hover {
+            color: #007aff;
+        }
+        .back-link .icon {
+            font-size: 20px;
+            margin-right: 4px;
+        }
+
         /* --- 설정 카드 UI --- */
         .settings-card {
             background-color: #fff;
@@ -138,15 +156,6 @@
         .setting-item .chevron {
             font-size: 24px;
             color: #b0b8c1;
-        }
-
-        /* 주의가 필요한 항목 (회원 탈퇴) */
-        .setting-item.danger .icon,
-        .setting-item.danger .item-text {
-            color: #f04452;
-        }
-        .setting-item.danger:hover {
-            background-color: #fff5f6;
         }
 
         /* Google Icons 스타일 */
@@ -200,50 +209,42 @@
 
 <!-- 메인 콘텐츠 -->
 <main class="container">
+
+    <!-- [추가] 뒤로가기 링크 -->
+    <a href="/mypage" class="back-link">
+        <span class="material-symbols-outlined icon">arrow_back</span>
+        <span>내 정보로 돌아가기</span>
+    </a>
+
     <div class="mypage-header">
-        <h1 class="mypage-title">내 정보</h1>
-        <p class="mypage-subtitle" th:text="|${user.cstmName}님, 안녕하세요!|">홍길동님, 안녕하세요!</p>
+        <h1 class="mypage-title">회원 정보 수정</h1>
+        <p class="mypage-subtitle">변경을 원하는 항목을 선택해주세요.</p>
     </div>
 
-    <!-- 사용자 정보 및 설정 메뉴 -->
-    <div class="settings-card">
-        <ul class="settings-list">
-            <!-- [확인] 이 링크는 비밀번호 확인 페이지로 이동하며, 성공 시 서버가 information.html로 리다이렉트합니다. -->
-            <li>
-                <a href="/member/confirm" class="setting-item">
-                    <span class="material-symbols-outlined icon">manage_accounts</span>
-                    <span class="item-text">회원 정보 수정</span>
-                    <span class="material-symbols-outlined chevron">chevron_right</span>
-                </a>
-            </li>
-        </ul>
-    </div>
-
+    <!-- 정보 수정 메뉴 -->
     <div class="settings-card">
         <ul class="settings-list">
             <li>
-                <a href="/order/myorders" class="setting-item">
-                    <span class="material-symbols-outlined icon">receipt_long</span>
-                    <span class="item-text">주문 내역 조회</span>
+                <!-- [수정] /password 로 변경 -->
+                <a href="/password" class="setting-item">
+                    <span class="material-symbols-outlined icon">lock_reset</span>
+                    <span class="item-text">비밀번호 변경</span>
                     <span class="material-symbols-outlined chevron">chevron_right</span>
                 </a>
             </li>
             <li>
-                <a href="/mypage/inquiries" class="setting-item">
-                    <span class="material-symbols-outlined icon">chat_bubble</span>
-                    <span class="item-text">내 문의 내역</span>
+                <!-- [수정] /info/address 로 변경 -->
+                <a href="/info/address" class="setting-item">
+                    <span class="material-symbols-outlined icon">home</span>
+                    <span class="item-text">주소 관리</span>
                     <span class="material-symbols-outlined chevron">chevron_right</span>
                 </a>
             </li>
-        </ul>
-    </div>
-
-    <div class="settings-card">
-        <ul class="settings-list">
             <li>
-                <a href="/member/delete" class="setting-item danger">
-                    <span class="material-symbols-outlined icon">person_remove</span>
-                    <span class="item-text">회원 탈퇴</span>
+                <!-- [수정] /info/phone 로 변경 -->
+                <a href="/info/phone" class="setting-item">
+                    <span class="material-symbols-outlined icon">phone_iphone</span>
+                    <span class="item-text">연락처 수정</span>
                     <span class="material-symbols-outlined chevron">chevron_right</span>
                 </a>
             </li>
