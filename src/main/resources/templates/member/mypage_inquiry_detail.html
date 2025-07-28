@@ -1,118 +1,227 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8" />
-    <title>문의 상세</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background: #f9f9f9;
-            color: #333;
-        }
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #ccc;
-            margin-bottom: 30px;
-        }
-        nav a {
-            margin-left: 15px;
-            text-decoration: none;
-            color: #333;
-        }
-        nav a:first-child {
-            margin-left: 0;
-        }
-        h1 {
-            margin: 0 0 20px 0;
-            color: #222;
-        }
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 8px rgba(0,0,0,0.1);
-        }
-        p {
-            line-height: 1.6;
-            margin-bottom: 15px;
-        }
-        strong {
-            color: #555;
-        }
-        .answer-section {
-            margin-top: 30px;
-            padding: 15px;
-            background-color: #f5f5f5;
-            border-left: 5px solid #ffd54f;
-            border-radius: 4px;
-        }
-        .answer-section h2 {
-            margin-top: 0;
-            color: #ffb300;
-        }
-        .back-link {
-            display: inline-block;
-            margin-top: 20px;
-            font-size: 14px;
-            color: #555;
-            text-decoration: none;
-        }
-        .back-link:hover {
-            color: #222;
-            text-decoration: underline;
-        }
-        a.action-link {
-            margin-left: 10px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        a.action-link.edit {
-            color: green;
-        }
-        a.action-link.delete {
-            color: red;
-        }
+        /* --- Google Fonts --- */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+
+/* --- 기본 & 초기화 --- */
+body { margin: 0; font-family: 'Noto Sans KR', sans-serif; background-color: #f5f7fa; color: #333d4b; }
+a { text-decoration: none; color: inherit; }
+
+/* --- 페이지 헤더 (모든 페이지에서 동일) --- */
+.page-header { background-color: #fff; border-bottom: 1px solid #e4e8eb; padding: 0 24px; }
+.header-content { display: flex; justify-content: space-between; align-items: center; max-width: 1080px; margin: 0 auto; height: 64px; }
+.logo { font-weight: 700; font-size: 22px; color: #1e2025; }
+.main-nav { display: flex; align-items: center; gap: 28px; }
+.main-nav a { font-size: 16px; font-weight: 500; color: #5a6a7a; transition: color 0.2s; }
+.main-nav a:hover { color: #007aff; }
+
+/* --- 메인 콘텐츠 컨테이너 --- */
+.container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+/* --- 문의 상세 카드 --- */
+.inquiry-detail-card {
+    background-color: #fff;
+    border-radius: 12px;
+    border: 1px solid #e4e8eb;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    overflow: hidden; /* 자식 요소의 radius 적용을 위함 */
+}
+
+/* 문의 내용 헤더 */
+.inquiry-header {
+    padding: 24px 28px 16px;
+}
+.inquiry-title {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+    color: #191f28;
+}
+.inquiry-meta {
+    font-size: 14px;
+    color: #8b95a1;
+    margin: 0;
+}
+
+/* 문의 내용 본문 */
+.inquiry-content {
+    padding: 0 28px 24px;
+    font-size: 16px;
+    line-height: 1.7;
+    color: #4e5968;
+    white-space: pre-wrap; /* 줄바꿈 유지 */
+}
+
+/* 답변 섹션 */
+.answer-section {
+    background-color: #f7f9fa;
+    padding: 24px 28px;
+    border-top: 1px solid #f2f4f6;
+}
+.answer-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #333d4b;
+    margin: 0 0 12px 0;
+}
+.answer-content {
+    font-size: 16px;
+    line-height: 1.7;
+    color: #4e5968;
+    margin: 0 0 16px 0;
+    white-space: pre-wrap;
+}
+.answer-meta {
+    font-size: 14px;
+    color: #8b95a1;
+    text-align: right;
+    margin: 0;
+}
+
+/* 답변 대기 상태 */
+.no-answer {
+    text-align: center;
+    padding: 32px 0;
+    color: #8b95a1;
+}
+.no-answer .material-symbols-outlined {
+    font-size: 32px;
+}
+.no-answer p {
+    font-size: 16px;
+    font-weight: 500;
+    margin-top: 8px;
+}
+
+/* 카드 푸터 */
+.card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 28px;
+    border-top: 1px solid #f2f4f6;
+}
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #5a6a7a;
+    transition: color 0.2s;
+}
+.back-link:hover { color: #191f28; }
+
+.action-buttons {
+    display: flex;
+    gap: 10px;
+}
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+}
+.action-btn .material-symbols-outlined { font-size: 18px; }
+.edit-btn { background-color: #e5f2ff; color: #007aff; }
+.edit-btn:hover { background-color: #d0e8ff; }
+.delete-btn { background-color: #fff5f6; color: #f04452; }
+.delete-btn:hover { background-color: #ffe3e6; }
+
+/* 아이콘 기본 스타일 */
+.material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    .container { margin: 24px auto; padding: 0 16px; }
+    .inquiry-header, .inquiry-content, .answer-section, .card-footer { padding-left: 20px; padding-right: 20px; }
+}
     </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>문의 상세 - AuGold</title>
+    <!-- Google Icons -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <!-- [중요] 여기에 새로운 CSS 코드를 붙여넣거나 링크하세요 -->
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header>
-    <h1><a href="/" style="text-decoration:none; color:inherit;">AuGold</a></h1>
-    <nav>
-        <a href="/" style="font-weight:bold;">메인</a>
-        <a href="/support">고객센터</a>
-        <a href="/logout">로그아웃</a>
-    </nav>
+
+<!-- 페이지 헤더 (모든 페이지에서 동일) -->
+<header class="page-header">
+    <div class="header-content">
+        <a href="/" class="logo">AuGold</a>
+        <nav class="main-nav">
+            <a href="/">메인</a>
+            <a href="/support">고객센터</a>
+            <a href="/logout">로그아웃</a>
+        </nav>
+    </div>
 </header>
 
-<div class="container">
-    <h1 th:text="${inquiry.inqTitle}">문의 제목</h1>
-    <p><strong>작성일:</strong> <span th:text="${#temporals.format(inquiry.inqDate, 'yyyy-MM-dd HH:mm')}">2025-07-14 11:45</span></p>
-    <p><strong>내용:</strong></p>
-    <p th:text="${inquiry.inqContent}">문의 내용</p>
+<!-- 메인 콘텐츠 -->
+<main class="container">
+    <div class="inquiry-detail-card">
+        <!-- 문의 내용 섹션 -->
+        <div class="inquiry-header">
+            <h1 class="inquiry-title" th:text="${inquiry.inqTitle}">문의 제목</h1>
+            <p class="inquiry-meta">
+                <span th:text="${#temporals.format(inquiry.inqDate, 'yyyy.MM.dd HH:mm')}">2025.07.15 11:45</span>
+            </p>
+        </div>
+        <div class="inquiry-content" th:text="${inquiry.inqContent}">
 
-    <div class="answer-section" th:if="${inquiry.answerContent != null and inquiry.answerContent != ''}">
-        <h2>관리자 답변</h2>
-        <p th:text="${inquiry.answerContent}">답변 내용</p>
-        <p><strong>답변일:</strong> <span th:text="${inquiry.replyDate != null ? #temporals.format(inquiry.replyDate, 'yyyy-MM-dd HH:mm') : '미답변'}">2025-07-15 09:00</span></p>
-    </div>
-    <div class="answer-section" th:if="${inquiry.answerContent == null or inquiry.answerContent == ''}">
-        <h2>관리자 답변</h2>
-        <p>아직 답변이 등록되지 않았습니다.</p>
-    </div>
+        </div>
 
-    <div style="margin-top: 20px;">
-        <a href="/mypage/inquiries" class="back-link">← 문의 내역으로 돌아가기</a>
-        <a th:href="@{/mypage/inquiries/{id}/confirm(id=${inquiry.inqNumber}, action='edit')}"
-           class="action-link edit">✏️ 수정</a>
-        <a th:href="@{/mypage/inquiries/{id}/confirm(id=${inquiry.inqNumber}, action='delete')}"
-           class="action-link delete">🗑️ 삭제</a>
+        <!-- 답변 섹션 -->
+        <div class="answer-section">
+            <!-- 답변이 있는 경우 -->
+            <div th:if="${inquiry.answerContent != null and inquiry.answerContent != ''}">
+                <h2 class="answer-title">
+                    <span class="material-symbols-outlined">supervisor_account</span>
+                    관리자 답변
+                </h2>
+                <p class="answer-content" th:text="${inquiry.answerContent}">답변 내용이 여기에 표시됩니다.</p>
+                <p class="answer-meta" th:text="${'답변일: ' + #temporals.format(inquiry.replyDate, 'yyyy.MM.dd HH:mm')}">답변일: 2025.07.16 09:00</p>
+            </div>
+            <!-- 답변이 없는 경우 -->
+            <div class="no-answer" th:if="${inquiry.answerContent == null or inquiry.answerContent == ''}">
+                <span class="material-symbols-outlined">hourglass_top</span>
+                <p>답변을 준비중입니다.</p>
+            </div>
+        </div>
+
+        <!-- 카드 푸터: 액션 버튼 -->
+        <div class="card-footer">
+            <a href="/mypage/inquiries" class="back-link">
+                <span class="material-symbols-outlined">arrow_back</span>
+                목록으로 돌아가기
+            </a>
+            <div class="action-buttons">
+                <a th:href="@{/mypage/inquiries/{id}/confirm(id=${inquiry.inqNumber}, action='edit')}" class="action-btn edit-btn">
+                    <span class="material-symbols-outlined">edit</span> 수정
+                </a>
+                <a th:href="@{/mypage/inquiries/{id}/confirm(id=${inquiry.inqNumber}, action='delete')}" class="action-btn delete-btn">
+                    <span class="material-symbols-outlined">delete</span> 삭제
+                </a>
+            </div>
+        </div>
     </div>
-</div>
+</main>
+
 </body>
 </html>

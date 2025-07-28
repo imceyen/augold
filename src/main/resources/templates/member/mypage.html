@@ -1,201 +1,272 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8" />
-    <title>AuGold 마이페이지</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap');
+        /* --- Google Fonts --- */
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
 
+        /* --- 기본 & 초기화 --- */
         body {
-          font-family: 'Nunito', sans-serif;
-          background-color: #f9fafb;
-          color: #333;
-          margin: 0;
-          padding: 20px;
+            margin: 0;
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f5f7fa; /* 더 부드럽고 안정적인 배경색 */
+            color: #333d4b;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
-        header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding-bottom: 12px;
-          border-bottom: 1px solid #ddd;
-          margin-bottom: 30px;
+        a {
+            text-decoration: none;
+            color: inherit;
         }
 
-        header h1 a {
-          text-decoration: none;
-          color: #2c3e50;
-          font-weight: 700;
-          font-size: 1.8rem;
+        /* --- 페이지 헤더 --- */
+        .page-header {
+            background-color: #fff;
+            border-bottom: 1px solid #e4e8eb;
+            padding: 0 24px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
-        nav a {
-          color: #4a4a4a;
-          margin-left: 20px;
-          font-weight: 600;
-          text-decoration: none;
-          transition: color 0.3s ease;
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1080px;
+            margin: 0 auto;
+            height: 64px;
         }
 
-        nav a:first-child {
-          margin-left: 0;
+        .logo {
+            font-weight: 700;
+            font-size: 22px;
+            color: #1e2025;
         }
 
-        nav a:hover {
-          color: #3498db;
+        .main-nav a {
+            font-size: 16px;
+            font-weight: 500;
+            color: #5a6a7a;
+            margin-left: 28px;
+            transition: color 0.2s ease-in-out;
         }
 
-        nav a.login-btn {
-          color: #e74c3c;
-          font-weight: 700;
+        .main-nav a:hover {
+            color: #007aff; /* 포인트 색상 */
         }
 
-        nav a.login-btn:hover {
-          color: #c0392b;
+        .nav-logout {
+            font-weight: 700 !important;
+            color: #007aff !important;
         }
 
-        main.container {
-          max-width: 800px;
-          margin: 0 auto;
-          background: #fff;
-          padding: 30px 40px;
-          border-radius: 8px;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        /* --- 메인 콘텐츠 컨테이너 --- */
+        .container {
+            max-width: 720px;
+            margin: 40px auto;
+            padding: 0 20px;
         }
 
-        main.container h2 {
-          font-weight: 700;
-          font-size: 2rem;
-          margin-bottom: 25px;
-          color: #2c3e50;
-          letter-spacing: 0.05em;
+        .mypage-header {
+            margin-bottom: 32px;
         }
 
-        .info-row {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 16px 0;
-          border-bottom: 1px solid #eee;
+        .mypage-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #191f28;
+            margin: 0;
         }
 
-        .info-label {
-          font-weight: 600;
-          color: #555;
-          width: 140px;
+        .mypage-subtitle {
+            font-size: 16px;
+            color: #4e5968;
+            margin: 8px 0 0;
         }
 
-        .info-value {
-          flex: 1;
-          font-size: 1rem;
-          color: #333;
+        /* --- 설정 카드 UI --- */
+        .settings-card {
+            background-color: #fff;
+            border-radius: 12px;
+            border: 1px solid #e4e8eb;
+            margin-bottom: 20px;
+            overflow: hidden; /* 자식 요소의 radius 적용을 위함 */
         }
 
-        .btn-edit {
-          background-color: #3498db;
-          color: white;
-          padding: 8px 18px;
-          border-radius: 5px;
-          font-weight: 600;
-          font-size: 0.9rem;
-          text-decoration: none;
-          border: none;
-          cursor: pointer;
-          transition: background-color 0.25s ease;
-          user-select: none;
+        .settings-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
         }
 
-        .btn-edit:hover {
-          background-color: #2980b9;
-          text-decoration: none;
+        .setting-item {
+            display: flex;
+            align-items: center;
+            padding: 18px 20px;
+            transition: background-color 0.15s ease;
+            cursor: pointer;
         }
 
-        .btn-edit.danger {
-          background-color: #e74c3c;
+        .setting-item:not(:last-child) {
+            border-bottom: 1px solid #f2f4f6;
         }
 
-        .btn-edit.danger:hover {
-          background-color: #c0392b;
+        .setting-item:hover {
+            background-color: #f7f8f9;
         }
 
-        .btn-edit.orders {
-          background-color: #f39c12;
+        .setting-item .icon {
+            font-size: 24px;
+            color: #5e6ad7; /* 구글 아이콘 기본 색상 */
+            margin-right: 16px;
         }
 
-        .btn-edit.orders:hover {
-          background-color: #e67e22;
+        .setting-item .item-text {
+            flex: 1;
+            font-size: 16px;
+            font-weight: 500;
+            color: #333d4b;
         }
 
-        @media (max-width: 600px) {
-          main.container {
-            padding: 20px;
-          }
-          .info-row {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 8px;
-          }
-          .info-label {
-            width: 100%;
-          }
-          .info-value {
-            width: 100%;
-          }
-          nav a {
-            margin-left: 12px;
-          }
+        .setting-item .chevron {
+            font-size: 24px;
+            color: #b0b8c1; /* 화살표 아이콘 */
         }
+
+        /* 주의가 필요한 항목 (회원 탈퇴) */
+        .setting-item.danger .icon,
+        .setting-item.danger .item-text {
+            color: #f04452; /* 부드러운 빨간색 */
+        }
+        .setting-item.danger:hover {
+            background-color: #fff5f6;
+        }
+
+        /* Google Icons 스타일 */
+        .material-symbols-outlined {
+          font-variation-settings:
+          'FILL' 0,
+          'wght' 400,
+          'GRAD' 0,
+          'opsz' 24
+        }
+
+
+        /* --- 반응형 디자인 --- */
+        @media (max-width: 768px) {
+            .page-header {
+                padding: 0 16px;
+            }
+            .header-content {
+                height: 56px;
+            }
+            .main-nav a {
+                margin-left: 16px;
+                font-size: 15px;
+            }
+            .container {
+                margin: 24px auto;
+                padding: 0 16px;
+            }
+            .mypage-title {
+                font-size: 24px;
+            }
+            .setting-item {
+                padding: 16px;
+            }
+        }
+
     </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuGold - 내 정보</title>
+    <!-- Google Fonts & Icons -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <!-- [중요] 여기에 새로운 CSS 코드를 붙여넣거나 링크하세요 -->
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header>
-    <h1><a href="/" style="user-select:none;">AuGold</a></h1>
-    <nav>
-        <a href="/" style="font-weight:bold;">메인</a>
-        <a href="/support">고객센터</a>
-        <a href="/logout" class="login-btn">로그아웃</a>
-    </nav>
+
+<!-- 페이지 헤더 -->
+<header class="page-header">
+    <div class="header-content">
+        <a href="/" class="logo">AuGold</a>
+        <nav class="main-nav">
+            <a href="/">메인</a>
+            <a href="/support">고객센터</a>
+            <a href="/logout" class="nav-logout">로그아웃</a>
+        </nav>
+    </div>
 </header>
 
-<main class="container" role="main">
-    <h2>회원 정보</h2>
-
-    <div class="info-row">
-        <div class="info-label">이름</div>
-        <div class="info-value" th:text="${user.cstmName}">홍길동</div>
+<!-- 메인 콘텐츠 -->
+<main class="container">
+    <div class="mypage-header">
+        <h1 class="mypage-title">내 정보</h1>
+        <p class="mypage-subtitle" th:text="|${user.cstmName}님, 안녕하세요!|">홍길동님, 안녕하세요!</p>
     </div>
 
-    <div class="info-row">
-        <div class="info-label">비밀번호</div>
-        <a href="/password" class="btn-edit" role="button" tabindex="0">수정</a>
+    <!-- 사용자 정보 및 설정 메뉴 -->
+    <div class="settings-card">
+        <ul class="settings-list">
+            <!-- 각 메뉴 항목 -->
+            <li>
+                <a href="/password" class="setting-item">
+                    <span class="material-symbols-outlined icon">lock_reset</span>
+                    <span class="item-text">비밀번호 변경</span>
+                    <span class="material-symbols-outlined chevron">chevron_right</span>
+                </a>
+            </li>
+            <li>
+                <a href="/address" class="setting-item">
+                    <span class="material-symbols-outlined icon">home</span>
+                    <span class="item-text">주소 관리</span>
+                    <span class="material-symbols-outlined chevron">chevron_right</span>
+                </a>
+            </li>
+            <li>
+                <a href="/phone" class="setting-item">
+                    <span class="material-symbols-outlined icon">phone_iphone</span>
+                    <span class="item-text">연락처 수정</span>
+                    <span class="material-symbols-outlined chevron">chevron_right</span>
+                </a>
+            </li>
+        </ul>
     </div>
 
-    <div class="info-row">
-        <div class="info-label">주소</div>
-        <a href="/address" class="btn-edit" role="button" tabindex="0">수정</a>
+    <div class="settings-card">
+        <ul class="settings-list">
+            <li>
+                <a href="/order/myorders" class="setting-item">
+                    <span class="material-symbols-outlined icon">receipt_long</span>
+                    <span class="item-text">주문 내역 조회</span>
+                    <span class="material-symbols-outlined chevron">chevron_right</span>
+                </a>
+            </li>
+            <li>
+                <a href="/mypage/inquiries" class="setting-item">
+                    <span class="material-symbols-outlined icon">chat_bubble</span>
+                    <span class="item-text">내 문의 내역</span>
+                    <span class="material-symbols-outlined chevron">chevron_right</span>
+                </a>
+            </li>
+        </ul>
     </div>
 
-    <div class="info-row">
-        <div class="info-label">전화번호</div>
-        <a href="/phone" class="btn-edit" role="button" tabindex="0">수정</a>
+    <div class="settings-card">
+        <ul class="settings-list">
+            <li>
+                <a href="/member/delete" class="setting-item danger">
+                    <span class="material-symbols-outlined icon">person_remove</span>
+                    <span class="item-text">회원 탈퇴</span>
+                    <span class="material-symbols-outlined chevron">chevron_right</span>
+                </a>
+            </li>
+        </ul>
     </div>
-
-    <div class="info-row">
-        <div class="info-label">주문 내역</div>
-        <a href="/order/myorders" class="btn-edit orders" role="button" tabindex="0">내 주문내역</a>
-    </div>
-
-    <div class="info-row">
-        <div class="info-label">문의 내역</div>
-        <a href="/mypage/inquiries" class="btn-edit" role="button" tabindex="0">내 문의내역</a>
-    </div>
-
-    <div class="info-row">
-        <div class="info-label">회원 탈퇴</div>
-        <a href="/member/delete" class="btn-edit danger" role="button" tabindex="0">탈퇴</a>
-    </div>
-
 </main>
+
 </body>
 </html>
