@@ -1,7 +1,3 @@
-// ===============================
-// OrderService.java - 주문 서비스
-// ===============================
-
 package com.global.augold.order.service;
 
 import com.global.augold.cart.dto.CartDTO;

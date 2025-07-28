@@ -245,7 +245,7 @@ public class OrderController {
             model.addAttribute("orderDetail", orderDetail);
 
             log.info("주문 상세 조회: 주문번호={}, 고객={}", orderNumber, loginUser.getCstmNumber());
-            return "order/order-detail"; // templates/order/order-detail.html
+            return "redirect:/order/myorders?highlight=" + orderNumber;
 
         } catch (IllegalArgumentException e) {
             log.warn("주문 상세 조회 실패: {}", e.getMessage());
@@ -278,15 +278,19 @@ public class OrderController {
             log.info("주문 취소 완료: 주문번호={}, 고객={}, 사유={}",
                     orderNumber, loginUser.getCstmNumber(), cancelReason);
 
-            return "redirect:/order/" + orderNumber + "?cancelled=true";
+            // 🔥 myorders로 리다이렉트 (성공 메시지와 함께)
+            return "redirect:/order/myorders?cancelled=true&orderNumber=" + orderNumber;
 
         } catch (IllegalArgumentException e) {
             log.warn("주문 취소 실패: {}", e.getMessage());
-            return "redirect:/order/" + orderNumber + "?error=cancel&message=" + e.getMessage();
+            // 🔥 myorders로 리다이렉트 (에러 메시지와 함께)
+            return "redirect:/order/myorders?error=cancel&message=" +
+                    java.net.URLEncoder.encode(e.getMessage(), java.nio.charset.StandardCharsets.UTF_8);
 
         } catch (Exception e) {
             log.error("주문 취소 실패: {}", e.getMessage(), e);
-            return "redirect:/order/" + orderNumber + "?error=system";
+            // 🔥 myorders로 리다이렉트 (시스템 에러)
+            return "redirect:/order/myorders?error=system";
         }
     }
 
