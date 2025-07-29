@@ -748,14 +748,13 @@
       } else if (subTabId === 'categoryProfit' && !categoryProfitLoaded) {
           loadCategoryProfit();
           categoryProfitLoaded = true;
-      }  else if (subTabId === 'demographics' && !demographicsLoaded) {
-      setTimeout(() => {
+      } else if (subTabId === 'demographics' && !demographicsLoaded) {
           loadDemographicsChart();
           demographicsLoaded = true;
-
       } else if (subTabId === 'cartAbandonment') {
       console.log('🛒 장바구니 이탈 분석 탭 활성화');
       }
+
 
   }
 
@@ -946,7 +945,7 @@
       console.error("[성별/연령대] 필요한 div가 없습니다.");
       return;
     }
-    fetch("/api/statistics/sex-age-chart")
+    fetch("/temp_output.json")
       .then(response => response.json())
       .then(data => {
         if (!data || !data.male || !data.female) {
@@ -1787,7 +1786,6 @@
     document.getElementById('interactiveAnalysisError').style.display = 'block';
   }
 </script>
-
 
 </body>
 

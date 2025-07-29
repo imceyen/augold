@@ -1,17 +1,17 @@
 {
   "metadata": {
-    "analysis_time": "2025-07-29 10:40:54",
+    "analysis_time": "2025-07-29 11:17:56",
     "base_time": "2025-07-28 14:19:15",
-    "threshold_hours": 24,
+    "threshold_hours": 1,
     "version": "1.0"
   },
   "summary": {
     "total": 3000,
-    "abandoned": 2367,
-    "active": 633,
-    "rate": 78.9,
+    "abandoned": 2442,
+    "active": 558,
+    "rate": 81.4,
     "base_time": "2025-07-28 14:19:15",
-    "threshold_hours": 24
+    "threshold_hours": 1
   },
   "charts": {
     "abandonment_donut": {
@@ -23,8 +23,8 @@
           "정상"
         ],
         "values": [
-          2367,
-          633
+          2442,
+          558
         ],
         "colors": [
           "#FF6B6B",
@@ -102,9 +102,9 @@
           "24K"
         ],
         "y": [
-          826,
-          779,
-          762
+          850,
+          802,
+          790
         ],
         "colors": [
           "#FFD93D",
@@ -125,18 +125,18 @@
           "7일이상"
         ],
         "y": [
-          0,
-          0,
+          21,
+          54,
           184,
           341,
           1842
         ],
         "percentages": [
-          0.0,
-          0.0,
-          7.77355302070131,
-          14.406421630756231,
-          77.82002534854246
+          0.85995085995086,
+          2.211302211302211,
+          7.534807534807535,
+          13.963963963963963,
+          75.42997542997543
         ],
         "colors": [
           "#FF9999",
@@ -150,12 +150,12 @@
   },
   "insights": {
     "summary": {
-      "total_abandoned": 2367,
-      "avg_hours": 368.0,
+      "total_abandoned": 2442,
+      "avg_hours": 357.1,
       "top_karat": "18K",
-      "top_karat_count": 826,
+      "top_karat_count": 850,
       "peak_hour": 13,
-      "avg_abandon_per_customer": 1.7,
+      "avg_abandon_per_customer": 1.8,
       "max_abandon_customer": 7,
       "base_time": "2025-07-28 14:19:15"
     },
@@ -167,10 +167,10 @@
       "고객별 맞춤 추천 시스템 도입"
     ],
     "key_findings": [
-      "총 2,367개 아이템이 평균 368.0시간 후 이탈",
-      "18K 순도가 826건으로 가장 많이 이탈",
+      "총 2,442개 아이템이 평균 357.1시간 후 이탈",
+      "18K 순도가 850건으로 가장 많이 이탈",
       "13시에 장바구니 추가가 가장 활발",
-      "고객당 평균 1.7개 아이템 이탈"
+      "고객당 평균 1.8개 아이템 이탈"
     ]
   },
   "threshold_analysis": [
