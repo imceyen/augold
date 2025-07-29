@@ -287,12 +287,17 @@
         데이터를 불러오는 중입니다...
       </div>
 
-      <!-- 차트가 그려질 영역 -->
-      <div style="display: flex; gap: 30px; justify-content: center; flex-wrap: wrap;">
-        <!-- 1. 요일별 트렌드 차트가 그려질 곳 -->
-        <div id="salesWeeklyPlot" style="flex:1; min-width:400px; max-width:600px;"></div>
-        <!-- 2. 월별 트렌드 차트가 그려질 곳 -->
-        <div id="salesYearlyPlot" style="flex:1; min-width:400px; max-width:600px;"></div>
+      <!-- 차트가 나란히 그려질 영역 -->
+      <div style="display: flex; gap: 30px; justify-content: center; flex-wrap: nowrap;">
+        <!-- 1. 요일별 트렌드 차트 -->
+        <div id="salesWeeklyPlot" style="flex:1; min-width:400px; max-width:600px;">
+          <canvas id="salesWeeklyCanvas"></canvas>
+        </div>
+
+        <!-- 2. 월별 트렌드 차트 -->
+        <div id="yearlyChart" style="flex:1; min-width:400px; max-width:600px;">
+          <canvas id="salesYearlyCanvas"></canvas>
+        </div>
       </div>
     </div>
 
@@ -808,69 +813,137 @@
   /**
    * 요일, 월별 트렌드 분석 데이터 로드 및 그래프 그리기 함수
    */
+  let weeklyChart = null;
+  let yearlyChart = null;
+
   function loadOrderTrends() {
       const loadingMsg = document.getElementById('orderTrendsLoading');
-      const weeklyPlotDiv = document.getElementById('salesWeeklyPlot');
-      const yearlyPlotDiv = document.getElementById('salesYearlyPlot');
+      const weeklyCanvas = document.getElementById('salesWeeklyCanvas');
+      const yearlyCanvas = document.getElementById('salesYearlyCanvas');
 
-      // 로딩 메시지 표시 및 이전 차트 내용 초기화
       loadingMsg.style.display = 'block';
-      weeklyPlotDiv.innerHTML = '';
-      yearlyPlotDiv.innerHTML = '';
+      loadingMsg.innerText = '로딩 중...';
 
-      // Java Controller에 정의된 API 호출
+      // 기존 차트가 있으면 제거
+      if (weeklyChart) {
+          weeklyChart.destroy();
+      }
+      if (yearlyChart) {
+          yearlyChart.destroy();
+      }
+
       fetch('/api/statistics/order-trends')
           .then(response => {
               if (!response.ok) {
-                  // 서버 응답이 실패하면(예: 500 에러) 에러를 발생시킴
                   throw new Error('서버 응답 오류: ' + response.statusText);
               }
               return response.json();
           })
           .then(data => {
-              // 서버에서 에러 메시지를 보냈는지 확인 (컨트롤러의 Map.of("error", ...))
               if (data.error) {
                   throw new Error(data.error);
               }
 
-              // 로딩 메시지 숨김
               loadingMsg.style.display = 'none';
 
-              // 1. 요일별 매출 트렌드 그래프 (Bar Chart)
-              const weeklyData = data.weekly_seasonality; // Python 결과의 key: weekly_seasonality
-              Plotly.newPlot('salesWeeklyPlot', [{
-                  x: weeklyData.map(d => d.day_name),
-                  y: weeklyData.map(d => d.weekly_effect),
+              // 요일별 데이터 준비
+              const weeklyLabels = data.weekly_seasonality.map(d => d.day_name);
+              const weeklyValues = data.weekly_seasonality.map(d => d.weekly_effect);
+              const weeklyColors = weeklyValues.map(v => v > 0 ? 'crimson' : 'royalblue');
+
+              weeklyChart = new Chart(weeklyCanvas, {
                   type: 'bar',
-                  name: '요일별 효과',
-                  marker: { color: weeklyData.map(d => d.weekly_effect > 0 ? 'crimson' : 'royalblue') }
-              }], {
-                  title: '요일별 매출 트렌드',
-                  xaxis: { title: '요일' },
-                  yaxis: { title: '매출 증감 효과', tickformat: ',.0f' }
+                  data: {
+                      labels: weeklyLabels,
+                      datasets: [{
+                          label: '요일별 효과',
+                          data: weeklyValues,
+                          backgroundColor: weeklyColors
+                      }]
+                  },
+                  options: {
+                      responsive: true,
+                      plugins: {
+                          title: {
+                              display: true,
+                              text: '요일별 매출 트렌드'
+                          }
+                      },
+                      scales: {
+                          x: {
+                              title: {
+                                  display: true,
+                                  text: '요일'
+                              }
+                          },
+                          y: {
+                              title: {
+                                  display: true,
+                                  text: '매출 증감 효과'
+                              },
+                              ticks: {
+                                  callback: value => value.toLocaleString()
+                              }
+                          }
+                      }
+                  }
               });
 
-              // 2. 월별 매출 트렌드 그래프 (Line Chart)
-              const yearlyData = data.yearly_seasonality; // Python 결과의 key: yearly_seasonality
-              Plotly.newPlot('salesYearlyPlot', [{
-                  x: yearlyData.map(d => d.month_name),
-                  y: yearlyData.map(d => d.yearly_effect),
-                  mode: 'lines+markers',
-                  type: 'scatter',
-                  name: '월별 효과'
-              }], {
-                  title: '월별 매출 트렌드',
-                  xaxis: { title: '월' },
-                  yaxis: { title: '매출 증감 효과', tickformat: ',.0f' }
+              // 월별 데이터 준비
+              const yearlyLabels = data.yearly_seasonality.map(d => d.month_name);
+              const yearlyValues = data.yearly_seasonality.map(d => d.yearly_effect);
+
+              yearlyChart = new Chart(yearlyCanvas, {
+                  type: 'line',
+                  data: {
+                      labels: yearlyLabels,
+                      datasets: [{
+                          label: '월별 효과',
+                          data: yearlyValues,
+                          borderColor: 'teal',
+                          backgroundColor: 'rgba(0, 128, 128, 0.1)',
+                          tension: 0.4,
+                          fill: true,
+                          pointRadius: 5,
+                          pointHoverRadius: 7
+                      }]
+                  },
+                  options: {
+                      responsive: true,
+                      plugins: {
+                          title: {
+                              display: true,
+                              text: '월별 매출 트렌드'
+                          }
+                      },
+                      scales: {
+                          x: {
+                              title: {
+                                  display: true,
+                                  text: '월'
+                              }
+                          },
+                          y: {
+                              title: {
+                                  display: true,
+                                  text: '매출 증감 효과'
+                              },
+                              ticks: {
+                                  callback: value => value.toLocaleString()
+                              }
+                          }
+                      }
+                  }
               });
+
           })
           .catch(error => {
-              // fetch 요청 실패 또는 위에서 발생시킨 에러 처리
               console.error('Error fetching order trends data:', error);
               loadingMsg.innerText = '데이터를 불러오는 데 실패했습니다. \n오류: ' + error.message;
               loadingMsg.style.color = 'red';
           });
   }
+
 
   // ... 다른 스크립트 함수들 ...
 
