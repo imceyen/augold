@@ -1,0 +1,672 @@
+{
+  "male": [
+    {
+      "Gender": "남",
+      "Age_Group": "20대",
+      "Category": "골드바",
+      "Total_Price": 6880637600
+    },
+    {
+      "Gender": "남",
+      "Age_Group": "20대",
+      "Category": "기념품",
+      "Total_Price": 1121215600
+    },
+    {
+      "Gender": "남",
+      "Age_Group": "20대",
+      "Category": "주얼리",
+      "Total_Price": 1876191100
+    },
+    {
+      "Gender": "남",
+      "Age_Group": "30대",
+      "Category": "골드바",
+      "Total_Price": 8510394600
+    },
+    {
+      "Gender": "남",
+      "Age_Group": "30대",
+      "Category": "기념품",
+      "Total_Price": 1321838100
+    },
+    {
+      "Gender": "남",
+      "Age_Group": "30대",
+      "Category": "주얼리",
+      "Total_Price": 2309753600
+    },
+    {
+      "Gender": "남",
+      "Age_Group": "40대",
+      "Category": "골드바",
+      "Total_Price": 8528114500
+    },
+    {
+      "Gender": "남",
+      "Age_Group": "40대",
+      "Category": "기념품",
+      "Total_Price": 1448929300
+    },
+    {
+      "Gender": "남",
+      "Age_Group": "40대",
+      "Category": "주얼리",
+      "Total_Price": 2369410700
+    },
+    {
+      "Gender": "남",
+      "Age_Group": "50대",
+      "Category": "골드바",
+      "Total_Price": 8030956400
+    },
+    {
+      "Gender": "남",
+      "Age_Group": "50대",
+      "Category": "기념품",
+      "Total_Price": 1289833800
+    },
+    {
+      "Gender": "남",
+      "Age_Group": "50대",
+      "Category": "주얼리",
+      "Total_Price": 2234757500
+    },
+    {
+      "Gender": "남",
+      "Age_Group": "60대 이상",
+      "Category": "골드바",
+      "Total_Price": 14102791500
+    },
+    {
+      "Gender": "남",
+      "Age_Group": "60대 이상",
+      "Category": "기념품",
+      "Total_Price": 2087159400
+    },
+    {
+      "Gender": "남",
+      "Age_Group": "60대 이상",
+      "Category": "주얼리",
+      "Total_Price": 3539666900
+    }
+  ],
+  "female": [
+    {
+      "Gender": "여",
+      "Age_Group": "20대",
+      "Category": "골드바",
+      "Total_Price": 6712923800
+    },
+    {
+      "Gender": "여",
+      "Age_Group": "20대",
+      "Category": "기념품",
+      "Total_Price": 1012942100
+    },
+    {
+      "Gender": "여",
+      "Age_Group": "20대",
+      "Category": "주얼리",
+      "Total_Price": 1819099900
+    },
+    {
+      "Gender": "여",
+      "Age_Group": "30대",
+      "Category": "골드바",
+      "Total_Price": 8279080400
+    },
+    {
+      "Gender": "여",
+      "Age_Group": "30대",
+      "Category": "기념품",
+      "Total_Price": 1291898000
+    },
+    {
+      "Gender": "여",
+      "Age_Group": "30대",
+      "Category": "주얼리",
+      "Total_Price": 2304792200
+    },
+    {
+      "Gender": "여",
+      "Age_Group": "40대",
+      "Category": "골드바",
+      "Total_Price": 8663094700
+    },
+    {
+      "Gender": "여",
+      "Age_Group": "40대",
+      "Category": "기념품",
+      "Total_Price": 1285030600
+    },
+    {
+      "Gender": "여",
+      "Age_Group": "40대",
+      "Category": "주얼리",
+      "Total_Price": 2292576000
+    },
+    {
+      "Gender": "여",
+      "Age_Group": "50대",
+      "Category": "골드바",
+      "Total_Price": 8156599300
+    },
+    {
+      "Gender": "여",
+      "Age_Group": "50대",
+      "Category": "기념품",
+      "Total_Price": 1393518700
+    },
+    {
+      "Gender": "여",
+      "Age_Group": "50대",
+      "Category": "주얼리",
+      "Total_Price": 2362914500
+    },
+    {
+      "Gender": "여",
+      "Age_Group": "60대 이상",
+      "Category": "골드바",
+      "Total_Price": 13772108500
+    },
+    {
+      "Gender": "여",
+      "Age_Group": "60대 이상",
+      "Category": "기념품",
+      "Total_Price": 2179681300
+    },
+    {
+      "Gender": "여",
+      "Age_Group": "60대 이상",
+      "Category": "주얼리",
+      "Total_Price": 3840820000
+    }
+  ],
+  "top_bottom": {
+    "top3": [
+      {
+        "Gender": "남",
+        "Age_Group": "20대",
+        "Products": [
+          {
+            "Gender": "남",
+            "Age_Group": "20대",
+            "Product_Name": "37.5g 골드바",
+            "Total_Price": 3660367400
+          },
+          {
+            "Gender": "남",
+            "Age_Group": "20대",
+            "Product_Name": "18.750g 골드바",
+            "Total_Price": 1559642000
+          },
+          {
+            "Gender": "남",
+            "Age_Group": "20대",
+            "Product_Name": "11.250g 골드바",
+            "Total_Price": 1136440800
+          }
+        ]
+      },
+      {
+        "Gender": "남",
+        "Age_Group": "30대",
+        "Products": [
+          {
+            "Gender": "남",
+            "Age_Group": "30대",
+            "Product_Name": "37.5g 골드바",
+            "Total_Price": 4363760700
+          },
+          {
+            "Gender": "남",
+            "Age_Group": "30대",
+            "Product_Name": "18.750g 골드바",
+            "Total_Price": 2141426200
+          },
+          {
+            "Gender": "남",
+            "Age_Group": "30대",
+            "Product_Name": "11.250g 골드바",
+            "Total_Price": 1365466300
+          }
+        ]
+      },
+      {
+        "Gender": "남",
+        "Age_Group": "40대",
+        "Products": [
+          {
+            "Gender": "남",
+            "Age_Group": "40대",
+            "Product_Name": "37.5g 골드바",
+            "Total_Price": 4582579000
+          },
+          {
+            "Gender": "남",
+            "Age_Group": "40대",
+            "Product_Name": "18.750g 골드바",
+            "Total_Price": 2131767000
+          },
+          {
+            "Gender": "남",
+            "Age_Group": "40대",
+            "Product_Name": "11.250g 골드바",
+            "Total_Price": 1173821400
+          }
+        ]
+      },
+      {
+        "Gender": "남",
+        "Age_Group": "50대",
+        "Products": [
+          {
+            "Gender": "남",
+            "Age_Group": "50대",
+            "Product_Name": "37.5g 골드바",
+            "Total_Price": 4031781700
+          },
+          {
+            "Gender": "남",
+            "Age_Group": "50대",
+            "Product_Name": "18.750g 골드바",
+            "Total_Price": 2061578000
+          },
+          {
+            "Gender": "남",
+            "Age_Group": "50대",
+            "Product_Name": "11.250g 골드바",
+            "Total_Price": 1268287400
+          }
+        ]
+      },
+      {
+        "Gender": "남",
+        "Age_Group": "60대 이상",
+        "Products": [
+          {
+            "Gender": "남",
+            "Age_Group": "60대 이상",
+            "Product_Name": "37.5g 골드바",
+            "Total_Price": 7126911700
+          },
+          {
+            "Gender": "남",
+            "Age_Group": "60대 이상",
+            "Product_Name": "18.750g 골드바",
+            "Total_Price": 3851725900
+          },
+          {
+            "Gender": "남",
+            "Age_Group": "60대 이상",
+            "Product_Name": "11.250g 골드바",
+            "Total_Price": 2080533600
+          }
+        ]
+      },
+      {
+        "Gender": "여",
+        "Age_Group": "20대",
+        "Products": [
+          {
+            "Gender": "여",
+            "Age_Group": "20대",
+            "Product_Name": "37.5g 골드바",
+            "Total_Price": 3546555000
+          },
+          {
+            "Gender": "여",
+            "Age_Group": "20대",
+            "Product_Name": "18.750g 골드바",
+            "Total_Price": 1668140900
+          },
+          {
+            "Gender": "여",
+            "Age_Group": "20대",
+            "Product_Name": "11.250g 골드바",
+            "Total_Price": 991976600
+          }
+        ]
+      },
+      {
+        "Gender": "여",
+        "Age_Group": "30대",
+        "Products": [
+          {
+            "Gender": "여",
+            "Age_Group": "30대",
+            "Product_Name": "37.5g 골드바",
+            "Total_Price": 4197060400
+          },
+          {
+            "Gender": "여",
+            "Age_Group": "30대",
+            "Product_Name": "18.750g 골드바",
+            "Total_Price": 2153783900
+          },
+          {
+            "Gender": "여",
+            "Age_Group": "30대",
+            "Product_Name": "11.250g 골드바",
+            "Total_Price": 1279687300
+          }
+        ]
+      },
+      {
+        "Gender": "여",
+        "Age_Group": "40대",
+        "Products": [
+          {
+            "Gender": "여",
+            "Age_Group": "40대",
+            "Product_Name": "37.5g 골드바",
+            "Total_Price": 4638334400
+          },
+          {
+            "Gender": "여",
+            "Age_Group": "40대",
+            "Product_Name": "18.750g 골드바",
+            "Total_Price": 2075851400
+          },
+          {
+            "Gender": "여",
+            "Age_Group": "40대",
+            "Product_Name": "11.250g 골드바",
+            "Total_Price": 1256201100
+          }
+        ]
+      },
+      {
+        "Gender": "여",
+        "Age_Group": "50대",
+        "Products": [
+          {
+            "Gender": "여",
+            "Age_Group": "50대",
+            "Product_Name": "37.5g 골드바",
+            "Total_Price": 3896396700
+          },
+          {
+            "Gender": "여",
+            "Age_Group": "50대",
+            "Product_Name": "18.750g 골드바",
+            "Total_Price": 2271356200
+          },
+          {
+            "Gender": "여",
+            "Age_Group": "50대",
+            "Product_Name": "11.250g 골드바",
+            "Total_Price": 1301915600
+          }
+        ]
+      },
+      {
+        "Gender": "여",
+        "Age_Group": "60대 이상",
+        "Products": [
+          {
+            "Gender": "여",
+            "Age_Group": "60대 이상",
+            "Product_Name": "37.5g 골드바",
+            "Total_Price": 6883108400
+          },
+          {
+            "Gender": "여",
+            "Age_Group": "60대 이상",
+            "Product_Name": "18.750g 골드바",
+            "Total_Price": 3859024500
+          },
+          {
+            "Gender": "여",
+            "Age_Group": "60대 이상",
+            "Product_Name": "11.250g 골드바",
+            "Total_Price": 2017036100
+          }
+        ]
+      }
+    ],
+    "bottom3": [
+      {
+        "Gender": "남",
+        "Age_Group": "20대",
+        "Products": [
+          {
+            "Gender": "남",
+            "Age_Group": "20대",
+            "Product_Name": "14K 볼 라운드 귀걸이",
+            "Total_Price": 19906600
+          },
+          {
+            "Gender": "남",
+            "Age_Group": "20대",
+            "Product_Name": "14K 커팅 스톤 목걸이",
+            "Total_Price": 22244400
+          },
+          {
+            "Gender": "남",
+            "Age_Group": "20대",
+            "Product_Name": "18K 볼 라운드 귀걸이",
+            "Total_Price": 22917200
+          }
+        ]
+      },
+      {
+        "Gender": "남",
+        "Age_Group": "30대",
+        "Products": [
+          {
+            "Gender": "남",
+            "Age_Group": "30대",
+            "Product_Name": "14K 볼 라운드 귀걸이",
+            "Total_Price": 21762300
+          },
+          {
+            "Gender": "남",
+            "Age_Group": "30대",
+            "Product_Name": "14K 베이직 하트 목걸이",
+            "Total_Price": 24625300
+          },
+          {
+            "Gender": "남",
+            "Age_Group": "30대",
+            "Product_Name": "14K 커팅 스톤 목걸이",
+            "Total_Price": 24849600
+          }
+        ]
+      },
+      {
+        "Gender": "남",
+        "Age_Group": "40대",
+        "Products": [
+          {
+            "Gender": "남",
+            "Age_Group": "40대",
+            "Product_Name": "14K 볼 라운드 귀걸이",
+            "Total_Price": 26823300
+          },
+          {
+            "Gender": "남",
+            "Age_Group": "40대",
+            "Product_Name": "14K 베이직 하트 목걸이",
+            "Total_Price": 28115500
+          },
+          {
+            "Gender": "남",
+            "Age_Group": "40대",
+            "Product_Name": "14K 네잎클로버 목걸이",
+            "Total_Price": 29412600
+          }
+        ]
+      },
+      {
+        "Gender": "남",
+        "Age_Group": "50대",
+        "Products": [
+          {
+            "Gender": "남",
+            "Age_Group": "50대",
+            "Product_Name": "18K 볼 라운드 귀걸이",
+            "Total_Price": 24646800
+          },
+          {
+            "Gender": "남",
+            "Age_Group": "50대",
+            "Product_Name": "14K 베이직 하트 목걸이",
+            "Total_Price": 25788700
+          },
+          {
+            "Gender": "남",
+            "Age_Group": "50대",
+            "Product_Name": "14K 네잎클로버 목걸이",
+            "Total_Price": 27636000
+          }
+        ]
+      },
+      {
+        "Gender": "남",
+        "Age_Group": "60대 이상",
+        "Products": [
+          {
+            "Gender": "남",
+            "Age_Group": "60대 이상",
+            "Product_Name": "14K 볼 라운드 귀걸이",
+            "Total_Price": 32390400
+          },
+          {
+            "Gender": "남",
+            "Age_Group": "60대 이상",
+            "Product_Name": "14K 베이직 하트 목걸이",
+            "Total_Price": 39749500
+          },
+          {
+            "Gender": "남",
+            "Age_Group": "60대 이상",
+            "Product_Name": "14K 네잎클로버 목걸이",
+            "Total_Price": 47573400
+          }
+        ]
+      },
+      {
+        "Gender": "여",
+        "Age_Group": "20대",
+        "Products": [
+          {
+            "Gender": "여",
+            "Age_Group": "20대",
+            "Product_Name": "14K 볼 라운드 귀걸이",
+            "Total_Price": 15857800
+          },
+          {
+            "Gender": "여",
+            "Age_Group": "20대",
+            "Product_Name": "14K 베이직 하트 목걸이",
+            "Total_Price": 19583900
+          },
+          {
+            "Gender": "여",
+            "Age_Group": "20대",
+            "Product_Name": "14K 커팅 스톤 목걸이",
+            "Total_Price": 22444800
+          }
+        ]
+      },
+      {
+        "Gender": "여",
+        "Age_Group": "30대",
+        "Products": [
+          {
+            "Gender": "여",
+            "Age_Group": "30대",
+            "Product_Name": "18K 볼 라운드 귀걸이",
+            "Total_Price": 25727800
+          },
+          {
+            "Gender": "여",
+            "Age_Group": "30대",
+            "Product_Name": "18K 네잎클로버 목걸이",
+            "Total_Price": 27587900
+          },
+          {
+            "Gender": "여",
+            "Age_Group": "30대",
+            "Product_Name": "14K 네잎클로버 목걸이",
+            "Total_Price": 29807400
+          }
+        ]
+      },
+      {
+        "Gender": "여",
+        "Age_Group": "40대",
+        "Products": [
+          {
+            "Gender": "여",
+            "Age_Group": "40대",
+            "Product_Name": "14K 볼 라운드 귀걸이",
+            "Total_Price": 28847700
+          },
+          {
+            "Gender": "여",
+            "Age_Group": "40대",
+            "Product_Name": "14K 네잎클로버 목걸이",
+            "Total_Price": 29610000
+          },
+          {
+            "Gender": "여",
+            "Age_Group": "40대",
+            "Product_Name": "18K 네잎클로버 목걸이",
+            "Total_Price": 30372000
+          }
+        ]
+      },
+      {
+        "Gender": "여",
+        "Age_Group": "50대",
+        "Products": [
+          {
+            "Gender": "여",
+            "Age_Group": "50대",
+            "Product_Name": "14K 볼 라운드 귀걸이",
+            "Total_Price": 14170800
+          },
+          {
+            "Gender": "여",
+            "Age_Group": "50대",
+            "Product_Name": "14K 네잎클로버 목걸이",
+            "Total_Price": 23293200
+          },
+          {
+            "Gender": "여",
+            "Age_Group": "50대",
+            "Product_Name": "14K 커팅 스톤 목걸이",
+            "Total_Price": 31062000
+          }
+        ]
+      },
+      {
+        "Gender": "여",
+        "Age_Group": "60대 이상",
+        "Products": [
+          {
+            "Gender": "여",
+            "Age_Group": "60대 이상",
+            "Product_Name": "14K 볼 라운드 귀걸이",
+            "Total_Price": 38632300
+          },
+          {
+            "Gender": "여",
+            "Age_Group": "60대 이상",
+            "Product_Name": "14K 커팅 스톤 목걸이",
+            "Total_Price": 44889600
+          },
+          {
+            "Gender": "여",
+            "Age_Group": "60대 이상",
+            "Product_Name": "14K 네잎클로버 목걸이",
+            "Total_Price": 45796800
+          }
+        ]
+      }
+    ]
+  }
+}
