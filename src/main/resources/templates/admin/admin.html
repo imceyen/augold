@@ -101,8 +101,8 @@
     }
   </style>
 
-  <!-- 🔷 Plotly.js 추가 -->
-  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <!-- 🔷 Plotly.js 업데이트된 버전 -->
+  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
 </head>
 
 <body>
@@ -221,6 +221,7 @@
       <button class="stats-subtab-btn" onclick="showStatsSubTab('demographics', event)">성별/연령대별 매출/구매패턴 분석</button>
       <button class="stats-subtab-btn" onclick="showStatsSubTab('orderTrends', event)">판매날짜 기반 주문 트렌드 분석</button>
       <button class="stats-subtab-btn" onclick="showStatsSubTab('categoryProfit', event)">카테고리별 이익률 분석/예측</button>
+      <button class="stats-subtab-btn" onclick="showStatsSubTab('cartAbandonment', event)">장바구니 이탈 분석</button>
     </div>
 
     <div id="salesAnalysis" class="stats-subtab-content active">
@@ -296,9 +297,6 @@
     </div>
 
     <div id="goldPrice" class="stats-subtab-content active">
-      <!-- Plotly.js CDN 추가 -->
-      <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
-
       <div id="loadingMessage" style="text-align: center; padding: 50px; font-size: 1.2em;">
         데이터를 불러오는 중입니다...
       </div>
@@ -328,6 +326,122 @@
       </div>
       <!-- 🔽 Plotly 그래프 -->
       <div id="categoryProfitPlot" class="plot-container" style="width: 90%; max-width: 900px; margin: 20px auto; display: none;"></div>
+    </div>
+  </div>
+  <div id="cartAbandonment" class="stats-subtab-content">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <h3>🛒 장바구니 이탈 분석 (인터랙티브)</h3>
+      <div style="display: flex; gap: 15px; align-items: center;">
+        <label>
+          이탈 기준:
+          <select id="abandonmentThreshold">
+            <option value="1" selected>1시간</option>
+            <option value="2">2시간</option>
+            <option value="6">6시간</option>
+            <option value="12">12시간</option>
+            <option value="24">24시간</option>
+          </select>
+        </label>
+        <button id="executeAnalysisBtn" onclick="executeInteractiveCartAnalysis()"
+                style="padding: 10px 20px; background-color: #4ECDC4; color: white; border: none; border-radius: 5px; cursor: pointer;">
+          📊 분석 실행
+        </button>
+        <button onclick="loadExistingAnalysis()"
+                style="padding: 10px 15px; background-color: #17a2b8; color: white; border: none; border-radius: 5px; cursor: pointer;">
+          📂 기존 결과 로드
+        </button>
+      </div>
+    </div>
+
+    <!-- 로딩 영역 -->
+    <div id="interactiveAnalysisLoading" style="display: none; text-align: center; padding: 40px; border: 2px dashed #ddd; border-radius: 10px; margin-bottom: 20px;">
+      <div style="font-size: 20px; margin-bottom: 10px;">🔄</div>
+      <div style="font-size: 16px; color: #666;">장바구니 이탈 분석 실행 중...</div>
+      <div style="font-size: 14px; color: #999; margin-top: 5px;">JSON 데이터 생성 중입니다</div>
+    </div>
+
+    <!-- 요약 통계 카드 -->
+    <div id="interactiveSummaryCards" style="display: none;">
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 30px;">
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px; text-align: center;">
+          <div style="font-size: 24px; font-weight: bold;" id="iTotalItems">-</div>
+          <div style="font-size: 14px; opacity: 0.9;">총 아이템</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 20px; border-radius: 8px; text-align: center;">
+          <div style="font-size: 24px; font-weight: bold;" id="iAbandonedItems">-</div>
+          <div style="font-size: 14px; opacity: 0.9;">이탈 아이템</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 20px; border-radius: 8px; text-align: center;">
+          <div style="font-size: 24px; font-weight: bold;" id="iActiveItems">-</div>
+          <div style="font-size: 14px; opacity: 0.9;">활성 아이템</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; padding: 20px; border-radius: 8px; text-align: center;">
+          <div style="font-size: 24px; font-weight: bold;" id="iAbandonmentRate">-</div>
+          <div style="font-size: 14px; opacity: 0.9;">이탈률</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 인터랙티브 차트 영역 -->
+    <div id="interactiveCharts" style="display: none;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+        <!-- 이탈률 도넛차트 -->
+        <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+          <div id="interactiveAbandonmentChart" style="height: 400px;"></div>
+        </div>
+
+        <!-- 시간대별 라인차트 -->
+        <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+          <div id="interactiveHourlyChart" style="height: 400px;"></div>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+        <!-- 순도별 바차트 -->
+        <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+          <div id="interactiveKaratChart" style="height: 400px;"></div>
+        </div>
+
+        <!-- 이탈 시간 분포 -->
+        <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+          <div id="interactiveTimeChart" style="height: 400px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 다양한 시간대별 이탈률 비교 -->
+    <div id="thresholdComparison" style="display: none; margin-bottom: 30px;">
+      <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <h4 style="margin-bottom: 15px;">📊 다양한 기준별 이탈률 비교</h4>
+        <div id="thresholdComparisonChart" style="height: 400px;"></div>
+      </div>
+    </div>
+
+    <!-- 인사이트 및 액션 아이템 -->
+    <div id="interactiveInsights" style="display: none;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <!-- 핵심 인사이트 -->
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px;">
+          <h4 style="margin-bottom: 15px;">💡 핵심 발견사항</h4>
+          <div id="keyFindings" style="line-height: 1.8; font-size: 14px;">
+            <!-- JavaScript로 채워집니다 -->
+          </div>
+        </div>
+
+        <!-- 즉시 실행 액션 -->
+        <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 20px; border-radius: 8px;">
+          <h4 style="margin-bottom: 15px;">🎯 추천 액션</h4>
+          <div id="recommendations" style="line-height: 1.8; font-size: 14px;">
+            <!-- JavaScript로 채워집니다 -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 에러 영역 -->
+    <div id="interactiveAnalysisError" style="display: none; padding: 20px; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 8px; color: #721c24;">
+      <h4>❌ 분석 오류</h4>
+      <div id="interactiveErrorContent"></div>
     </div>
   </div>
 
@@ -579,6 +693,7 @@
   let orderTrendsLoaded = false;
   let categoryProfitLoaded = false;
   let demographicsLoaded = false;
+  let cartAbandonmentLoaded = false;
 
   /**
    * 메인 탭 전환 함수
@@ -636,7 +751,11 @@
       } else if (subTabId === 'demographics' && !demographicsLoaded) {
           loadDemographicsChart();
           demographicsLoaded = true;
+      } else if (subTabId === 'cartAbandonment') {
+      console.log('🛒 장바구니 이탈 분석 탭 활성화');
       }
+
+
   }
 
   // --- 차트 로드 함수들 ---
@@ -993,7 +1112,6 @@
 
 <script> // 영업이익률 차트
     let categoryProfitLoaded = false;
->>>>>>> Stashed changes
 
     // 차트 초기화
     function drawSalesAnalysisChart(data) {
@@ -1296,14 +1414,14 @@
       const plotDivMale = document.getElementById("genderAgeChartPlotMale");
       const plotDivFemale = document.getElementById("genderAgeChartPlotFemale");
       if (!loadingDiv || !plotDivMale || !plotDivFemale) {
-        console.error("[\uC131\uBCC4/\uC5F0\uB839\uB300] \uD544\uC694\uD55C div\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4.");
+        console.error("성별/연령대 필요한 div가 없습니다.");
         return;
       }
       fetch("/temp_output.json")
         .then(response => response.json())
         .then(data => {
           if (!data || !data.male || !data.female) {
-            loadingDiv.innerText = "\uB370\uC774\uD130\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4.";
+            loadingDiv.innerText = "데이터가 없습니다.";
             return;
           }
           const maleData = data.male;
@@ -1371,7 +1489,303 @@
     });
 </script>
 
+<script>
+  // 장바구니 이탈 분석 전역 변수
+  let cartAnalysisData = null;
 
+  /**
+   * 인터랙티브 장바구니 이탈 분석 실행 (선택된 시간으로 Python 재실행)
+   */
+  function executeInteractiveCartAnalysis() {
+    const threshold = document.getElementById('abandonmentThreshold').value;
+    const loadingDiv = document.getElementById('interactiveAnalysisLoading');
+    const executeBtn = document.getElementById('executeAnalysisBtn');
+
+    // UI 초기화
+    hideAllAnalysisElements();
+    loadingDiv.style.display = 'block';
+    executeBtn.disabled = true;
+    executeBtn.textContent = '실행 중...';
+
+    console.log(`🛒 새로운 분석 실행 (기준: ${threshold}시간)`);
+
+    // 🔥 핵심: 선택된 시간으로 Python 스크립트 실행
+    fetch('/api/cart-analysis/execute', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ hours: parseInt(threshold) })
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log('Python 실행 결과:', data);
+
+      if (data.status === 'success') {
+        console.log(`✅ ${threshold}시간 기준 분석 완료! 새 JSON 파일 생성됨`);
+        // 성공 시 새로 생성된 JSON 데이터 로드 (캐시 무시)
+        return loadAnalysisJsonData(true);
+      } else {
+        throw new Error(data.message || 'Python 스크립트 실행 실패');
+      }
+    })
+    .then(() => {
+      console.log('✅ 새로운 분석 결과 로드 완료');
+      loadingDiv.style.display = 'none';
+      executeBtn.disabled = false;
+      executeBtn.textContent = '📊 분석 실행';
+
+      showInteractiveAnalysisResults();
+    })
+    .catch(error => {
+      console.error('❌ 분석 실패:', error);
+      loadingDiv.style.display = 'none';
+      executeBtn.disabled = false;
+      executeBtn.textContent = '📊 분석 실행';
+
+      showInteractiveError(error.message);
+    });
+  }
+
+  /**
+   * 기존 분석 결과 로드 (Python 실행 없이 현재 JSON만 로드)
+   */
+  function loadExistingAnalysis() {
+    console.log('📂 기존 분석 결과 로드 시도');
+
+    hideAllAnalysisElements();
+    document.getElementById('interactiveAnalysisLoading').style.display = 'block';
+
+    loadAnalysisJsonData(false) // 캐시 사용
+      .then(() => {
+        console.log('✅ 기존 결과 로드 완료');
+        document.getElementById('interactiveAnalysisLoading').style.display = 'none';
+        showInteractiveAnalysisResults();
+      })
+      .catch(error => {
+        console.error('❌ 기존 결과 로드 실패:', error);
+        document.getElementById('interactiveAnalysisLoading').style.display = 'none';
+        showInteractiveError('기존 분석 결과가 없습니다. 먼저 분석을 실행해주세요.');
+      });
+  }
+
+  /**
+   * JSON 분석 데이터 로드 (static 폴더에서 직접 로드)
+   */
+  function loadAnalysisJsonData() {
+    console.log('📂 JSON 파일 로드 시도...');
+
+    return fetch('/cart_abandonment_analysis.json')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`JSON 파일을 찾을 수 없습니다. cart_abandonment_analysis.json 파일이 src/main/resources/static/ 폴더에 있는지 확인해주세요.`);
+        }
+        console.log('✅ JSON 파일 로드 성공!');
+        return response.json();
+      })
+      .then(data => {
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
+        cartAnalysisData = data;
+        console.log('📊 JSON 데이터 로드 완료:', data);
+        return data;
+      });
+  }
+
+  /**
+   * 에러 메시지 업데이트
+   */
+  function tryLoadFromFiles(fileList, index) {
+    // 이 함수는 더 이상 사용하지 않습니다.
+    // 단순화를 위해 loadAnalysisJsonData에서 직접 처리합니다.
+  }
+
+  /**
+   * 인터랙티브 분석 결과 표시 (Python 스크립트 JSON 구조에 맞게 수정)
+   */
+  function showInteractiveAnalysisResults() {
+    if (!cartAnalysisData) {
+      showInteractiveError('분석 데이터가 없습니다.');
+      return;
+    }
+
+    const { summary, charts, insights, threshold_analysis } = cartAnalysisData;
+
+    // 요약 카드 업데이트
+    updateSummaryCards(summary);
+
+    // 인터랙티브 차트 그리기
+    drawInteractiveCharts(charts);
+
+    // 시간대별 비교 차트
+    drawThresholdComparisonChart(threshold_analysis);
+
+    // 인사이트 업데이트 (Python 스크립트 구조에 맞게)
+    updateInsights(insights);
+
+    // 모든 결과 영역 표시
+    document.getElementById('interactiveSummaryCards').style.display = 'block';
+    document.getElementById('interactiveCharts').style.display = 'block';
+    document.getElementById('thresholdComparison').style.display = 'block';
+    document.getElementById('interactiveInsights').style.display = 'block';
+  }
+
+  /**
+   * 요약 카드 업데이트
+   */
+  function updateSummaryCards(summary) {
+    document.getElementById('iTotalItems').textContent = summary.total.toLocaleString();
+    document.getElementById('iAbandonedItems').textContent = summary.abandoned.toLocaleString();
+    document.getElementById('iActiveItems').textContent = summary.active.toLocaleString();
+    document.getElementById('iAbandonmentRate').textContent = summary.rate + '%';
+  }
+
+  /**
+   * 인터랙티브 차트 그리기
+   */
+  function drawInteractiveCharts(charts) {
+    // 1. 이탈률 도넛차트
+    const abandonmentData = charts.abandonment_donut.data;
+    Plotly.newPlot('interactiveAbandonmentChart', [{
+      values: abandonmentData.values,
+      labels: abandonmentData.labels,
+      type: 'pie',
+      hole: 0.6,
+      marker: { colors: abandonmentData.colors },
+      textinfo: 'label+percent+value',
+      textposition: 'outside',
+      hovertemplate: '<b>%{label}</b><br>개수: %{value:,}<br>비율: %{percent}<extra></extra>'
+    }], {
+      title: '📊 전체 이탈률',
+      showlegend: true,
+      margin: { t: 50, b: 50, l: 50, r: 50 }
+    }, { responsive: true });
+
+    // 2. 시간대별 라인차트
+    const hourlyData = charts.hourly_line.data;
+    Plotly.newPlot('interactiveHourlyChart', [{
+      x: hourlyData.x,
+      y: hourlyData.y,
+      type: 'scatter',
+      mode: 'lines+markers',
+      line: { color: '#4ECDC4', width: 3 },
+      marker: { size: 8, color: '#FF6B6B' },
+      fill: 'tonexty',
+      fillcolor: 'rgba(78, 205, 196, 0.3)',
+      hovertemplate: '<b>%{x}시</b><br>장바구니 추가: %{y}건<extra></extra>'
+    }], {
+      title: '⏰ 시간대별 장바구니 추가 패턴',
+      xaxis: { title: '시간', dtick: 2 },
+      yaxis: { title: '추가 건수' },
+      margin: { t: 50, b: 50, l: 50, r: 50 },
+      annotations: [{
+        x: hourlyData.peak_hour,
+        y: hourlyData.peak_value,
+        text: `피크: ${hourlyData.peak_hour}시<br>(${hourlyData.peak_value}건)`,
+        arrowcolor: 'red',
+        arrowwidth: 2,
+        bgcolor: 'yellow',
+        bordercolor: 'red',
+        borderwidth: 1
+      }]
+    }, { responsive: true });
+
+    // 3. 순도별 바차트
+    const karatData = charts.karat_bar.data;
+    Plotly.newPlot('interactiveKaratChart', [{
+      x: karatData.x,
+      y: karatData.y,
+      type: 'bar',
+      marker: {
+        color: karatData.colors,
+        line: { color: 'black', width: 1 }
+      },
+      hovertemplate: '<b>%{x}</b><br>이탈 건수: %{y:,}건<extra></extra>'
+    }], {
+      title: '💎 순도별 이탈 현황',
+      xaxis: { title: '순도' },
+      yaxis: { title: '이탈 건수' },
+      margin: { t: 50, b: 50, l: 50, r: 50 }
+    }, { responsive: true });
+
+    // 4. 이탈 시간 분포
+    const timeData = charts.time_distribution.data;
+    Plotly.newPlot('interactiveTimeChart', [{
+      x: timeData.x,
+      y: timeData.y,
+      type: 'bar',
+      marker: {
+        color: timeData.colors,
+        line: { color: 'black', width: 1 }
+      },
+      text: timeData.y.map((count, i) => `${count}건<br>(${timeData.percentages[i].toFixed(1)}%)`),
+      textposition: 'outside',
+      hovertemplate: '<b>%{x}</b><br>이탈 건수: %{y:,}건<br>비율: %{text}<extra></extra>'
+    }], {
+      title: '📈 이탈 시간 분포',
+      xaxis: { title: '이탈 시간 구간' },
+      yaxis: { title: '이탈 건수' },
+      margin: { t: 50, b: 80, l: 50, r: 50 }
+    }, { responsive: true });
+  }
+
+  /**
+   * 시간대별 비교 차트 그리기
+   */
+  function drawThresholdComparisonChart(thresholdData) {
+    Plotly.newPlot('thresholdComparisonChart', [{
+      x: thresholdData.map(d => d.time_label),
+      y: thresholdData.map(d => d.rate),
+      type: 'bar',
+      marker: {
+        color: thresholdData.map(d => d.rate > 50 ? '#FF6B6B' : '#4ECDC4'),
+        line: { color: 'black', width: 1 }
+      },
+      text: thresholdData.map(d => `${d.abandoned_count.toLocaleString()}개`),
+      textposition: 'outside',
+      hovertemplate: '<b>%{x} 기준</b><br>이탈률: %{y}%<br>이탈 건수: %{text}<extra></extra>'
+    }], {
+      title: '다양한 기준별 이탈률 비교',
+      xaxis: { title: '이탈 기준 시간' },
+      yaxis: { title: '이탈률 (%)' },
+      margin: { t: 50, b: 80, l: 50, r: 50 }
+    }, { responsive: true });
+  }
+
+  /**
+   * 인사이트 업데이트 (Python 스크립트 JSON 구조에 맞게 수정)
+   */
+  function updateInsights(insights) {
+    // 핵심 발견사항
+    const findings = insights.key_findings.map(finding => `• ${finding}`).join('<br>');
+    document.getElementById('keyFindings').innerHTML = findings;
+
+    // 추천 액션
+    const recommendations = insights.recommendations.map((rec, index) => `${index + 1}. ${rec}`).join('<br>');
+    document.getElementById('recommendations').innerHTML = recommendations;
+  }
+
+  /**
+   * 모든 분석 결과 영역 숨기기
+   */
+  function hideAllAnalysisElements() {
+    const elements = [
+      'interactiveSummaryCards', 'interactiveCharts',
+      'thresholdComparison', 'interactiveInsights', 'interactiveAnalysisError'
+    ];
+    elements.forEach(id => {
+      document.getElementById(id).style.display = 'none';
+    });
+  }
+
+  /**
+   * 에러 표시
+   */
+  function showInteractiveError(message) {
+    document.getElementById('interactiveErrorContent').innerHTML = `<p>${message}</p>`;
+    document.getElementById('interactiveAnalysisError').style.display = 'block';
+  }
+</script>
 
 </body>
 
