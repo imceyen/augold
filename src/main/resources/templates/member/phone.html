@@ -2,96 +2,125 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8" />
-  <title>전화번호 변경 - AuGold</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>연락처 변경 - AuGold</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f7f7f7;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
-    .phone-container {
-      background-color: white;
-      padding: 30px 40px;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      width: 350px;
-    }
-    h2 {
-      text-align: center;
-      margin-bottom: 25px;
-      color: #333;
-    }
-    label {
-      display: block;
-      margin-bottom: 6px;
-      color: #555;
-    }
-    input[type="text"] {
-      width: 100%;
-      padding: 10px 8px;
-      margin-bottom: 18px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      box-sizing: border-box;
-      font-size: 14px;
-    }
-    button {
-      width: 100%;
-      padding: 10px 0;
-      background-color: #007bff;
-      border: none;
-      border-radius: 4px;
-      color: white;
-      font-size: 1em;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #0056b3;
-    }
-    .back-link {
-      display: block;
-      margin-top: 15px;
-      text-align: center;
-      color: #007bff;
-      text-decoration: none;
-    }
-    .back-link:hover {
-      text-decoration: underline;
-    }
-    .message {
-      color: red;
-      margin-bottom: 10px;
-      font-weight: bold;
-      text-align: center;
-    }
-    .success-message {
-      color: green;
-      margin-bottom: 10px;
-      font-weight: bold;
-      text-align: center;
-    }
+    /* --- Google Fonts --- */
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+    /* --- 기본 & 초기화 --- */
+    body { margin: 0; font-family: 'Noto Sans KR', sans-serif; background-color: #f5f7fa; color: #333d4b; }
+    a { text-decoration: none; color: inherit; }
+    /* --- 페이지 헤더 --- */
+    .page-header { background-color: #fff; border-bottom: 1px solid #e4e8eb; padding: 0 24px; }
+    .header-content { display: flex; justify-content: space-between; align-items: center; max-width: 1080px; margin: 0 auto; height: 64px; }
+    .logo { font-weight: 700; font-size: 22px; color: #1e2025; }
+    .main-nav a { font-size: 16px; font-weight: 500; color: #5a6a7a; margin-left: 28px; transition: color 0.2s ease-in-out; }
+    .main-nav a:hover { color: #007aff; }
+    .nav-logout { font-weight: 700 !important; color: #007aff !important; }
+    /* --- 메인 콘텐츠 컨테이너 --- */
+    .container { display: flex; justify-content: center; align-items: flex-start; padding: 40px 20px; }
+    /* --- 연락처 폼 카드 --- */
+    .phone-form-card { background-color: #fff; width: 100%; max-width: 400px; padding: 32px; border-radius: 12px; border: 1px solid #e4e8eb; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    .form-header { display: flex; align-items: center; margin-bottom: 24px; position: relative; justify-content: center; }
+    .back-link { position: absolute; left: 0; top: 50%; transform: translateY(-50%); display: flex; align-items: center; justify-content: center; color: #5a6a7a; padding: 4px; border-radius: 50%; transition: background-color 0.2s; }
+    .back-link:hover { background-color: #f2f4f6; }
+    .form-title { font-size: 22px; font-weight: 700; margin: 0; color: #191f28; }
+    /* --- 메시지 박스 --- */
+    .message-box { display: flex; align-items: center; padding: 12px 16px; margin-bottom: 20px; border-radius: 8px; font-size: 14px; font-weight: 500; }
+    .message-box .icon { margin-right: 10px; font-size: 20px; }
+    .message-box.error { background-color: #fff5f6; color: #f04452; }
+    .message-box.success { background-color: #f0f8f4; color: #008f5a; }
+    /* --- 폼 요소 --- */
+    .phone-form .form-group { margin-bottom: 20px; }
+    .phone-form label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 8px; color: #4e5968; }
+    .phone-form input[type="text"] { width: 100%; padding: 12px 14px; border: 1px solid #d1d8e0; border-radius: 8px; font-size: 16px; box-sizing: border-box; transition: border-color 0.2s, box-shadow 0.2s; }
+    .phone-form input[type="text"]::placeholder { color: #aeb9c6; }
+    .phone-form input[type="text"]:focus { outline: none; border-color: #007aff; box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.15); }
+    .submit-btn { width: 100%; padding: 14px 0; background-color: #007aff; border: none; border-radius: 8px; color: white; font-size: 16px; font-weight: 700; cursor: pointer; transition: background-color 0.2s; margin-top: 10px; }
+    .submit-btn:hover { background-color: #0056b3; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    /* --- 반응형 --- */
+    @media (max-width: 768px) { .container { padding: 20px 16px; } .phone-form-card { padding: 24px; } }
   </style>
 </head>
 <body>
-<div class="phone-container">
-  <h2>전화번호 변경</h2>
 
-  <div>
-    <div th:if="${errorMessage}" class="message" th:text="${errorMessage}"></div>
-    <div th:if="${successMessage}" class="success-message" th:text="${successMessage}"></div>
+<!-- 페이지 헤더 -->
+<header class="page-header">
+  <div class="header-content">
+    <a href="/" class="logo">AuGold</a>
+    <nav class="main-nav">
+      <a href="/">메인</a>
+      <a href="/support">고객센터</a>
+      <a href="/logout" class="nav-logout">로그아웃</a>
+    </nav>
   </div>
+</header>
 
-  <form method="post" action="/phoneOk">
-    <label for="newPhone">새 전화번호:</label>
-    <input type="text" id="newPhone" name="newPhone" required />
+<!-- 메인 콘텐츠 -->
+<main class="container">
+  <div class="phone-form-card">
+    <div class="form-header">
+      <a href="/mypage" class="back-link" title="마이페이지로 돌아가기">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </a>
+      <h1 class="form-title">연락처 변경</h1>
+    </div>
 
-    <button type="submit">전화번호 변경</button>
-  </form>
-  <a href="/mypage" class="back-link">← 마이페이지로 돌아가기</a>
-</div>
+    <!-- 에러/성공 메시지 출력 영역 -->
+    <div th:if="${errorMessage}" class="message-box error">
+      <span class="material-symbols-outlined icon">error</span>
+      <span th:text="${errorMessage}">에러 메시지</span>
+    </div>
+    <div th:if="${successMessage}" class="message-box success">
+      <span class="material-symbols-outlined icon">check_circle</span>
+      <span th:text="${successMessage}">성공 메시지</span>
+    </div>
+
+    <!-- 전화번호 변경 폼 -->
+    <form method="post" action="/phoneOk" class="phone-form">
+      <div class="form-group">
+        <label for="newPhone">새 연락처</label>
+        <!-- 컨트롤러에서 전달받은 loginUser의 전화번호를 기본값으로 설정 -->
+        <input type="text" id="newPhone" name="newPhone" placeholder="'-' 없이 숫자만 입력"
+               th:value="${#strings.defaultString(loginUser?.cstmPhone, '')}"
+               maxlength="13" required>
+      </div>
+      <button type="submit" class="submit-btn">변경 완료</button>
+    </form>
+  </div>
+</main>
+
+<!-- 자동 하이픈(-) 포맷팅을 위한 JavaScript -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const phoneInput = document.getElementById('newPhone');
+
+    if (phoneInput) {
+        // 페이지 로드 시 기존 값에 대해 포맷팅 적용
+        formatPhoneNumber(phoneInput);
+
+        phoneInput.addEventListener('input', function(e) {
+            formatPhoneNumber(e.target);
+        });
+    }
+
+    function formatPhoneNumber(inputElement) {
+        let numbers = inputElement.value.replace(/[^0-9]/g, '');
+        let formatted = '';
+
+        if (numbers.length < 4) {
+            formatted = numbers;
+        } else if (numbers.length < 8) {
+            formatted = numbers.substring(0, 3) + '-' + numbers.substring(3);
+        } else {
+            formatted = numbers.substring(0, 3) + '-' + numbers.substring(3, 7) + '-' + numbers.substring(7, 11);
+        }
+        inputElement.value = formatted;
+    }
+  });
+</script>
+
 </body>
 </html>

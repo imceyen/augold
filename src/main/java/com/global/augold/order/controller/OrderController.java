@@ -4,6 +4,7 @@ import com.global.augold.cart.dto.CartDTO;
 import com.global.augold.cart.service.CartService;
 import com.global.augold.member.entity.Customer;
 import com.global.augold.order.entity.Order;
+import com.global.augold.order.entity.OrderItem;
 import com.global.augold.order.service.OrderService;
 import com.global.augold.order.dto.OrderCreateRequest;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import jakarta.servlet.http.HttpSession;
 import java.util.List;
@@ -32,7 +36,9 @@ public class OrderController {
      * URL: GET /order
      */
     @GetMapping("")
-    public String orderPage(HttpSession session, Model model) {
+    public String orderPage(HttpSession session,
+                            Model model,
+                            @RequestParam(required = false) String selectedProducts) {
         try {
             // 세션에서 고객 정보 가져오기
             Customer loginUser = (Customer) session.getAttribute("loginUser");
@@ -43,21 +49,53 @@ public class OrderController {
 
             String cstmNumber = loginUser.getCstmNumber();
 
-            // 장바구니에서 상품 목록 가져오기
-            List<CartDTO> cartItems = cartService.getCartList(cstmNumber);
-            if (cartItems.isEmpty()) {
+            // 🔥 전체 장바구니에서 상품 목록 가져오기
+            List<CartDTO> allCartItems = cartService.getCartList(cstmNumber);
+            if (allCartItems.isEmpty()) {
                 log.warn("장바구니가 비어있는 상태에서 주문 요청: {}", cstmNumber);
                 return "redirect:/cart?error=empty";
             }
 
-            // 총 금액 계산
+            // 🔥 선택된 상품만 필터링
+            List<CartDTO> cartItems;
+            if (selectedProducts != null && !selectedProducts.isEmpty()) {
+                // 선택된 상품 ID:K값 목록
+                List<String> selectedProductKeys = Arrays.asList(selectedProducts.split(","));
+
+                // 선택된 상품만 필터링 (productId + karatCode 조합으로)
+                cartItems = allCartItems.stream()
+                        .filter(item -> {
+                            String itemKey = item.getProductId() + ":" + item.getKaratName();
+                            return selectedProductKeys.contains(itemKey);
+                        })
+                        .collect(Collectors.toList());
+
+                log.info("선택된 상품으로 주문: 전체={}, 선택={}", allCartItems.size(), cartItems.size());
+            } else {
+                // 파라미터가 없으면 전체 장바구니
+                cartItems = allCartItems;
+            }
+
+            // 🔥 필터링 후 빈 상품 체크
+            if (cartItems.isEmpty()) {
+                log.warn("선택된 상품이 없음: {}", cstmNumber);
+                return "redirect:/cart?error=empty";
+            }
+
+            // 🔥 선택된 상품들로 총 금액 계산
             double totalAmount = cartItems.stream()
                     .mapToDouble(item -> item.getFinalPrice() * item.getQuantity())
+                    .sum();
+
+            // 🔥 선택된 상품들로 총 수량 계산
+            int totalQuantity = cartItems.stream()
+                    .mapToInt(CartDTO::getQuantity)
                     .sum();
 
             // 주문 페이지에 필요한 데이터 설정
             model.addAttribute("cartItems", cartItems);
             model.addAttribute("totalAmount", totalAmount);
+            model.addAttribute("totalQuantity", totalQuantity);
             model.addAttribute("customerName", loginUser.getCstmName());
             model.addAttribute("customerPhone", loginUser.getCstmPhone());
             model.addAttribute("customerAddr", loginUser.getCstmAddr());
@@ -65,7 +103,7 @@ public class OrderController {
             log.info("주문 페이지 요청 처리: 고객={}, 상품수={}, 총금액={}",
                     cstmNumber, cartItems.size(), totalAmount);
 
-            return "order/order"; // templates/order/order-form.html
+            return "order/order";
 
         } catch (Exception e) {
             log.error("주문 페이지 요청 처리 실패: {}", e.getMessage(), e);
@@ -80,37 +118,47 @@ public class OrderController {
     @PostMapping("/create")
     public String createOrder(@ModelAttribute OrderCreateRequest orderRequest,
                               HttpSession session,
-                              Model model) {
+                              Model model,
+                              @RequestParam(required = false) String selectedProducts,
+                              @RequestParam(required = false) String directBuy) {  // 🔥 추가
         try {
-            // 세션에서 고객 정보 가져오기
             Customer loginUser = (Customer) session.getAttribute("loginUser");
+
             if (loginUser == null) {
-                log.warn("로그인되지 않은 사용자의 주문 생성 요청");
                 return "redirect:/login?returnUrl=/cart";
             }
 
             String cstmNumber = loginUser.getCstmNumber();
             orderRequest.setCstmNumber(cstmNumber);
 
-            // 주문 생성
+            if (selectedProducts != null && !selectedProducts.isEmpty()) {
+                orderRequest.setSelectedProductIds(selectedProducts);
+            }
+
+            // 🔥 바로구매인 경우 기본 배송정보 설정
+            if ("true".equals(directBuy)) {
+                // 고객 정보에서 기본 배송정보 가져오기
+                orderRequest.setDeliveryAddr(loginUser.getCstmAddr() != null ? loginUser.getCstmAddr() : "배송지 정보 없음");
+                orderRequest.setDeliveryPhone(loginUser.getCstmPhone() != null ? loginUser.getCstmPhone() : "연락처 정보 없음");
+            }
+
             String orderNumber = orderService.createOrderFromCart(orderRequest, cstmNumber);
+            return "redirect:/payment/request?orderNumber=" + orderNumber;  // 👈 원래처럼 간결하게
 
-            // 결제 페이지로 리다이렉트
-            return "redirect:/payment/request?orderNumber=" + orderNumber;
-
-        } catch (IllegalArgumentException e) {
-            model.addAttribute("errorMessage", e.getMessage());
-            return orderPage(session, model); // 주문 페이지로 돌아가기
+        } catch (OrderService.StockShortageException e) {
+            log.error("❌ StockShortageException: {}", e.getMessage());
+            return "redirect:/order?stockShortage=true&productName=" +
+                    java.net.URLEncoder.encode(e.getProductName(), java.nio.charset.StandardCharsets.UTF_8);
 
         } catch (Exception e) {
-            model.addAttribute("errorMessage", "주문 처리 중 오류가 발생했습니다.");
-            return orderPage(session, model);
+            log.error("❌ 예상치 못한 예외: {}", e.getMessage(), e);
+            return "redirect:/order?error=system";
         }
     }
 
-
-     // 주문 상세 조회 API (JSON 반환)
-
+    /**
+     * 주문 상세 조회 API (JSON 반환) - 수정된 버전
+     */
     @GetMapping("/api/{orderNumber}")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> getOrderDetailApi(@PathVariable String orderNumber,
@@ -125,11 +173,41 @@ public class OrderController {
                 return ResponseEntity.status(401).body(response);
             }
 
-            // 주문 상세 정보 조회 (기존 메서드 활용)
+            // 주문 상세 정보 조회
             Order order = orderService.getOrderDetail(orderNumber, loginUser.getCstmNumber());
 
+            // 안전한 JSON 구조로 변환
+            Map<String, Object> orderData = new HashMap<>();
+            orderData.put("orderNumber", order.getOrderNumber());
+            orderData.put("orderDate", order.getOrderDate().toString());
+            orderData.put("orderStatus", Map.of(
+                    "name", order.getOrderStatus().name(),
+                    "description", order.getOrderStatus().getDescription()
+            ));
+            orderData.put("totalAmount", order.getTotalAmount());
+            orderData.put("finalAmount", order.getFinalAmount());
+            orderData.put("deliveryAddr", order.getDeliveryAddr());
+            orderData.put("deliveryPhone", order.getDeliveryPhone());
+
+            // OrderItem 정보를 안전한 형태로 변환
+            List<Map<String, Object>> orderItemsData = new ArrayList<>();
+            if (order.getOrderItems() != null) {
+                for (OrderItem item : order.getOrderItems()) {
+                    Map<String, Object> itemData = new HashMap<>();
+                    itemData.put("productId", item.getProductId());
+                    itemData.put("productName", item.getProductName() != null ? item.getProductName() : "상품명 없음");
+                    itemData.put("imageUrl", item.getImageUrl());
+                    itemData.put("quantity", item.getQuantity());
+                    itemData.put("unitPrice", item.getUnitPrice());
+                    itemData.put("finalAmount", item.getFinalAmount());
+
+                    orderItemsData.add(itemData);
+                }
+            }
+            orderData.put("orderItems", orderItemsData);
+
             response.put("success", true);
-            response.put("order", order);
+            response.put("order", orderData);
 
             log.info("주문 상세 API 조회: 주문번호={}, 고객={}", orderNumber, loginUser.getCstmNumber());
             return ResponseEntity.ok(response);
@@ -167,7 +245,7 @@ public class OrderController {
             model.addAttribute("orderDetail", orderDetail);
 
             log.info("주문 상세 조회: 주문번호={}, 고객={}", orderNumber, loginUser.getCstmNumber());
-            return "order/order-detail"; // templates/order/order-detail.html
+            return "redirect:/order/myorders?highlight=" + orderNumber;
 
         } catch (IllegalArgumentException e) {
             log.warn("주문 상세 조회 실패: {}", e.getMessage());
@@ -179,10 +257,6 @@ public class OrderController {
             return "redirect:/mypage/orders?error=system";
         }
     }
-
-
-
-
 
     /**
      * 주문 취소
@@ -204,15 +278,19 @@ public class OrderController {
             log.info("주문 취소 완료: 주문번호={}, 고객={}, 사유={}",
                     orderNumber, loginUser.getCstmNumber(), cancelReason);
 
-            return "redirect:/order/" + orderNumber + "?cancelled=true";
+            // 🔥 myorders로 리다이렉트 (성공 메시지와 함께)
+            return "redirect:/order/myorders?cancelled=true&orderNumber=" + orderNumber;
 
         } catch (IllegalArgumentException e) {
             log.warn("주문 취소 실패: {}", e.getMessage());
-            return "redirect:/order/" + orderNumber + "?error=cancel&message=" + e.getMessage();
+            // 🔥 myorders로 리다이렉트 (에러 메시지와 함께)
+            return "redirect:/order/myorders?error=cancel&message=" +
+                    java.net.URLEncoder.encode(e.getMessage(), java.nio.charset.StandardCharsets.UTF_8);
 
         } catch (Exception e) {
             log.error("주문 취소 실패: {}", e.getMessage(), e);
-            return "redirect:/order/" + orderNumber + "?error=system";
+            // 🔥 myorders로 리다이렉트 (시스템 에러)
+            return "redirect:/order/myorders?error=system";
         }
     }
 
@@ -232,13 +310,12 @@ public class OrderController {
             List<Order> orders = orderService.getCustomerOrders(loginUser.getCstmNumber());
             model.addAttribute("orders", orders);
 
-            log.info("고객 주문 목록 조회: 고객={}, 주문수={}",
-                    loginUser.getCstmNumber(), orders.size());
+            model.addAttribute("customerName", loginUser.getCstmName());
 
             return "order/myorders"; // templates/order/myorders.html
 
         } catch (Exception e) {
-            log.error("주문 목록 조회 실패: {}", e.getMessage(), e);
+
             model.addAttribute("errorMessage", "주문 목록을 불러오는 중 오류가 발생했습니다.");
             return "order/myorders";
         }
@@ -272,6 +349,4 @@ public class OrderController {
             return "redirect:/order/" + orderNumber + "?error=update";
         }
     }
-
-
 }

@@ -86,18 +86,23 @@ public class DetailPageController {
                 })
                 .toList();
 
-        Set<String> seen = new HashSet<>();
+        Set<String> seenKarats = new HashSet<>(); // 순도(Karat)만 추적하기 위한 Set
         List<DetailPageDTO> deduplicatedOptions = new ArrayList<>();
 
         for (DetailPageDTO opt : options) {
-            String key = opt.getKaratCode() + "-" + opt.getGoldWeight();
-            if (!seen.contains(key)) {
-                seen.add(key);
+            // 🔥 키를 오직 'karatCode'만 사용하여 중복을 확인합니다.
+            String key = opt.getKaratCode();
+
+            // 이 순도(Karat)가 아직 추가된 적 없다면 리스트에 추가합니다.
+            if (key != null && !seenKarats.contains(key)) {
+                seenKarats.add(key);
                 deduplicatedOptions.add(opt);
             }
         }
 
+// 중복이 제거된 리스트로 options 변수를 교체합니다.
         options = deduplicatedOptions;
+
 
         options.sort(Comparator.comparingInt(opt -> switch (opt.getKaratCode()) {
             case "14K" -> 1;
@@ -106,21 +111,18 @@ public class DetailPageController {
             default -> 99;
         }));
 
+
         if ("CTGR-00002".equals(dto.getCtgrId())) {
-            double marketPrice = detailPageService.getLatestGoldPrice();
-            double goldPricePerGram = marketPrice * 1.1;
+            // 🔥 골드바: 스케줄러가 업데이트한 DB 값 그대로 사용
+            // dto.setFinalPrice()는 호출하지 않음 (이미 DB에서 올바른 값 가져옴)
 
-            if (dto.getGoldWeight() != null) {
-                double newPrice = dto.getGoldWeight() * goldPricePerGram;
-                dto.setFinalPrice(newPrice);
-                System.out.println("✅ 골드바 실시간 계산 가격: " + newPrice);
-            }
-
+            // 재고 정보만 업데이트
             dto.setProductInventory(productRepository.findById(productId)
                     .map(Product::getProductInventory)
                     .orElse(0));
 
         } else {
+            // 🔥 주얼리: 기존 로직 (14K 기본으로 옵션에서 찾기)
             DetailPageDTO baseOption = options.stream()
                     .filter(opt -> "14K".equals(opt.getKaratCode()))
                     .findFirst()

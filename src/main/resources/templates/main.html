@@ -212,21 +212,23 @@
             </a>
 
             <nav class="nav-section">
+                <!-- 로그인 전: 로그인, 회원가입 메뉴만 보임 -->
                 <th:block th:if="${loginName == null}">
                     <a href="/login">로그인</a>
                     <a href="/customer/register">회원가입</a>
                 </th:block>
+
+                <!-- 로그인 후: 환영 메시지 및 모든 메뉴가 보임 -->
                 <th:block th:if="${loginName != null}">
                     <span class="nav-text">[[${loginName}]]님 환영합니다</span>
                     <a href="/logout">로그아웃</a>
+                    <a href="/support">고객센터</a>
+                    <a href="/mypage">마이페이지</a>
+                    <a href="/cart">
+                        장바구니
+                        <span id="cartBadge" class="cart-badge hidden">0</span>
+                    </a>
                 </th:block>
-
-                <a href="/support">고객센터</a>
-                <a href="/mypage">마이페이지</a>
-                <a href="/cart">
-                    장바구니
-                    <span id="cartBadge" class="cart-badge hidden">0</span>
-                </a>
             </nav>
         </div>
     </div>
@@ -254,6 +256,7 @@
 </section>
 
 <!-- 금 시세 테이블 + 차트 나란히 배치 -->
+<!-- 금 시세 테이블 + 차트 나란히 배치 -->
 <section class="py-24 bg-white">
     <div class="container mx-auto px-4 flex flex-col lg:flex-row gap-8">
 
@@ -276,27 +279,31 @@
                      th:text="${#numbers.formatInteger(todayPrice.pricePerGram * 3.75 * 1.1, 0, 'COMMA')} + '원'">
                     612,662원
                 </div>
-                <div class="py-5 text-gray-800">541,000원</div>
+                <!-- 🔥 순금 팔 때만 동적으로 변경 -->
+                <div class="py-5 text-gray-800"
+                     th:text="${#numbers.formatInteger(sellPrice24k, 0, 'COMMA')} + '원'">
+                    521,000원
+                </div>
 
-                <!-- 18K -->
+                <!-- 18K (원래대로 유지) -->
                 <div class="py-5">
                     <div><strong>18K 금 시세</strong></div>
                     <div class="text-sm text-gray-500">Gold18k·3.75g</div>
                 </div>
                 <div class="py-5 text-gray-400">제품 시세 적용</div>
                 <div class="py-5 text-gray-800"
-                     th:text="${#numbers.formatInteger(price18k, 0, 'COMMA')} + '원'">
+                     th:text="${#numbers.formatInteger(sellPrice18k, 0, 'COMMA')} + '원'">
                     381,382원
                 </div>
 
-                <!-- 14K -->
+                <!-- 14K (원래대로 유지) -->
                 <div class="py-5">
                     <div><strong>14K 금 시세</strong></div>
                     <div class="text-sm text-gray-500">Gold14k·3.75g</div>
                 </div>
                 <div class="py-5 text-gray-400">제품 시세 적용</div>
                 <div class="py-5 text-gray-800"
-                     th:text="${#numbers.formatInteger(price14k, 0, 'COMMA')} + '원'">
+                     th:text="${#numbers.formatInteger(sellPrice14k, 0, 'COMMA')} + '원'">
                     297,478원
                 </div>
             </div>
@@ -304,7 +311,7 @@
             <p class="text-center text-sm text-gray-500 mt-6">* 시세는 매일 변동됩니다. VAT 포함.</p>
         </div>
 
-        <!-- 차트 영역 -->
+        <!-- 차트 영역 (변경 없음) -->
         <div class="w-full lg:w-1/2 bg-white p-6 rounded-2xl shadow-md">
             <canvas id="goldPriceChart" style="width: 100%; height: 100%;"></canvas>
         </div>

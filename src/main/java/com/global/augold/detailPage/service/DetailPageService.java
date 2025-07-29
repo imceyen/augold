@@ -109,4 +109,4 @@ public class DetailPageService {
         String uploadDir = "C:/upload/detail";
         return FileUploadUtil.upload(file, uploadDir);
     }
-} 
+}

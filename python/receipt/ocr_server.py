@@ -43,6 +43,7 @@ def ocr_image_to_text(path):
     text = pytesseract.image_to_string(img, lang='kor+eng')
     return text
 
+
 # 전체 이미지 처리 + 엑셀 저장
 def process_all_receipts(folder_path):
     data = []

@@ -1,125 +1,168 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8" />
-    <title>AuGold 로그인</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f7f7f7;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .login-container {
-            background-color: white;
-            padding: 30px 40px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            width: 320px;
-        }
-        h2 {
-            text-align: center;
-            margin-bottom: 25px;
-            color: #333;
-        }
-        label {
-            display: block;
-            margin-bottom: 6px;
-            color: #555;
-        }
-        input[type="text"], input[type="password"] {
-            width: 100%;
-            padding: 10px 8px;
-            margin-bottom: 18px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-            font-size: 14px;
-        }
-        .cstmPwd-field {
-            position: relative;
-        }
-        .cstmPwd-field input {
-            padding-right: 38px;
-        }
-        .toggle-cstmPwd {
-            position: absolute;
-            right: 10px;
-            top: 32%;
-            transform: translateY(-50%);
-            cursor: pointer;
-            font-size: 18px;
-            color: #666;
-            user-select: none;
-        }
-        button {
-            width: 100%;
-            padding: 10px 0;
-            background-color: #007bff;
-            border: none;
-            border-radius: 4px;
-            color: white;
-            font-size: 1em;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        .back-link {
-            display: block;
-            margin-top: 15px;
-            text-align: center;
-            color: #007bff;
-            text-decoration: none;
-        }
-        .back-link:hover {
-            text-decoration: underline;
-        }
+        /* --- Google Fonts --- */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+
+/* --- 기본 & 초기화 --- */
+body { margin: 0; font-family: 'Noto Sans KR', sans-serif; background-color: #f5f7fa; color: #333d4b; }
+a { text-decoration: none; color: inherit; }
+
+/* --- 페이지 헤더 --- */
+.page-header { background-color: #fff; border-bottom: 1px solid #e4e8eb; padding: 0 24px; }
+.header-content { display: flex; justify-content: space-between; align-items: center; max-width: 1080px; margin: 0 auto; height: 64px; }
+.logo { font-weight: 700; font-size: 22px; color: #1e2025; }
+.main-nav { display: flex; align-items: center; gap: 28px; }
+.main-nav a { font-size: 16px; font-weight: 500; color: #5a6a7a; transition: color 0.2s; }
+.main-nav a:hover, .main-nav a.active { color: #007aff; }
+
+/* --- 메인 콘텐츠 컨테이너 --- */
+.container { display: flex; justify-content: center; align-items: flex-start; padding: 40px 20px; }
+
+/* --- 로그인 카드 --- */
+.login-card {
+    background-color: #fff;
+    width: 100%;
+    max-width: 400px;
+    padding: 32px 40px;
+    border-radius: 12px;
+    border: 1px solid #e4e8eb;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+.form-header { text-align: center; margin-bottom: 24px; }
+.form-title { font-size: 24px; font-weight: 700; margin: 0; color: #191f28; }
+.form-subtitle { font-size: 15px; color: #6b7886; margin: 8px 0 0; }
+
+/* --- 메시지 박스 (에러) --- */
+.message-box { display: flex; align-items: center; padding: 12px 16px; margin-bottom: 20px; border-radius: 8px; font-size: 14px; font-weight: 500; }
+.message-box.error { background-color: #fff5f6; color: #f04452; }
+.message-box .icon { margin-right: 10px; font-size: 20px; }
+
+/* --- 로그인 폼 --- */
+.login-form .form-group { margin-bottom: 20px; }
+.login-form label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 8px; color: #4e5968; }
+
+.login-form input[type="text"],
+.login-form input[type="password"] {
+    width: 100%; padding: 12px 14px; border: 1px solid #d1d8e0; border-radius: 8px; font-size: 16px;
+    box-sizing: border-box; transition: border-color 0.2s, box-shadow 0.2s;
+}
+.login-form input::placeholder { color: #aeb9c6; }
+.login-form input:focus { outline: none; border-color: #007aff; box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.15); }
+
+/* 비밀번호 보기/숨기기 */
+.password-field-group { position: relative; }
+.toggle-password {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #8b95a1;
+    user-select: none;
+    transition: color 0.2s;
+}
+.toggle-password:hover { color: #4e5968; }
+.password-field-group input { padding-right: 48px; }
+
+/* 제출 버튼 */
+.submit-btn {
+    width: 100%; padding: 14px 0; background-color: #007aff; border: none; border-radius: 8px;
+    color: white; font-size: 16px; font-weight: 700; cursor: pointer; transition: background-color 0.2s;
+    margin-top: 10px;
+}
+.submit-btn:hover { background-color: #0056b3; }
+
+/* 폼 푸터 */
+.form-footer { text-align: center; margin-top: 24px; font-size: 14px; color: #6b7886; border-top: 1px solid #f2f4f6; padding-top: 20px;}
+.form-footer a { color: #007aff; font-weight: 600; margin-left: 6px; }
+
+/* 아이콘 기본 스타일 */
+.material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+
+/* --- 반응형 디자인 --- */
+@media (max-width: 768px) {
+    .container { padding: 20px 16px; }
+    .login-card { padding: 24px; }
+}
     </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로그인 - AuGold</title>
+    <!-- Google Icons -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <!-- [중요] 여기에 새로운 CSS 코드를 붙여넣거나 링크하세요 -->
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="login-container">
-    <h2>로그인</h2>
-    <form method="post" action="/loginOk">
-        <label for="cstmId">아이디:</label>
-        <input type="text" name="cstmId" id="cstmId" required>
-        <label for="cstmPwd">비밀번호:</label>
-        <div class="cstmPwd-field">
-            <input type="password" name="cstmPwd" id="cstmPwd" required>
-            <span class="toggle-cstmPwd" onclick="toggleVisibility('cstmPwd', this)">🔒</span>
+
+<!-- 페이지 헤더 -->
+<header class="page-header">
+    <div class="header-content">
+        <a href="/" class="logo">AuGold</a>
+        <nav class="main-nav">
+            <a href="/customer/register">회원가입</a>
+            <a href="/support">고객센터</a>
+        </nav>
+    </div>
+</header>
+
+<!-- 메인 콘텐츠 -->
+<main class="container">
+    <div class="login-card">
+        <div class="form-header">
+            <h1 class="form-title">AuGold</h1>
+            <p class="form-subtitle"></p>
         </div>
 
-        <input type="hidden" name="returnUrl" th:value="${returnUrl}" th:if="${returnUrl != null}">
+        <!-- 에러 메시지 출력 영역 -->
+        <div th:if="${param.error != null}" class="message-box error">
+            <span class="material-symbols-outlined icon">error</span>
+            <th:block th:switch="${param.error[0]}">
+                <span th:case="'true'">아이디 또는 비밀번호가 올바르지 않습니다.</span>
+                <span th:case="'login'">로그인이 필요한 서비스입니다.</span>
+                <span th:case="*">로그인 중 오류가 발생했습니다.</span>
+            </th:block>
+        </div>
 
-        <button type="submit">로그인</button>
-        <a href="/" class="back-link">← 메인페이지로 돌아가기</a>
-    </form>
-</div>
+        <!-- 로그인 폼 -->
+        <form method="post" action="/loginOk" class="login-form">
+            <div class="form-group">
+                <label for="cstmId">아이디</label>
+                <input type="text" name="cstmId" id="cstmId" placeholder="아이디를 입력하세요" required>
+            </div>
+            <div class="form-group">
+                <label for="cstmPwd">비밀번호</label>
+                <div class="password-field-group">
+                    <input type="password" name="cstmPwd" id="cstmPwd" placeholder="비밀번호를 입력하세요" required>
+                    <span class="material-symbols-outlined toggle-password" onclick="toggleVisibility()">visibility_off</span>
+                </div>
+            </div>
+
+            <!-- 이전 페이지로 리다이렉트를 위한 hidden input -->
+            <input type="hidden" name="returnUrl" th:value="${returnUrl}" th:if="${returnUrl != null}">
+
+            <button type="submit" class="submit-btn">로그인</button>
+        </form>
+
+        <div class="form-footer">
+            <span>계정이 없으신가요?</span>
+            <a href="/customer/register">회원가입</a>
+        </div>
+    </div>
+</main>
 
 <script>
-    // 로그인 실패 경고
-    window.addEventListener('DOMContentLoaded', () => {
-        const params = new URLSearchParams(window.location.search);
-        if (params.get("error") === "true") {
-            alert("아이디(로그인 전화번호, 로그인 전용 아이디) 또는 비밀번호가 잘못 되었습니다. 아이디와 비밀번호를 정확히 입력해 주세요.");
-        }
-    // 로그인 필요 경고 추가
-    if (params.get("error") === "login") {
-        alert("로그인 후 사용할 수 있는 서비스입니다.");
-    }
+    function toggleVisibility() {
+        const passwordField = document.getElementById('cstmPwd');
+        const toggleIcon = document.querySelector('.toggle-password');
+        const isPassword = passwordField.type === 'password';
 
-    });
-
-    // 비밀번호 보기/숨기기
-    function toggleVisibility(fieldId, iconElement) {
-        const field = document.getElementById(fieldId);
-        const isHidden = field.getAttribute("type") === "password";
-        field.setAttribute("type", isHidden ? "text" : "password");
-        iconElement.textContent = isHidden ? "👁️" : "🔒";
+        passwordField.type = isPassword ? 'text' : 'password';
+        toggleIcon.textContent = isPassword ? 'visibility' : 'visibility_off';
     }
 </script>
+
 </body>
 </html>
