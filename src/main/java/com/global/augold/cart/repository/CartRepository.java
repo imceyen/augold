@@ -32,6 +32,10 @@ public interface CartRepository extends JpaRepository<Cart, String> {
     @Transactional
     int deleteByCstmNumber(String cstmNumber); // 전체 삭제
 
+    @Modifying
+    @Transactional
+    int deleteByCstmNumberAndProductIdAndKaratCode(String cstmNumber, String productId, String karatCode);
+
     int countByCstmNumber(String cstmNumber); // 개수 조회
 
     Optional<Cart> findByCstmNumberAndProductIdAndKaratCode(String cstmNumber, String productId, String karatCode);

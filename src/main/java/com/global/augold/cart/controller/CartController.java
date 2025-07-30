@@ -120,10 +120,20 @@ public class CartController {
     }
 
     @PostMapping("/remove")
-    public String deleteFromCart(@RequestParam List<String> productIds, HttpSession session) {
+    public String deleteFromCart(@RequestParam List<String> productIds,
+                                 @RequestParam(required = false) List<String> karatCodes, // 🆕 순도 추가
+                                 HttpSession session) {
         try {
             String cstmNumber = getCstmNumberFromSession(session);
-            boolean remove = cartService.deleteCartItems(cstmNumber, productIds);
+
+            if (karatCodes != null && !karatCodes.isEmpty()) {
+                // 🔥 순도별 삭제
+                boolean remove = cartService.deleteCartItemsWithKarat(cstmNumber, productIds, karatCodes);
+            } else {
+                // 🔥 기존 전체 삭제 (하위 호환)
+                boolean remove = cartService.deleteCartItems(cstmNumber, productIds);
+            }
+
             return "redirect:/cart?removed=true";
         } catch (RuntimeException e) {
             return "redirect:/login?error=login";

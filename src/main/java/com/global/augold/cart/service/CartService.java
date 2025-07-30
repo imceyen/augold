@@ -205,4 +205,21 @@ public class CartService {
             return false;
         }
     }
+
+    public boolean deleteCartItemsWithKarat(String cstmNumber, List<String> productIds, List<String> karatCodes) {
+        try {
+            int totalDelete = 0;
+            for (int i = 0; i < productIds.size(); i++) {
+                String productId = productIds.get(i);
+                String karatCode = i < karatCodes.size() ? karatCodes.get(i) : null;
+
+                // 🔥 productId + karatCode 조합으로 삭제
+                int deleted = cartRepository.deleteByCstmNumberAndProductIdAndKaratCode(cstmNumber, productId, karatCode);
+                totalDelete += deleted;
+            }
+            return totalDelete > 0;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }

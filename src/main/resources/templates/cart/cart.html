@@ -1059,7 +1059,7 @@
         });
     });
 
-    // 선택 삭제 (SweetAlert2 적용)
+    // 🔥 수정된 선택 삭제 함수
     function deleteSelected() {
         const checkedBoxes = document.querySelectorAll('.product-checkbox:checked');
         if (checkedBoxes.length === 0) {
@@ -1084,7 +1084,33 @@
             cancelButtonColor: '#6b7280'
         }).then((result) => {
             if (result.isConfirmed) {
-                document.getElementById('cartForm').submit();
+                // 🔥 productId와 karatCode 분리해서 전송
+                const form = document.createElement('form');
+                form.method = 'post';
+                form.action = '/cart/remove';
+
+                checkedBoxes.forEach(checkbox => {
+                    const productItem = checkbox.closest('.product-item');
+                    const productId = checkbox.value.split(':')[0]; // productId 추출
+                    const karatCode = productItem.getAttribute('data-karat-code'); // karatCode 추출
+
+                    // productId hidden input
+                    const productIdInput = document.createElement('input');
+                    productIdInput.type = 'hidden';
+                    productIdInput.name = 'productIds';
+                    productIdInput.value = productId;
+                    form.appendChild(productIdInput);
+
+                    // karatCode hidden input
+                    const karatCodeInput = document.createElement('input');
+                    karatCodeInput.type = 'hidden';
+                    karatCodeInput.name = 'karatCodes';
+                    karatCodeInput.value = karatCode;
+                    form.appendChild(karatCodeInput);
+                });
+
+                document.body.appendChild(form);
+                form.submit();
             }
         });
     }
@@ -1111,10 +1137,12 @@
         });
     }
 
-    // 개별 삭제 (SweetAlert2 적용)
+    // 🔥 수정된 개별 삭제 함수
     function deleteItem(button) {
         const productId = button.getAttribute('data-product-id');
-        const productName = button.closest('.product-item').querySelector('.product-name').textContent;
+        const productItem = button.closest('.product-item');
+        const karatCode = productItem.getAttribute('data-karat-code'); // 🆕 karatCode 추가
+        const productName = productItem.querySelector('.product-name').textContent;
 
         Swal.fire({
             icon: 'question',
@@ -1131,12 +1159,19 @@
                 form.method = 'post';
                 form.action = '/cart/remove';
 
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = 'productIds';
-                input.value = productId;
+                // 🔥 productId와 karatCode 둘 다 전송
+                const productIdInput = document.createElement('input');
+                productIdInput.type = 'hidden';
+                productIdInput.name = 'productIds';
+                productIdInput.value = productId;
+                form.appendChild(productIdInput);
 
-                form.appendChild(input);
+                const karatCodeInput = document.createElement('input');
+                karatCodeInput.type = 'hidden';
+                karatCodeInput.name = 'karatCodes';
+                karatCodeInput.value = karatCode;
+                form.appendChild(karatCodeInput);
+
                 document.body.appendChild(form);
                 form.submit();
             }
@@ -1177,24 +1212,38 @@
         .catch(error => console.error('Error:', error));
     }
 
-    // - 버튼 클릭 시
+    // 🔥 수정된 - 버튼 함수 (수량 1일 때 순도별 삭제)
     function decreaseQuantity(button) {
         const productId = button.getAttribute('data-product-id');
         const productItem = button.closest('.product-item');
         const quantityDisplay = productItem.querySelector('.quantity-display');
         const currentQuantity = parseInt(quantityDisplay.textContent);
+        const karatCode = productItem.getAttribute('data-karat-code') || '';
 
         if (currentQuantity <= 1) {
-            deleteItem(button);
+            // 🔥 수량이 1일 때는 순도별 삭제 확인
+            const productName = productItem.querySelector('.product-name').textContent;
+            Swal.fire({
+                icon: 'question',
+                title: '상품 삭제',
+                html: `<strong>${productName} (${karatCode})</strong><br>수량이 0이 되어 장바구니에서 삭제됩니다. 계속하시겠습니까?`,
+                showCancelButton: true,
+                confirmButtonText: '삭제',
+                cancelButtonText: '취소',
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // 🔥 순도별 삭제 진행
+                    deleteSpecificKarat(productId, karatCode);
+                }
+            });
             return;
         }
 
-        // CSRF 토큰 가져오기
+        // 🔥 수량 감소 (기존 로직)
         const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
         const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
-
-        // karatCode 가져오기
-        const karatCode = productItem.getAttribute('data-karat-code') || '';
 
         fetch('/cart/decrease', {
             method: 'POST',
@@ -1209,6 +1258,28 @@
                 location.reload();
             }
         });
+    }
+
+    // 🆕 순도별 삭제 함수
+    function deleteSpecificKarat(productId, karatCode) {
+        const form = document.createElement('form');
+        form.method = 'post';
+        form.action = '/cart/remove';
+
+        const productIdInput = document.createElement('input');
+        productIdInput.type = 'hidden';
+        productIdInput.name = 'productIds';
+        productIdInput.value = productId;
+        form.appendChild(productIdInput);
+
+        const karatCodeInput = document.createElement('input');
+        karatCodeInput.type = 'hidden';
+        karatCodeInput.name = 'karatCodes';
+        karatCodeInput.value = karatCode;
+        form.appendChild(karatCodeInput);
+
+        document.body.appendChild(form);
+        form.submit();
     }
 
     // 선택된 상품의 총 금액 계산
