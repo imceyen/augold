@@ -4,57 +4,102 @@
   <meta charset="UTF-8">
   <title>AuGold 관리자 페이지</title>
   <style>
-    body { margin: 0; font-family: 'Segoe UI', sans-serif; }
+    body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f5f8fa; }
     header {
-        background-color: #343a40;
+        background-color: #2a3f54;
         color: white;
         padding: 15px 20px;
         display: flex;
         justify-content: space-between;
         align-items: center;
     }
-    .tab-bar {
-        background-color: #f8f9fa;
+    /* 카드형 대시보드 스타일 */
+    .dashboard-cards {
         display: flex;
-        border-bottom: 1px solid #dee2e6;
+        gap: 24px;
+        margin: 32px 0 24px 0;
+        justify-content: space-between;
+        padding: 0 24px;
     }
-    .tab-bar button {
+    .dashboard-card {
         flex: 1;
-        padding: 15px;
-        font-size: 16px;
-        border: none;
-        background-color: #f8f9fa;
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        padding: 32px 0 24px 0;
+        text-align: center;
+        color: #2a3f54;
         cursor: pointer;
+        font-size: 1.1em;
+        font-weight: 500;
+        transition: box-shadow 0.2s, background 0.2s;
+        border: 2px solid transparent;
     }
-    .tab-bar button.active {
-        background-color: white;
-        border-bottom: 3px solid goldenrod;
-        font-weight: bold;
+    .dashboard-card.active, .dashboard-card:hover {
+        box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+        background: #eaf3fb;
+        border: 2px solid #1976d2;
+        color: #1976d2;
+    }
+    .dashboard-card i {
+        display: block;
+        font-size: 2.2em;
+        margin-bottom: 10px;
+        color: #1976d2;
     }
     .content {
-        padding: 30px;
+        padding: 30px 24px;
+    }
+    /* 기존 탭바 숨김 */
+    .tab-bar { display: none; }
+    /* 하단 카드/박스 스타일 */
+    .tab-content {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        padding: 32px 24px;
+        margin-bottom: 32px;
     }
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
     /* 통계 하위 탭 스타일 */
     .stats-subtab-bar {
-        margin-bottom: 20px;
-        display: flex;
-        border-bottom: 1px solid #ccc;
+      display: flex;
+      gap: 16px;
+      padding: 0 24px;
+      background: transparent;
+      border-bottom: none;
+      margin-bottom: 40px;
+      justify-content: center;
     }
     .stats-subtab-bar button {
-        padding: 10px 15px;
-        border: none;
-        background-color: #eee;
-        cursor: pointer;
-        margin-right: 5px;
-        font-size: 14px;
+      background: #fff;
+      color: #1976d2;
+      border: 2px solid #e3eaf5;
+      border-radius: 22px;
+      box-shadow: 0 4px 16px rgba(25, 118, 210, 0.13);
+      padding: 28px 48px;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: box-shadow 0.18s, border 0.18s, color 0.18s, background 0.18s;
+      margin-bottom: 0;
+      outline: none;
+      letter-spacing: 0.5px;
     }
     .stats-subtab-bar button.active {
-        background-color: white;
-        border-bottom: 3px solid goldenrod;
-        font-weight: bold;
+      border: 3px solid #1976d2;
+      color: #1976d2;
+      background: #f5faff;
+      box-shadow: 0 8px 32px rgba(25, 118, 210, 0.18);
+      z-index: 2;
+    }
+    .stats-subtab-bar button:hover:not(.active) {
+      border: 2px solid #90caf9;
+      background: #f5faff;
+      color: #1976d2;
+      box-shadow: 0 4px 24px rgba(25, 118, 210, 0.13);
     }
 
     .stats-subtab-content {
@@ -99,32 +144,111 @@
         background-color: #dc3545;
         margin-left: 10px;
     }
+    /* 상품관리 표 modern 스타일 */
+    #productTable {
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        border-collapse: collapse;
+        margin-top: 24px;
+        width: 100%;
+        font-size: 14px;
+    }
+    #productTable thead tr {
+        background: #e3f2fd;
+        border-bottom: 2px solid #1976d2;
+    }
+    #productTable th {
+        color: #1565c0;
+        font-weight: 600;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 16px 12px;
+        text-align: center;
+        border-bottom: 2px solid #1976d2;
+    }
+    #productTable td {
+        padding: 16px 12px;
+        text-align: center;
+        border-bottom: 1px solid #e0e0e0;
+        vertical-align: middle;
+    }
+    #productTable tbody tr {
+        transition: background 0.15s ease;
+    }
+    #productTable tbody tr:hover {
+        background: #f5f5f5;
+    }
+    #productTable tbody tr:nth-child(even) {
+        background: #fafafa;
+    }
+    #productTable tbody tr:nth-child(even):hover {
+        background: #f0f0f0;
+    }
+    /* 표 안 링크(상품명) 스타일 */
+    #productTable a {
+        color: #1976d2;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    #productTable a:hover {
+        color: #1565c0;
+        text-decoration: underline;
+    }
+    
+    /* 상품 등록 버튼 호버 효과 */
+    .tab-content button[onclick="toggleForm()"]:hover {
+        background: #1565c0 !important;
+    }
   </style>
 
   <!-- 🔷 Plotly.js 추가 -->
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <!-- FontAwesome 아이콘 추가 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 
 <body>
 
 <header>
   <h2>관리자 페이지</h2>
-  <div>AuGold Admin</div>
+  <div style="display: flex; align-items: center; gap: 20px;">
+    <a href="/" style="color: white; text-decoration: none; padding: 8px 16px; border: 1px solid white; border-radius: 4px; transition: all 0.2s;">홈</a>
+    <a href="/logout" style="color: white; text-decoration: none; padding: 8px 16px; border: 1px solid white; border-radius: 4px; transition: all 0.2s;">로그아웃</a>
+    <div>AuGold Admin</div>
+  </div>
 </header>
 
-<div class="tab-bar">
-  <button class="tab-btn active" onclick="showTab('productTab', event)">상품 관리</button>
-  <button class="tab-btn" onclick="showTab('statsTab', event)">통계</button>
-  <button class="tab-btn" onclick="showTab('receiptTab', event)">영수증 등록</button>
-  <button class="tab-btn" onclick="showTab('inquiryTab', event)">문의 답변</button>
+<!-- 상단 카드형 대시보드 -->
+<div class="dashboard-cards">
+  <div class="dashboard-card tab-btn active" onclick="showTab('productTab', event)">
+    <i class="fa fa-cube"></i>
+    상품 관리
+  </div>
+  <div class="dashboard-card tab-btn" onclick="showTab('statsTab', event)">
+    <i class="fa fa-chart-bar"></i>
+    통계
+  </div>
+  <div class="dashboard-card tab-btn" onclick="showTab('receiptTab', event)">
+    <i class="fa fa-receipt"></i>
+    영수증 등록
+  </div>
+  <div class="dashboard-card tab-btn" onclick="showTab('inquiryTab', event)">
+    <i class="fa fa-question-circle"></i>
+    문의 답변
+  </div>
 </div>
 
 <div class="content">
   <!-- 상품 관리 -->
   <div id="productTab" class="tab-content active">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-      <h3>상품 관리</h3>
-      <button onclick="toggleForm()">상품 등록</button>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <h3 style="margin: 0; color: #1976d2; font-size: 24px; font-weight: 600;">상품 관리</h3>
+      <button onclick="toggleForm()" style="background: #1976d2; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 500; cursor: pointer; transition: background 0.2s; display: flex; align-items: center; gap: 8px;">
+        <i class="fa fa-plus" style="font-size: 14px;"></i>
+        상품 등록
+      </button>
     </div>
 
     <div class="form-container" id="productForm" style="display:none;">
@@ -307,29 +431,45 @@
       <div id="weeklyPlot" class="plot-container" style="width: 90%; max-width: 900px; margin: 20px auto; display: none;"></div>
     </div>
 
+
+
+
+
     <!-- 📊 성별·연령대별 매출 차트 영역 -->
     <div id="demographics" class="stats-subtab-content">
       <p>성별 및 연령대별 매출 분석 시각화 결과입니다.</p>
       <div id="sexAgeLoading" style="text-align: center; padding: 40px; font-size: 1.1em;">
         데이터를 불러오는 중입니다...
       </div>
-      <!-- 이곳에 Plotly 차트가 출력됩니다 -->
+
+      <!-- Plotly 차트들 -->
       <div style="display: flex; gap: 30px; justify-content: center;">
         <div id="genderAgeChartPlotMale" style="flex:1; min-width:350px; max-width:600px;"></div>
         <div id="genderAgeChartPlotFemale" style="flex:1; min-width:350px; max-width:600px;"></div>
       </div>
+
+      <div style="display: flex; gap: 40px; justify-content: center; margin-top: 40px;">
+        <div id="topProductsChart" style="flex:1; min-width:500px; max-width:700px; height:520px;"></div>
+        <div id="bottomProductsChart" style="flex:1; min-width:500px; max-width:700px; height:520px;"></div>
+      </div>
     </div>
 
+
+
+
+    <!-- 카테고리별 이익률 분석/예측 탭 -->
     <div id="categoryProfit" class="stats-subtab-content">
       <p>카테고리별 이익률 분석 및 예측 데이터를 보여주는 영역입니다.</p>
-      <!-- 🔽 로딩 메시지 -->
       <div id="categoryProfitLoading" style="text-align: center; padding: 50px; font-size: 1.2em;">
         데이터를 불러오는 중입니다...
       </div>
-      <!-- 🔽 Plotly 그래프 -->
-      <div id="categoryProfitPlot" class="plot-container" style="width: 90%; max-width: 900px; margin: 20px auto; display: none;"></div>
+      <div id="categoryProfitPlot1" class="plot-container" style="width: 90%; max-width: 900px; margin: 20px auto; display: none;"></div>
+      <div id="categoryProfitPlot2" class="plot-container" style="width: 90%; max-width: 900px; margin: 20px auto; display: none;"></div>
+      <div id="categoryProfitPlot3" class="plot-container" style="width: 90%; max-width: 900px; margin: 20px auto; display: none;"></div>
     </div>
   </div>
+
+
 
   <div id="receiptTab" class="tab-content">
     <h3>영수증 등록</h3>
@@ -586,7 +726,7 @@
   function showTab(tabId, event) {
       // 모든 탭 컨텐츠와 버튼 비활성화
       document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.dashboard-card').forEach(card => card.classList.remove('active'));
 
       // 클릭된 탭과 버튼 활성화
       document.getElementById(tabId).classList.add('active');
@@ -633,11 +773,10 @@
       } else if (subTabId === 'categoryProfit' && !categoryProfitLoaded) {
           loadCategoryProfit();
           categoryProfitLoaded = true;
-      }  else if (subTabId === 'demographics' && !demographicsLoaded) {
-      setTimeout(() => {
+      } else if (subTabId === 'demographics' && !demographicsLoaded) {
           loadDemographicsChart();
           demographicsLoaded = true;
-      }, 100); // 100ms 딜레이
+      }
   }
 
   // --- 차트 로드 함수들 ---
@@ -827,7 +966,7 @@
       console.error("[성별/연령대] 필요한 div가 없습니다.");
       return;
     }
-    fetch("/api/statistics/sex-age-chart")
+    fetch("/temp_output.json")
       .then(response => response.json())
       .then(data => {
         if (!data || !data.male || !data.female) {
@@ -992,97 +1131,143 @@
 </script>
 
 
-<script> // 영업이익률 차트
-    let categoryProfitLoaded = false;
+<script> // 카테고리별 이익률 분석 및 예측 데이터 로드 및 그래프 그리기 함수
+  function loadCategoryProfit() {
+const loadingDiv = document.getElementById("categoryProfitLoading");
+const plotDiv1 = document.getElementById("categoryProfitPlot1");
+const plotDiv2 = document.getElementById("categoryProfitPlot2");
+const plotDiv3 = document.getElementById("categoryProfitPlot3");
 
-    // 차트 초기화
-    function drawSalesAnalysisChart(data) {
-      const plotDiv = document.getElementById('salesForecastPlot');
-      if (!plotDiv) return;
+fetch('/api/statistics/category-profit')
+  .then(res => res.json())
+  .then(data => {
+    loadingDiv.style.display = 'none';
+    plotDiv1.style.display = 'block';
+    plotDiv2.style.display = 'block';
+    plotDiv3.style.display = 'block';
 
-      if (!data || data.length === 0) {
-        plotDiv.style.display = 'none';
-        document.getElementById('orderTrendsLoading').innerText = '데이터가 없습니다.';
-        return;
-      }
+    const sales = data.category_sales;
+    const margin = data.category_margin;
+    const ts = data.category_timeseries;
+    const forecast = data.category_forecast;
 
-      // 예시 데이터 형태 가정: [{date:'2025-07', sales:1000, forecast:1100}, ...]
-      const x = data.map(item => item.date);
-      const ySales = data.map(item => item.sales);
-      const yForecast = showForecast ? data.map(item => item.forecast) : [];
-
-      const traces = [
-        {
-          x,
-          y: ySales,
-          mode: 'lines+markers',
-          name: '실제 매출',
-          line: {color: 'blue'}
-        }
-      ];
-
-      if(showForecast){
-        traces.push({
-          x,
-          y: yForecast,
-          mode: 'lines+markers',
-          name: '예측 매출',
-          line: {color: 'red', dash: 'dot'}
-        });
-      }
-
-      Plotly.newPlot(plotDiv, traces, {
-        title: `매출 분석 (${currentPeriod} 단위)`,
-        xaxis: {title: '기간'},
-        yaxis: {title: '매출액'},
-        margin: { t: 40, b: 50 }
-      });
-
-      plotDiv.style.display = 'block';
-      document.getElementById('orderTrendsLoading').style.display = 'none';
-    }
-
-    // 기간 변경 이벤트
-    document.querySelectorAll('input[name="period"]').forEach(radio => {
-      radio.addEventListener('change', e => {
-        currentPeriod = e.target.value;
-        fetchAndDrawChart();
-      });
-    });
-
-    // 예측 표시 on/off 체크박스 이벤트
-    document.getElementById('toggleForecast').addEventListener('change', e => {
-      showForecast = e.target.checked;
-      fetchAndDrawChart();
-    });
-
-    // 서버에서 데이터 받아와서 차트 그리기 (예: /api/sales-analysis?period=month)
-    function fetchAndDrawChart(){
-      const loadingDiv = document.getElementById('orderTrendsLoading');
-      const plotDiv = document.getElementById('salesForecastPlot');
-
-      loadingDiv.style.display = 'block';
-      loadingDiv.innerText = '데이터를 불러오는 중입니다...';
-      plotDiv.style.display = 'none';
-
-      fetch(`/api/sales-analysis?period=${currentPeriod}`)
-        .then(res => res.json())
-        .then(data => {
-          if(!data || data.length === 0){
-            loadingDiv.innerText = '데이터가 없습니다.';
-            plotDiv.style.display = 'none';
-            return;
+    // 차트 1: 카테고리별 총 판매금액
+      Plotly.newPlot("categoryProfitPlot1", [{
+        x: sales.map(d => d.Category),
+        y: sales.map(d => d.total_price),
+        type: 'bar',
+        marker: { color: 'goldenrod' }
+      }], {
+        title: '카테고리별 총 판매금액',
+        xaxis: { title: '카테고리' },
+        yaxis: {
+          title: '총 판매금액 (원)',
+          tickformat: ',.0f',
+          automargin: true,
+          titlefont: { size: 14 },
+          title: {
+            text: '총 판매금액 (원)',
+            standoff: 20 // ← Y축 제목과 축 사이 간격
           }
-          drawSalesAnalysisChart(data);
-        })
-        .catch(err => {
-          loadingDiv.innerText = '데이터 로딩 중 오류가 발생했습니다.';
-          console.error(err);
-        });
-    }
+        },
+        margin: {
+          l: 100,
+          r: 20,
+          t: 50,
+          b: 50
+        }
+      });
 
-    // 초기 실행
-    fetchAndDrawChart();
+
+    // 차트 2: 카테고리별 평균 이익률
+    Plotly.newPlot("categoryProfitPlot2", [{
+      x: margin.map(d => d.Category),
+      y: margin.map(d => d.avg_profit_margin),
+      type: 'bar',
+      marker: { color: 'seagreen' }
+    }], {
+      title: '카테고리별 평균 이익률',
+      xaxis: { title: '카테고리' },
+      yaxis: {
+        title: '평균 이익률',
+        tickformat: ',.2%',
+        automargin: true,
+        titlefont: { size: 14 },
+        title: {
+          text: '평균 이익률',
+          standoff: 20
+        }
+      },
+      margin: {
+        l: 100,
+        r: 20,
+        t: 50,
+        b: 50
+      }
+    });
+
+   // 차트 3: 카테고리별 순이익 시계열 + 예측
+const netprofit_ts = data.category_netprofit_timeseries;
+const netprofit_forecast = data.category_netprofit_forecast;
+
+const np_categories = [...new Set(netprofit_ts.map(d => d.Category))];
+const np_traces = [];
+
+// 시계열 선
+np_categories.forEach(cat => {
+const catData = netprofit_ts.filter(d => d.Category === cat);
+np_traces.push({
+  x: catData.map(d => d.Month),
+  y: catData.map(d => d.Net_Profit),
+  mode: 'lines+markers',
+  name: cat
+});
+});
+
+
+// 카테고리별 색상 매핑
+const categoryColors = {
+"골드바": "blue",
+"기념품": "orange",
+"주얼리": "green"
+};
+
+// 예측 점
+netprofit_forecast.forEach(f => {
+np_traces.push({
+  x: [f.Month],
+  y: [f.Predicted_Net_Profit],
+  mode: 'markers+text',
+  name: `${f.Category} 예측`,
+  marker: { color: categoryColors[f.Category], size: 10 },
+  text: ['예측'],
+  textposition: 'top center'
+});
+});
+
+Plotly.newPlot("categoryProfitPlot3", np_traces, {
+title: '카테고리별 순이익 시계열 및 예측 (2025년 7월)',
+xaxis: { title: '월' },
+yaxis: {
+  title: {
+    text: '순이익 (원)',
+    standoff: 50  // ✅ 간격을 넓혀서 겹침 방지
+  },
+  tickformat: ',.0f'
+},
+margin: {
+  l: 100, // ✅ 왼쪽 마진도 넓혀줌
+  r: 20,
+  t: 50,
+  b: 50
+}
+});
+
+
+
+}); // ← fetch.then의 닫는 괄호
+} // ← 함수의 닫는 괄호
+
 </script>
 
 
@@ -1290,87 +1475,132 @@
 
 
 
-<script>//성별 연령별 분석
-    document.addEventListener("DOMContentLoaded", function () {
-      const loadingDiv = document.getElementById("sexAgeLoading");
-      const plotDivMale = document.getElementById("genderAgeChartPlotMale");
-      const plotDivFemale = document.getElementById("genderAgeChartPlotFemale");
-      if (!loadingDiv || !plotDivMale || !plotDivFemale) {
-        console.error("[\uC131\uBCC4/\uC5F0\uB839\uB300] \uD544\uC694\uD55C div\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4.");
-        return;
-      }
-      fetch("/temp_output.json")
-        .then(response => response.json())
-        .then(data => {
-          if (!data || !data.male || !data.female) {
-            loadingDiv.innerText = "\uB370\uC774\uD130\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4.";
-            return;
-          }
-          const maleData = data.male;
-          const femaleData = data.female;
+<script>
+  //성별 연령별 분석
+const colorMap = {
+'골드바': '#1f77b4',   // 파란색
+'기념품': '#ff7f0e',   // 주황색
+'주얼리': '#2ca02c'    // 초록색
+};
 
-          const ageGroups = [...new Set([...maleData, ...femaleData].map(d => d.Age_Group))];
-          const categories = [...new Set([...maleData, ...femaleData].map(d => d.Category))];
+function renderTopBottomSummaryCharts(maleData, femaleData) {
+const combined = [...maleData, ...femaleData];
 
-          // 특정 div 여부 확인 (이 부분 해결 수정)
-          const plotDiv = document.getElementById("categoryProfitPlot");
+// ➤ 연령대 + 성별 + 카테고리별 매출 정리
+const summaryList = combined.map(d => ({
+label: `${d.Age_Group} ${d.Gender === '남' ? '남성' : '여성'}`,
+category: d.Category,
+value: d.Total_Price / 100000000 // 억 원 단위
+}));
 
-          // 호출 위해 plotDiv 비시 보이게
-          if (plotDiv) {
-            plotDiv.style.display = "block";
-          }
+const validCategories = ['골드바', '기념품', '주얼리'];
+const filtered = summaryList.filter(d => validCategories.includes(d.category));
 
-          // 할당 데이터 제조
-          const maleSeries = categories.map(category => {
-            return {
-              x: ageGroups,
-              y: ageGroups.map(ageGroup => {
-                const item = maleData.find(d => d.Age_Group === ageGroup && d.Category === category);
-                return item ? item.Total_Price : 0;
-              }),
-              name: `${category}`,
-              type: 'bar'
-            };
-          });
+// ➤ TOP3 & BOTTOM3
+const top3 = [...filtered].sort((a, b) => b.value - a.value).slice(0, 3);
+const bottom3 = [...filtered].sort((a, b) => a.value - b.value).slice(0, 3);
 
-          const femaleSeries = categories.map(category => {
-            return {
-              x: ageGroups,
-              y: ageGroups.map(ageGroup => {
-                const item = femaleData.find(d => d.Age_Group === ageGroup && d.Category === category);
-                return item ? item.Total_Price : 0;
-              }),
-              name: `${category}`,
-              type: 'bar'
-            };
-          });
+// ➤ 막대차트 트레이스 생성 함수
+const makeTrace = (dataList) => ({
+x: dataList.map(d => d.label),
+y: dataList.map(d => d.value),
+type: 'bar',
+marker: {
+color: dataList.map(d => colorMap[d.category])
+},
+text: dataList.map(d => `${d.value.toFixed(2)}억`),
+textposition: 'auto',
+hoverinfo: 'x+y',
+showlegend: false
+});
 
-          const baseLayout = {
-            barmode: 'group',
-            xaxis: { title: '연령대' },
-            yaxis: { title: '총 매출 (원)' },
-            legend: { orientation: 'h' },
-            height: 450
-          };
+// ➤ 레이아웃 공통 옵션
+const makeLayout = (titleText) => ({
+title: titleText,
+xaxis: { title: '연령대 + 성별' },
+yaxis: { title: '매출 (억 원)', tickformat: ',' },
+margin: { t: 60, b: 100 },
+height: 520,
+showlegend: false
+});
 
-          Plotly.newPlot("genderAgeChartPlotMale", maleSeries, {
-            ...baseLayout,
-            title: '👨 남성 연령대별 · 카테고리별 매출'
-          });
-          Plotly.newPlot("genderAgeChartPlotFemale", femaleSeries, {
-            ...baseLayout,
-            title: '👩 여성 연령대별 · 카테고리별 매출'
-          });
+// ➤ Plotly 차트 렌더링
+Plotly.newPlot('topProductsChart', [makeTrace(top3)], makeLayout('연령별 선호도 TOP3'));
+Plotly.newPlot('bottomProductsChart', [makeTrace(bottom3)], makeLayout('연령별 선호도 BOTTOM3'));
+}
 
-          loadingDiv.style.display = "none";
-        })
-        .catch(error => {
-          loadingDiv.innerText = "데이터 로딩 중 오류가 발생했습니다.";
-          console.error("❌ JSON 로딩 오류:", error);
-        });
-    });
+
+
+function loadDemographicsChart() {
+const loadingDiv = document.getElementById("sexAgeLoading");
+const malePlotDiv = document.getElementById("genderAgeChartPlotMale");
+const femalePlotDiv = document.getElementById("genderAgeChartPlotFemale");
+
+fetch("/api/statistics/sex-age-chart")
+.then(response => response.json())
+.then(data => {
+if (!data || !data.male || !data.female) {
+loadingDiv.innerText = "데이터가 없습니다.";
+return;
+}
+
+const maleData = data.male;
+const femaleData = data.female;
+
+const ageGroups = [...new Set([...maleData, ...femaleData].map(d => d.Age_Group))];
+const categories = [...new Set([...maleData, ...femaleData].map(d => d.Category))];
+
+// 남자 차트
+const maleTraces = categories.map(category => ({
+x: ageGroups,
+y: ageGroups.map(ageGroup => {
+const item = maleData.find(d => d.Age_Group === ageGroup && d.Category === category);
+return item ? item.Total_Price / 100000000 : 0;
+}),
+name: category,
+type: 'bar'
+}));
+
+// 여자 차트
+const femaleTraces = categories.map(category => ({
+x: ageGroups,
+y: ageGroups.map(ageGroup => {
+const item = femaleData.find(d => d.Age_Group === ageGroup && d.Category === category);
+return item ? item.Total_Price / 100000000 : 0;
+}),
+name: category,
+type: 'bar'
+}));
+
+renderTopBottomSummaryCharts(maleData, femaleData);
+
+// 공통 레이아웃
+const layout = gender => ({
+barmode: 'stack',
+title: `${gender} · 연령대별 카테고리 매출 (단위: 억 원)`,
+xaxis: { title: '연령대' },
+yaxis: { title: '총 매출 (억 원)', tickformat: ',' },
+legend: { orientation: 'h', x: 0.5, y: -0.25, xanchor: 'center', yanchor: 'top' },
+margin: { t: 60, b: 100 },
+height: 500
+});
+
+Plotly.newPlot(malePlotDiv, maleTraces, layout("👨 남성"));
+Plotly.newPlot(femalePlotDiv, femaleTraces, layout("👩 여성"));
+
+// Top/Bottom 차트 렌더링
+if (data.top_bottom) {
+renderTopBottomCharts(data.top_bottom);
+}
+
+loadingDiv.style.display = "none";
+})
+.catch(error => {
+loadingDiv.innerText = "데이터 로딩 중 오류가 발생했습니다.";
+console.error("❌ JSON 로딩 오류:", error);
+});
+}
 </script>
-
 
 
 
