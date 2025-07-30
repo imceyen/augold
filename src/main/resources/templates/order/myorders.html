@@ -5,317 +5,331 @@
     <title>주문 내역 | AuGold</title>
     <!-- SweetAlert2 CDN 추가 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Google Fonts 및 Material Symbols 아이콘 라이브러리 -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap">
+    <!-- 🔥 수정된 부분: Material Symbols 아이콘 라이브러리 추가 -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap');
+        /* --- Google Fonts --- */
+       @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+       @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap');
 
-        body {
-          font-family: 'Nunito', sans-serif;
-          background-color: #f9fafb;
-          color: #333;
-          margin: 0;
-          padding: 20px;
-        }
+       body {
+         font-family: 'Nunito', sans-serif;
+         background-color: #f9fafb;
+         color: #333;
+         margin: 0;
+         padding: 20px;
+       }
 
-        header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding-bottom: 12px;
-          border-bottom: 1px solid #ddd;
-          margin-bottom: 30px;
-        }
+       header {
+         display: flex;
+         justify-content: space-between;
+         align-items: center;
+         padding-bottom: 12px;
+         border-bottom: 1px solid #ddd;
+         margin-bottom: 30px;
+       }
 
-        header h1 a {
-          text-decoration: none;
-          color: #2c3e50;
-          font-weight: 700;
-          font-size: 1.8rem;
-        }
+       header h1 a {
+         text-decoration: none;
+         color: #2c3e50;
+         font-weight: 700;
+         font-size: 1.8rem;
+       }
 
-        nav a {
-          color: #4a4a4a;
-          margin-left: 20px;
-          font-weight: 600;
-          text-decoration: none;
-          transition: color 0.3s ease;
-        }
+       nav a {
+         color: #4a4a4a;
+         margin-left: 20px;
+         font-weight: 600;
+         text-decoration: none;
+         transition: color 0.3s ease;
+       }
 
-        nav a:hover {
-          color: #3498db;
-        }
+       nav a:hover {
+         color: #3498db;
+       }
 
-        .container {
-          max-width: 1000px;
-          margin: 0 auto;
-        }
+       .container {
+         max-width: 1000px;
+         margin: 0 auto;
+       }
 
-        .page-header {
-          background: #fff;
-          padding: 30px 40px;
-          border-radius: 8px;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-          margin-bottom: 30px;
-        }
+       .page-header {
+         background: #fff;
+         padding: 30px 40px;
+         border-radius: 8px;
+         box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+         margin-bottom: 30px;
+       }
 
-        .page-header h2 {
-          font-weight: 700;
-          font-size: 2rem;
-          margin: 0;
-          color: #2c3e50;
-        }
+       .page-header h2 {
+         font-weight: 700;
+         font-size: 2rem;
+         margin: 0;
+         color: #2c3e50;
+       }
 
-        .page-header p {
-          margin: 8px 0 0 0;
-          color: #666;
-        }
+       .page-header p {
+         margin: 8px 0 0 0;
+         color: #666;
+       }
 
-        .order-list {
-          display: flex;
-          flex-direction: column;
-          gap: 20px;
-        }
+       .order-list {
+         display: flex;
+         flex-direction: column;
+         gap: 20px;
+       }
 
-        .order-card {
-          background: #fff;
-          border-radius: 8px;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-          overflow: hidden;
-          transition: transform 0.2s ease;
-        }
+       .order-card {
+         background: #fff;
+         border-radius: 8px;
+         box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+         overflow: hidden;
+         transition: transform 0.2s ease;
+       }
 
-        .order-card:hover {
-          transform: translateY(-2px);
-        }
+       .order-card:hover {
+         transform: translateY(-2px);
+       }
 
-        .order-header {
-          padding: 20px 30px;
-          border-bottom: 1px solid #eee;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
+       .order-header {
+         padding: 20px 30px;
+         border-bottom: 1px solid #eee;
+         display: flex;
+         justify-content: space-between;
+         align-items: center;
+       }
 
-        .order-number {
-          font-weight: 700;
-          color: #2c3e50;
-          font-size: 1.1rem;
-        }
+       .order-number {
+         font-weight: 700;
+         color: #2c3e50;
+         font-size: 1.1rem;
+       }
 
-        .order-date {
-          color: #666;
-          font-size: 0.9rem;
-        }
+       .order-date {
+         color: #666;
+         font-size: 0.9rem;
+       }
 
-        .order-status {
-          padding: 4px 12px;
-          border-radius: 12px;
-          font-size: 0.8rem;
-          font-weight: 600;
-        }
+       .order-status {
+         padding: 4px 12px;
+         border-radius: 12px;
+         font-size: 0.8rem;
+         font-weight: 600;
+       }
 
-        .status-paid { background: #d1fae5; color: #065f46; }
-        .status-preparing { background: #dbeafe; color: #1e40af; }
-        .status-shipped { background: #e0e7ff; color: #5b21b6; }
-        .status-delivered { background: #dcfce7; color: #166534; }
-        .status-cancelled { background: #fee2e2; color: #991b1b; }
+       .status-paid { background: #d1fae5; color: #065f46; }
+       .status-preparing { background: #dbeafe; color: #1e40af; }
+       .status-shipped { background: #e0e7ff; color: #5b21b6; }
+       .status-delivered { background: #dcfce7; color: #166534; }
+       .status-cancelled { background: #fee2e2; color: #991b1b; }
 
-        .order-content {
-          padding: 20px 30px;
-          display: flex;
-          align-items: center;
-          gap: 20px;
-        }
+       .order-content {
+         padding: 20px 30px;
+         display: flex;
+         align-items: center;
+         gap: 20px;
+       }
 
-        .product-image {
-          width: 80px;
-          height: 80px;
-          border-radius: 8px;
-          object-fit: cover;
-          background: #f3f4f6;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 2rem;
-        }
+       .product-image {
+         width: 80px;
+         height: 80px;
+         border-radius: 8px;
+         object-fit: cover;
+         background: #f3f4f6;
+         display: flex;
+         align-items: center;
+         justify-content: center;
+         font-size: 2rem;
+       }
 
-        .order-details {
-          flex: 1;
-        }
+       .order-details {
+         flex: 1;
+       }
 
-        .product-name {
-          font-weight: 600;
-          color: #2c3e50;
-          margin-bottom: 4px;
-        }
+       .product-name {
+         font-weight: 600;
+         color: #2c3e50;
+         margin-bottom: 4px;
+       }
 
-        .product-summary {
-          color: #666;
-          font-size: 0.9rem;
-        }
+       .product-summary {
+         color: #666;
+         font-size: 0.9rem;
+       }
 
-        .order-price {
-          text-align: right;
-        }
+       .order-price {
+         text-align: right;
+       }
 
-        .price-amount {
-          font-weight: 700;
-          font-size: 1.3rem;
-          color: #2c3e50;
-        }
+       .price-amount {
+         font-weight: 700;
+         font-size: 1.3rem;
+         color: #2c3e50;
+       }
 
-        .order-actions {
-          padding: 20px 30px;
-          border-top: 1px solid #eee;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
+       .order-actions {
+         padding: 20px 30px;
+         border-top: 1px solid #eee;
+         display: flex;
+         justify-content: space-between;
+         align-items: center;
+       }
 
-        .btn {
-          padding: 8px 16px;
-          border-radius: 5px;
-          font-weight: 600;
-          font-size: 0.9rem;
-          text-decoration: none;
-          border: none;
-          cursor: pointer;
-          transition: all 0.2s ease;
-        }
+       .btn {
+         padding: 8px 16px;
+         border-radius: 5px;
+         font-weight: 600;
+         font-size: 0.9rem;
+         text-decoration: none;
+         border: none;
+         cursor: pointer;
+         transition: all 0.2s ease;
+       }
 
-        .btn-primary {
-          background-color: #3498db;
-          color: white;
-        }
+       .btn-primary {
+         background-color: #3498db;
+         color: white;
+       }
 
-        .btn-primary:hover {
-          background-color: #2980b9;
-        }
+       .btn-primary:hover {
+         background-color: #2980b9;
+       }
 
-        .btn-danger {
-          background-color: #e74c3c;
-          color: white;
-        }
+       .btn-danger {
+         background-color: #e74c3c;
+         color: white;
+       }
 
-        .btn-danger:hover {
-          background-color: #c0392b;
-        }
+       .btn-danger:hover {
+         background-color: #c0392b;
+       }
 
-        .btn-secondary {
-          background-color: #95a5a6;
-          color: white;
-        }
+       .btn-secondary {
+         background-color: #95a5a6;
+         color: white;
+       }
 
-        .empty-state {
-          text-align: center;
-          padding: 60px 20px;
-          background: #fff;
-          border-radius: 8px;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
+       .empty-state {
+         text-align: center;
+         padding: 60px 20px;
+         background: #fff;
+         border-radius: 8px;
+         box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+       }
 
-        .empty-state img {
-          width: 120px;
-          opacity: 0.6;
-          margin-bottom: 20px;
-        }
+       .empty-state img {
+         width: 120px;
+         opacity: 0.6;
+         margin-bottom: 20px;
+       }
 
-        /* 모달 스타일 - 부드러운 애니메이션 */
-        .modal {
-          display: none;
-          position: fixed;
-          z-index: 1000;
-          left: 0;
-          top: 0;
-          width: 100%;
-          height: 100%;
-          background-color: rgba(0,0,0,0.5);
-          opacity: 0;
-          transition: opacity 0.3s ease;
-        }
+       /* 모달 스타일 - 부드러운 애니메이션 */
+       .modal {
+         display: none;
+         position: fixed;
+         z-index: 1000;
+         left: 0;
+         top: 0;
+         width: 100%;
+         height: 100%;
+         background-color: rgba(0,0,0,0.5);
+         opacity: 0;
+         transition: opacity 0.3s ease;
+       }
 
-        .modal-content {
-          background-color: #fff;
-          margin: 5% auto;
-          padding: 30px;
-          border-radius: 8px;
-          width: 90%;
-          max-width: 800px;
-          max-height: 80vh;
-          overflow-y: auto;
-          transform: translateY(-20px);
-          transition: transform 0.3s ease;
-        }
+       .modal-content {
+         background-color: #fff;
+         margin: 5% auto;
+         padding: 30px;
+         border-radius: 8px;
+         width: 90%;
+         max-width: 800px;
+         max-height: 80vh;
+         overflow-y: auto;
+         transform: translateY(-20px);
+         transition: transform 0.3s ease;
+       }
 
-        .modal-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 20px;
-          padding-bottom: 15px;
-          border-bottom: 1px solid #eee;
-        }
+       .modal-header {
+         display: flex;
+         justify-content: space-between;
+         align-items: center;
+         margin-bottom: 20px;
+         padding-bottom: 15px;
+         border-bottom: 1px solid #eee;
+       }
 
-        .close {
-          color: #aaa;
-          font-size: 28px;
-          font-weight: bold;
-          cursor: pointer;
-        }
+       .close {
+         color: #aaa;
+         font-size: 28px;
+         font-weight: bold;
+         cursor: pointer;
+       }
 
-        .close:hover {
-          color: #000;
-        }
+       .close:hover {
+         color: #000;
+       }
 
-        .detail-item {
-          display: flex;
-          align-items: center;
-          padding: 15px 0;
-          border-bottom: 1px solid #f0f0f0;
-        }
+       .detail-item {
+         display: flex;
+         align-items: center;
+         padding: 15px 0;
+         border-bottom: 1px solid #f0f0f0;
+       }
 
-        .detail-item:last-child {
-          border-bottom: none;
-        }
+       .detail-item:last-child {
+         border-bottom: none;
+       }
 
-        .detail-image {
-          width: 60px;
-          height: 60px;
-          border-radius: 6px;
-          object-fit: cover;
-          background: #f3f4f6;
-          margin-right: 15px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
+       .detail-image {
+         width: 60px;
+         height: 60px;
+         border-radius: 6px;
+         object-fit: cover;
+         background: #f3f4f6;
+         margin-right: 15px;
+         display: flex;
+         align-items: center;
+         justify-content: center;
+       }
 
-        .detail-info {
-          flex: 1;
-        }
+       .detail-info {
+         flex: 1;
+       }
 
-        .detail-price {
-          text-align: right;
-          font-weight: 600;
-        }
+       .detail-price {
+         text-align: right;
+         font-weight: 600;
+       }
 
-        .total-price {
-          font-size: 1.2rem;
-          font-weight: 700;
-          color: #2c3e50;
-          text-align: right;
-          padding-top: 15px;
-          border-top: 2px solid #eee;
-          margin-top: 15px;
-        }
+       .total-price {
+         font-size: 1.2rem;
+         font-weight: 700;
+         color: #2c3e50;
+         text-align: right;
+         padding-top: 15px;
+         border-top: 2px solid #eee;
+         margin-top: 15px;
+       }
+
+       .back-link {
+            text-decoration: none;
+            color: #333;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+       }
     </style>
 </head>
 <body>
 <header>
     <h1><a href="/">AuGold</a></h1>
     <nav>
-        <a href="/">메인</a>
-        <a href="/mypage">마이페이지</a>
-        <a href="/cart">장바구니</a>
         <a href="/logout">로그아웃</a>
     </nav>
 </header>
@@ -357,11 +371,11 @@
             <div class="order-content">
                 <!-- 이미지 표시 -->
                 <div class="product-image">
-        <span th:if="${order.orderItems != null and !#lists.isEmpty(order.orderItems) and order.orderItems[0].imageUrl != null}">
-            <img th:src="${order.orderItems[0].imageUrl}"
-                 th:alt="${order.orderItems[0].productName}"
-                 style="width: 100%; height: 100%; object-fit: cover;">
-        </span>
+                    <span th:if="${order.orderItems != null and !#lists.isEmpty(order.orderItems) and order.orderItems[0].imageUrl != null}">
+                        <img th:src="${order.orderItems[0].imageUrl}"
+                             th:alt="${order.orderItems[0].productName}"
+                             style="width: 100%; height: 100%; object-fit: cover;">
+                    </span>
                     <span th:unless="${order.orderItems != null and !#lists.isEmpty(order.orderItems) and order.orderItems[0].imageUrl != null}">💎</span>
                 </div>
 
@@ -393,6 +407,9 @@
                 </div>
                 <div>
                     <span th:if="${order.orderStatus.name() == 'DELIVERED'}" class="btn btn-secondary">리뷰 작성</span>
+                    <a href="/mypage" class="back-link">
+                        <span class="material-symbols-outlined">arrow_back</span>
+                    </a>
                 </div>
             </div>
         </div>
@@ -404,7 +421,7 @@
     <div class="modal-content">
         <div class="modal-header">
             <h2>주문 상세 정보</h2>
-            <span class="close">&times;</span>
+            <span class="close">×</span>
         </div>
         <div id="orderDetailContent">
             <!-- 상세 내용이 동적으로 로드됩니다 -->
