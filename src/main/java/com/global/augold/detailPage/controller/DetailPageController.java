@@ -40,8 +40,19 @@ public class DetailPageController {
             productOptions = List.of();
 
         } else if ("돌반지".equals(dto.getSubCtgr())) {
+            // 🔥 현재 상품명에서 중량 부분 제거
+            String baseProductName = dto.getProductName()
+                    .replaceAll("\\s*\\d+(\\.\\d+)?g", "") // 중량 제거
+                    .replaceAll("\\s+", " ").trim();
+
             productOptions = productRepository.findAll().stream()
                     .filter(p -> "돌반지".equals(p.getSubCtgr()))
+                    .filter(p -> {
+                        String optionBaseName = p.getProductName()
+                                .replaceAll("\\s*\\d+(\\.\\d+)?g", "") // 중량 제거
+                                .replaceAll("\\s+", " ").trim();
+                        return baseProductName.equals(optionBaseName); // 같은 제품명만
+                    })
                     .toList();
 
         } else if (dto.getProductGroup() != null && !dto.getProductGroup().isEmpty()) {
@@ -90,13 +101,13 @@ public class DetailPageController {
         List<DetailPageDTO> deduplicatedOptions = new ArrayList<>();
 
         if ("돌반지".equals(dto.getSubCtgr())) {
-            Set<Double> seenWeights = new HashSet<>();
+            Set<String> seenProductIds = new HashSet<>(); // 🔥 productId 기준으로 변경
 
             for (DetailPageDTO opt : options) {
-                Double key = opt.getGoldWeight();
+                String key = opt.getProductId(); // 🔥 productId 사용
 
-                if (key != null && !seenWeights.contains(key)) {
-                    seenWeights.add(key);
+                if (key != null && !seenProductIds.contains(key)) {
+                    seenProductIds.add(key);
                     deduplicatedOptions.add(opt);
                 }
             }
@@ -141,8 +152,7 @@ public class DetailPageController {
                     .findFirst()
                     .orElse(!options.isEmpty() ? options.get(0) : dto);
 
-            dto.setFinalPrice(baseOption.getFinalPrice());
-            dto.setKaratCode(baseOption.getKaratCode());
+
 
             if (dto.getProductInventory() == null && baseOption.getProductInventory() != null) {
                 dto.setProductInventory(baseOption.getProductInventory());
