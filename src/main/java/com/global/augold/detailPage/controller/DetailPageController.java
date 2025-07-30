@@ -89,16 +89,29 @@ public class DetailPageController {
         Set<String> seenKarats = new HashSet<>(); // 순도(Karat)만 추적하기 위한 Set
         List<DetailPageDTO> deduplicatedOptions = new ArrayList<>();
 
-        for (DetailPageDTO opt : options) {
-            // 🔥 키를 오직 'karatCode'만 사용하여 중복을 확인합니다.
-            String key = opt.getKaratCode();
+        if ("돌반지".equals(dto.getSubCtgr())) {
+            Set<Double> seenWeights = new HashSet<>();
 
-            // 이 순도(Karat)가 아직 추가된 적 없다면 리스트에 추가합니다.
-            if (key != null && !seenKarats.contains(key)) {
-                seenKarats.add(key);
-                deduplicatedOptions.add(opt);
+            for (DetailPageDTO opt : options) {
+                Double key = opt.getGoldWeight();
+
+                if (key != null && !seenWeights.contains(key)) {
+                    seenWeights.add(key);
+                    deduplicatedOptions.add(opt);
+                }
+            }
+        } else {
+            // 🔥 기존 for문 그대로
+            for (DetailPageDTO opt : options) {
+                String key = opt.getKaratCode();
+
+                if (key != null && !seenKarats.contains(key)) {
+                    seenKarats.add(key);
+                    deduplicatedOptions.add(opt);
+                }
             }
         }
+
 
 // 중복이 제거된 리스트로 options 변수를 교체합니다.
         options = deduplicatedOptions;
