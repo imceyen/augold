@@ -31,6 +31,7 @@ public class MypageController {
             return "redirect:/login";
         }
         model.addAttribute("user", loginUser);
+        model.addAttribute("loginName", loginUser.getCstmName());
         return "member/mypage";
     }
 

@@ -1,0 +1,226 @@
+{
+  "metadata": {
+    "analysis_time": "2025-07-30 09:38:17",
+    "base_time": "2025-07-28 14:19:15",
+    "threshold_hours": 12,
+    "version": "1.0"
+  },
+  "summary": {
+    "total": 3000,
+    "abandoned": 2407,
+    "active": 593,
+    "rate": 80.2,
+    "base_time": "2025-07-28 14:19:15",
+    "threshold_hours": 12
+  },
+  "charts": {
+    "abandonment_donut": {
+      "type": "donut",
+      "title": "전체 이탈률",
+      "data": {
+        "labels": [
+          "이탈",
+          "정상"
+        ],
+        "values": [
+          2407,
+          593
+        ],
+        "colors": [
+          "#FF6B6B",
+          "#4ECDC4"
+        ]
+      }
+    },
+    "hourly_line": {
+      "type": "line",
+      "title": "시간대별 장바구니 추가",
+      "data": {
+        "x": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23
+        ],
+        "y": [
+          103,
+          73,
+          111,
+          111,
+          104,
+          93,
+          96,
+          122,
+          99,
+          115,
+          92,
+          97,
+          102,
+          477,
+          278,
+          102,
+          95,
+          110,
+          111,
+          105,
+          92,
+          105,
+          103,
+          104
+        ],
+        "peak_hour": 13,
+        "peak_value": 477
+      }
+    },
+    "karat_bar": {
+      "type": "bar",
+      "title": "순도별 이탈 현황",
+      "data": {
+        "x": [
+          "18K",
+          "14K",
+          "24K"
+        ],
+        "y": [
+          842,
+          790,
+          775
+        ],
+        "colors": [
+          "#FFD93D",
+          "#C0C0C0",
+          "#CD7F32"
+        ]
+      }
+    },
+    "time_distribution": {
+      "type": "histogram",
+      "title": "이탈 시간 분포",
+      "data": {
+        "x": [
+          "1-6시간",
+          "6-24시간",
+          "1-3일",
+          "3-7일",
+          "7일이상"
+        ],
+        "y": [
+          0,
+          40,
+          184,
+          341,
+          1842
+        ],
+        "percentages": [
+          0.0,
+          1.6618196925633568,
+          7.644370585791442,
+          14.167012879102616,
+          76.5267968425426
+        ],
+        "colors": [
+          "#FF9999",
+          "#FFB366",
+          "#FFFF66",
+          "#99FF99",
+          "#99CCFF"
+        ]
+      }
+    }
+  },
+  "insights": {
+    "summary": {
+      "total_abandoned": 2407,
+      "avg_hours": 362.2,
+      "top_karat": "18K",
+      "top_karat_count": 842,
+      "peak_hour": 13,
+      "avg_abandon_per_customer": 1.7,
+      "max_abandon_customer": 7,
+      "base_time": "2025-07-28 14:19:15"
+    },
+    "recommendations": [
+      "12~14시 집중 광고 집행",
+      "18K 상품 특별 할인 이벤트",
+      "1-6시간 이탈 고객에게 즉시 리마인드",
+      "6-24시간 이탈 고객에게 쿠폰 발송",
+      "고객별 맞춤 추천 시스템 도입"
+    ],
+    "key_findings": [
+      "총 2,407개 아이템이 평균 362.2시간 후 이탈",
+      "18K 순도가 842건으로 가장 많이 이탈",
+      "13시에 장바구니 추가가 가장 활발",
+      "고객당 평균 1.7개 아이템 이탈"
+    ]
+  },
+  "threshold_analysis": [
+    {
+      "hours": 0.5,
+      "time_label": "30분",
+      "abandoned_count": 2723,
+      "rate": 90.8
+    },
+    {
+      "hours": 1,
+      "time_label": "1시간",
+      "abandoned_count": 2442,
+      "rate": 81.4
+    },
+    {
+      "hours": 2,
+      "time_label": "2시간",
+      "abandoned_count": 2435,
+      "rate": 81.2
+    },
+    {
+      "hours": 6,
+      "time_label": "6시간",
+      "abandoned_count": 2421,
+      "rate": 80.7
+    },
+    {
+      "hours": 12,
+      "time_label": "12시간",
+      "abandoned_count": 2407,
+      "rate": 80.2
+    },
+    {
+      "hours": 24,
+      "time_label": "1일",
+      "abandoned_count": 2367,
+      "rate": 78.9
+    },
+    {
+      "hours": 48,
+      "time_label": "2일",
+      "abandoned_count": 2265,
+      "rate": 75.5
+    },
+    {
+      "hours": 72,
+      "time_label": "3일",
+      "abandoned_count": 2183,
+      "rate": 72.8
+    }
+  ]
+}
