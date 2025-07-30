@@ -7,21 +7,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
 
 /* --- 기본 & 초기화 --- */
-body {
-    margin: 0;
-    font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    background-color: #f5f7fa;
-    color: #333d4b;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
 
-a {
-    text-decoration: none;
-    color: inherit;
-}
 
-{
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -32,6 +25,7 @@ a {
             background-color: #f9fafb;
             color: #374151;
             line-height: 1.6;
+
         }
 
         /* 헤더 컨테이너 */
@@ -49,6 +43,7 @@ a {
             top: 0;
             z-index: 100;
             font-family: 'Arial', sans-serif;
+            margin-top: 0;
         }
 
         .header-content {
@@ -308,6 +303,58 @@ a {
             .logo-icon span {
                 font-size: 16px;
             }
+        }
+
+        .social-links {
+            display: flex;
+            gap: 16px;
+            margin-top: 16px;
+            justify-content: center;
+        }
+
+        .social-links a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: #374151;
+            border-radius: 50%;
+            color: #9ca3af;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 18px;
+        }
+
+        .social-links a:hover {
+            background: linear-gradient(135deg, #ffd700, #ffb300);
+            color: #1f2937;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+        }
+
+        .additional-info {
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid #e4e8eb;
+        }
+
+        .info-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .info-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .info-list li {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            gap: 8px;
         }
 
 

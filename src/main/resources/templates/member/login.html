@@ -3,85 +3,7 @@
 <head>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        /* --- Google Fonts --- */
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
-
-/* --- 기본 & 초기화 --- */
-body { margin: 0; font-family: 'Noto Sans KR', sans-serif; background-color: #f5f7fa; color: #333d4b; }
-a { text-decoration: none; color: inherit; }
-
-/* --- 페이지 헤더 --- */
-.page-header { background-color: #fff; border-bottom: 1px solid #e4e8eb; padding: 0 24px; }
-.header-content { display: flex; justify-content: space-between; align-items: center; max-width: 1080px; margin: 0 auto; height: 64px; }
-.logo { font-weight: 700; font-size: 22px; color: #1e2025; }
-.main-nav { display: flex; align-items: center; gap: 28px; }
-.main-nav a { font-size: 16px; font-weight: 500; color: #5a6a7a; transition: color 0.2s; }
-.main-nav a:hover, .main-nav a.active { color: #007aff; }
-
-/* --- 메인 콘텐츠 컨테이너 --- */
-.container { display: flex; justify-content: center; align-items: flex-start; padding: 40px 20px; }
-
-/* --- 로그인 카드 --- */
-.login-card {
-    background-color: #fff;
-    width: 100%;
-    max-width: 400px;
-    padding: 32px 40px;
-    border-radius: 12px;
-    border: 1px solid #e4e8eb;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-}
-.form-header { text-align: center; margin-bottom: 24px; }
-.form-title { font-size: 24px; font-weight: 700; margin: 0; color: #191f28; }
-.form-subtitle { font-size: 15px; color: #6b7886; margin: 8px 0 0; }
-
-/* --- 메시지 박스 (에러) --- */
-.message-box { display: flex; align-items: center; padding: 12px 16px; margin-bottom: 20px; border-radius: 8px; font-size: 14px; font-weight: 500; }
-.message-box.error { background-color: #fff5f6; color: #f04452; }
-.message-box .icon { margin-right: 10px; font-size: 20px; }
-
-/* --- 로그인 폼 --- */
-.login-form .form-group { margin-bottom: 20px; }
-.login-form label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 8px; color: #4e5968; }
-
-.login-form input[type="text"],
-.login-form input[type="password"] {
-    width: 100%; padding: 12px 14px; border: 1px solid #d1d8e0; border-radius: 8px; font-size: 16px;
-    box-sizing: border-box; transition: border-color 0.2s, box-shadow 0.2s;
-}
-.login-form input::placeholder { color: #aeb9c6; }
-.login-form input:focus { outline: none; border-color: #007aff; box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.15); }
-
-/* 비밀번호 보기/숨기기 */
-.password-field-group { position: relative; }
-.toggle-password {
-    position: absolute;
-    right: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    cursor: pointer;
-    color: #8b95a1;
-    user-select: none;
-    transition: color 0.2s;
-}
-.toggle-password:hover { color: #4e5968; }
-.password-field-group input { padding-right: 48px; }
-
-/* 제출 버튼 */
-.submit-btn {
-    width: 100%; padding: 14px 0; background-color: #007aff; border: none; border-radius: 8px;
-    color: white; font-size: 16px; font-weight: 700; cursor: pointer; transition: background-color 0.2s;
-    margin-top: 10px;
-}
-.submit-btn:hover { background-color: #0056b3; }
-
-/* 폼 푸터 */
-.form-footer { text-align: center; margin-top: 24px; font-size: 14px; color: #6b7886; border-top: 1px solid #f2f4f6; padding-top: 20px;}
-.form-footer a { color: #007aff; font-weight: 600; margin-left: 6px; }
-
-/* 아이콘 기본 스타일 */
-.material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
-
+        /* --- 기본 초기화 --- */
 * {
     margin: 0;
     padding: 0;
@@ -95,7 +17,7 @@ body {
     line-height: 1.6;
 }
 
-/* 헤더 컨테이너 */
+/* --- 헤더 --- */
 .header-container {
     max-width: 1200px;
     margin: 0 auto;
@@ -132,7 +54,6 @@ header {
     opacity: 0.8;
 }
 
-/* 로고 아이콘 */
 .logo-icon {
     width: 40px;
     height: 40px;
@@ -160,7 +81,6 @@ header {
     50% { transform: scale(1.05); }
 }
 
-/* 로고 텍스트 */
 .logo-text h1 {
     font-size: 24px;
     font-weight: bold;
@@ -230,7 +150,317 @@ header {
     display: none;
 }
 
-/* 반응형 헤더 */
+/* 로고 섹션 호버 효과 */
+.logo-section:hover .logo-icon {
+    animation: iconPulse 1s infinite;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+}
+
+.logo-section:hover .logo-text h1 {
+    animation: shimmer 1.5s ease-in-out infinite;
+    filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.8));
+}
+
+/* --- 메인 콘텐츠 컨테이너 --- */
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 40px 20px;
+    margin-bottom: 100px;
+}
+
+/* --- 로그인 카드 --- */
+.login-card {
+    background-color: #fff;
+    width: 100%;
+    max-width: 400px;
+    padding: 32px 40px;
+    border-radius: 12px;
+    border: 1px solid #e4e8eb;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.form-header {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.form-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0;
+    color: #191f28;
+}
+
+.form-subtitle {
+    font-size: 15px;
+    color: #6b7886;
+    margin: 8px 0 0;
+}
+
+/* --- 메시지 박스 (에러) --- */
+.message-box {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.message-box.error {
+    background-color: #fff5f6;
+    color: #f04452;
+}
+
+.message-box .icon {
+    margin-right: 10px;
+    font-size: 20px;
+}
+
+/* --- 로그인 폼 --- */
+.login-form .form-group {
+    margin-bottom: 20px;
+}
+
+.login-form label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #4e5968;
+}
+
+.login-form input[type="text"],
+.login-form input[type="password"] {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #d1d8e0;
+    border-radius: 8px;
+    font-size: 16px;
+    box-sizing: border-box;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.login-form input::placeholder {
+    color: #aeb9c6;
+}
+
+.login-form input:focus {
+    outline: none;
+    border-color: #007aff;
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.15);
+}
+
+/* 비밀번호 보기/숨기기 */
+.password-field-group {
+    position: relative;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #8b95a1;
+    user-select: none;
+    transition: color 0.2s;
+}
+
+.toggle-password:hover {
+    color: #4e5968;
+}
+
+.password-field-group input {
+    padding-right: 48px;
+}
+
+/* 제출 버튼 */
+.submit-btn {
+    width: 100%;
+    padding: 14px 0;
+    background-color: #007aff;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-top: 10px;
+}
+
+.submit-btn:hover {
+    background-color: #0056b3;
+}
+
+/* 폼 푸터 */
+.form-footer {
+    text-align: center;
+    margin-top: 24px;
+    font-size: 14px;
+    color: #6b7886;
+    border-top: 1px solid #f2f4f6;
+    padding-top: 20px;
+}
+
+.form-footer a {
+    color: #007aff;
+    font-weight: 600;
+    margin-left: 6px;
+}
+
+/* 아이콘 기본 스타일 */
+.material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    vertical-align: middle;
+}
+
+/* --- 푸터 --- */
+.augold-footer {
+    background: linear-gradient(135deg, #1f2937, #111827);
+    color: white;
+    padding: 48px 0;
+    margin-top: auto;
+}
+
+.footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 16px;
+}
+
+.footer-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 32px;
+    margin-bottom: 32px;
+}
+
+.footer-brand h3 {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    background: linear-gradient(45deg, #ffd700, #ffb300);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.footer-brand p {
+    color: #9ca3af;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.footer-section h4 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: #ffd700;
+    position: relative;
+}
+
+.footer-section h4::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 30px;
+    height: 2px;
+    background: linear-gradient(90deg, #ffd700, transparent);
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-links li {
+    margin-bottom: 8px;
+}
+
+.footer-links a {
+    color: #9ca3af;
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    display: inline-block;
+    position: relative;
+}
+
+.footer-links a:hover {
+    color: #ffd700;
+    transform: translateX(4px);
+}
+
+.contact-info p {
+    color: #9ca3af;
+    font-size: 14px;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.footer-bottom {
+    border-top: 1px solid #374151;
+    margin-top: 32px;
+    padding-top: 32px;
+    text-align: center;
+}
+
+.footer-bottom p {
+    color: #6b7280;
+    font-size: 14px;
+    margin: 0;
+}
+
+.social-links {
+    display: flex;
+    gap: 16px;
+    margin-top: 16px;
+    justify-content: center;
+}
+
+.social-links a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: #374151;
+    border-radius: 50%;
+    color: #9ca3af;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-size: 18px;
+}
+
+.social-links a:hover {
+    background: linear-gradient(135deg, #ffd700, #ffb300);
+    color: #1f2937;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+}
+
+/* SweetAlert2 커스텀 스타일 */
+.swal-confirm-btn {
+    background-color: #ffd700 !important;
+    color: #8b4513 !important;
+    font-weight: bold !important;
+}
+
+.swal-cancel-btn {
+    background-color: #6b7280 !important;
+    color: white !important;
+}
+
+/* 반응형 디자인 */
 @media (max-width: 768px) {
     .header-content {
         flex-direction: column;
@@ -253,29 +483,6 @@ header {
     .logo-icon span {
         font-size: 16px;
     }
-}
-
-/* 로고 섹션 호버 효과 */
-.logo-section:hover .logo-icon {
-    animation: iconPulse 1s infinite;
-    box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
-}
-
-.logo-section:hover .logo-text h1 {
-    animation: shimmer 1.5s ease-in-out infinite;
-    filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.8));
-}
-
-/* SweetAlert2 커스텀 스타일 */
-.swal-confirm-btn {
-    background-color: #ffd700 !important;
-    color: #8b4513 !important;
-    font-weight: bold !important;
-}
-
-.swal-cancel-btn {
-    background-color: #6b7280 !important;
-    color: white !important;
 }
 
 
@@ -376,6 +583,64 @@ header {
         </div>
     </div>
 </main>
+<footer class="augold-footer">
+    <div class="footer-container">
+        <div class="footer-content">
+            <!-- 브랜드 섹션 -->
+            <div class="footer-brand">
+                <h3>AuGold</h3>
+                <p>믿을 수 있는 프리미엄 금 전문 플랫폼<br>
+                    고품질 골드바부터 럭셔리 주얼리까지<br>
+                    당신의 소중한 투자를 함께합니다.</p>
+            </div>
+
+            <!-- 고객서비스 섹션 -->
+            <div class="footer-section">
+                <h4>고객서비스</h4>
+                <ul class="footer-links">
+                    <li><a href="/order/tracking">주문/배송 조회</a></li>
+                    <li><a href="/support/return">반품/교환</a></li>
+                    <li><a href="/support/faq">FAQ</a></li>
+                    <li><a href="#" onclick="loginRequired()">1:1 문의</a></li>
+                </ul>
+            </div>
+
+            <!-- 회사정보 섹션 -->
+            <div class="footer-section">
+                <h4>회사정보</h4>
+                <ul class="footer-links">
+                    <li><a href="/company/about">회사소개</a></li>
+                    <li><a href="/legal/terms">이용약관</a></li>
+                    <li><a href="/legal/privacy">개인정보처리방침</a></li>
+                    <li><a href="/company/info">사업자정보</a></li>
+                </ul>
+            </div>
+
+            <!-- 연락처 섹션 -->
+            <div class="footer-section">
+                <h4>연락처</h4>
+                <div class="contact-info">
+                    <p>📞 1588-1234</p>
+                    <p>✉️ help@augold.co.kr</p>
+                    <p>🕒 평일 09:00-18:00</p>
+                    <p>🕒 주말/공휴일 휴무</p>
+                </div>
+
+                <!-- 소셜 미디어 링크 -->
+                <div class="social-links">
+                    <a href="#" title="카카오톡">💬</a>
+                    <a href="#" title="인스타그램">📷</a>
+                    <a href="#" title="네이버 블로그">📝</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 하단 저작권 -->
+        <div class="footer-bottom">
+            <p>&copy; 2025 AuGold. All rights reserved. | 대표: 임채연 | 사업자등록번호: 123-45-67890</p>
+        </div>
+    </div>
+</footer>
 
 <script>
     function toggleVisibility() {

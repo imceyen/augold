@@ -21,13 +21,15 @@
             line-height: 1.6;
         }
 
-        .container {
+
+
+        /* 헤더 컨테이너 */
+        .header-container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 20px;
         }
 
-        /* 헤더 스타일 */
         header {
             background: white;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
@@ -35,6 +37,7 @@
             position: sticky;
             top: 0;
             z-index: 100;
+            font-family: 'Arial', sans-serif;
         }
 
         .header-content {
@@ -59,28 +62,55 @@
         .logo-icon {
             width: 40px;
             height: 40px;
-            background: linear-gradient(135deg, #facc15, #f59e0b);
+            background:
+                radial-gradient(circle at 30% 30%, #fff 2px, transparent 2px),
+                linear-gradient(135deg, #ffd700, #ffb300, #ff8c00);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-weight: bold;
+            position: relative;
+            border: 2px solid #ff8c00;
+            animation: iconPulse 2s infinite;
+        }
+
+        .logo-icon span {
             font-size: 18px;
+            color: #8b4513;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.5);
+        }
+
+        @keyframes iconPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
 
         .logo-text h1 {
             font-size: 24px;
             font-weight: bold;
-            background: linear-gradient(135deg, #d97706, #92400e);
+            background: linear-gradient(45deg, #ffd700, #ffb300, #ffd700, #ffb300);
+            background-size: 400% 400%;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            margin: 0;
+            line-height: 1.2;
+            font-family: 'Arial', sans-serif;
+            animation: shimmer 3s ease-in-out infinite;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        @keyframes shimmer {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
         }
 
         .logo-text p {
             font-size: 12px;
             color: #6b7280;
+            margin: 0;
+            font-family: 'Arial', sans-serif;
         }
 
         .nav-section {
@@ -90,23 +120,21 @@
         }
 
         .nav-section a,
-         .nav-section .nav-text {
+        .nav-section .nav-text {
             color: #374151;
             text-decoration: none;
             font-weight: 500;
             transition: color 0.2s;
             position: relative;
+            font-family: 'Arial', sans-serif;
+            font-size: 16px;
         }
 
         .nav-section a:hover {
             color: #d97706;
         }
 
-        .nav-section a.active {
-        color: #d97706;
-        font-weight: 600;
-    }
-
+        /* 장바구니 배지 */
         .cart-badge {
             position: absolute;
             top: -8px;
@@ -120,10 +148,154 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            animation: badgePulse 2s infinite;
+        }
+
+        @keyframes badgePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
         }
 
         .hidden {
             display: none !important;
+        }
+
+        .augold-footer {
+            background: linear-gradient(135deg, #1f2937, #111827);
+            color: white;
+            padding: 48px 0;
+            margin-top: auto;
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 32px;
+            margin-bottom: 32px;
+        }
+
+        .footer-brand h3 {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            background: linear-gradient(45deg, #ffd700, #ffb300);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .footer-brand p {
+            color: #9ca3af;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .footer-section h4 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #ffd700;
+            position: relative;
+        }
+
+        .footer-section h4::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 30px;
+            height: 2px;
+            background: linear-gradient(90deg, #ffd700, transparent);
+        }
+
+        /* 기타 푸터 스타일들... */
+        .footer-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .footer-links li {
+            margin-bottom: 8px;
+        }
+
+        .footer-links a {
+            color: #9ca3af;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            display: inline-block;
+            position: relative;
+        }
+
+        .footer-links a:hover {
+            color: #ffd700;
+            transform: translateX(4px);
+        }
+
+        .contact-info p {
+            color: #9ca3af;
+            font-size: 14px;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid #374151;
+            margin-top: 32px;
+            padding-top: 32px;
+            text-align: center;
+        }
+
+        .footer-bottom p {
+            color: #6b7280;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        /* SweetAlert2 커스텀 스타일 */
+        .swal-confirm-btn {
+            background-color: #ffd700 !important;
+            color: #8b4513 !important;
+            font-weight: bold !important;
+        }
+
+        .swal-cancel-btn {
+            background-color: #6b7280 !important;
+            color: white !important;
+        }
+
+        /* 반응형 디자인 */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .nav-section {
+                gap: 16px;
+            }
+
+            .logo-text h1 {
+                font-size: 20px;
+            }
+
+            .logo-icon {
+                width: 35px;
+                height: 35px;
+            }
+
+            .logo-icon span {
+                font-size: 16px;
+            }
         }
 
         /* 메인 콘텐츠 */
@@ -502,6 +674,32 @@
             font-size: 14px;
         }
 
+        .social-links {
+        display: flex;
+        gap: 16px;
+        margin-top: 16px;
+        justify-content: center;
+        }
+        .social-links a {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 40px;
+                height: 40px;
+                background: #374151;
+                border-radius: 50%;
+                color: #9ca3af;
+                text-decoration: none;
+                transition: all 0.3s ease;
+                font-size: 18px;
+        }
+        .social-links a:hover {
+                background: linear-gradient(135deg, #ffd700, #ffb300);
+                color: #1f2937;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+        }
+
         /* 반응형 */
         @media (max-width: 768px) {
             .header-content {
@@ -564,7 +762,7 @@
 </head>
 <body>
 <header>
-    <div class="container">
+    <div class="header-container">
         <div class="header-content">
             <a href="/" class="logo-section">
                 <div class="logo-icon">
@@ -580,24 +778,26 @@
                 <th:block th:if="${loginName == null}">
                     <a href="/login">로그인</a>
                     <a href="/customer/register">회원가입</a>
-                </th:block>
-                <th:block th:if="${loginName != null}">
-                    <span class = "nav-text">[[${loginName}]]님 환영합니다</span>
-                    <a href="/logout">로그아웃</a>
+                    <a href="#" onclick="loginRequired()">고객센터</a>
                 </th:block>
 
-                <a href="/support">고객센터</a>
-                <a href="/mypage">마이페이지</a>
-                <a href="/cart" class="active">장바구니
-                    <span id="cartBadge" class="cart-badge hidden">0</span>
-                </a>
+                <!-- 로그인 후: 환영 메시지 및 모든 메뉴가 보임 -->
+                <th:block th:if="${loginName != null}">
+                    <span class="nav-text">[[${loginName}]]님 환영합니다</span>
+                    <a href="/logout">로그아웃</a>
+                    <a href="/support">고객센터</a>
+                    <a href="/mypage">마이페이지</a>
+                    <a href="/cart">장바구니
+                        <span id="cartBadge" class="cart-badge hidden">0</span>
+                    </a>
+                </th:block>
             </nav>
         </div>
     </div>
 </header>
 
 <main>
-    <div class="container">
+    <div class="header-container">
         <div class="page-header">
             <h2 class="page-title">장바구니</h2>
             <div class="item-count">
@@ -715,41 +915,61 @@
     </div>
 </main>
 
-<footer>
-    <div class="container">
+<footer class="augold-footer">
+    <div class="footer-container">
         <div class="footer-content">
-            <div class="footer-section">
+            <!-- 브랜드 섹션 -->
+            <div class="footer-brand">
                 <h3>AuGold</h3>
-                <p>믿을 수 있는 프리미엄 금 전문 플랫폼</p>
+                <p>믿을 수 있는 프리미엄 금 전문 플랫폼<br>
+                    고품질 골드바부터 럭셔리 주얼리까지<br>
+                    당신의 소중한 투자를 함께합니다.</p>
             </div>
+
+            <!-- 고객서비스 섹션 -->
             <div class="footer-section">
                 <h4>고객서비스</h4>
-                <ul class="footer-list">
-                    <li><a href="#">주문/배송 조회</a></li>
-                    <li><a href="#">반품/교환</a></li>
-                    <li><a href="#">FAQ</a></li>
-                    <li><a href="#">1:1 문의</a></li>
+                <ul class="footer-links">
+                    <li><a href="/order/tracking">주문/배송 조회</a></li>
+                    <li><a href="/support/return">반품/교환</a></li>
+                    <li><a href="/support/faq">FAQ</a></li>
+                    <li><a href="#" onclick="loginRequired()">1:1 문의</a></li>
                 </ul>
             </div>
+
+            <!-- 회사정보 섹션 -->
             <div class="footer-section">
                 <h4>회사정보</h4>
-                <ul class="footer-list">
-                    <li><a href="#">회사소개</a></li>
-                    <li><a href="#">이용약관</a></li>
-                    <li><a href="#">개인정보처리방침</a></li>
-                    <li><a href="#">사업자정보</a></li>
+                <ul class="footer-links">
+                    <li><a href="/company/about">회사소개</a></li>
+                    <li><a href="/legal/terms">이용약관</a></li>
+                    <li><a href="/legal/privacy">개인정보처리방침</a></li>
+                    <li><a href="/company/info">사업자정보</a></li>
                 </ul>
             </div>
+
+            <!-- 연락처 섹션 -->
             <div class="footer-section">
                 <h4>연락처</h4>
-                <p>1588-1234</p>
-                <p>help@augold.co.kr</p>
-                <p>평일 09:00-18:00</p>
-                <p>주말/공휴일 휴무</p>
+                <div class="contact-info">
+                    <p>📞 1588-1234</p>
+                    <p>✉️ help@augold.co.kr</p>
+                    <p>🕒 평일 09:00-18:00</p>
+                    <p>🕒 주말/공휴일 휴무</p>
+                </div>
+
+                <!-- 소셜 미디어 링크 -->
+                <div class="social-links">
+                    <a href="#" title="카카오톡">💬</a>
+                    <a href="#" title="인스타그램">📷</a>
+                    <a href="#" title="네이버 블로그">📝</a>
+                </div>
             </div>
         </div>
+
+        <!-- 하단 저작권 -->
         <div class="footer-bottom">
-            &copy; 2025 AuGold. All rights reserved.
+            <p>&copy; 2025 AuGold. All rights reserved. | 대표: 임채연 | 사업자등록번호: 123-45-67890</p>
         </div>
     </div>
 </footer>
@@ -1126,6 +1346,46 @@
                         confirmButtonColor: '#f59e0b'
                     });
                 }
+            }
+        });
+    }
+
+    function loginRequired() {
+    const isLoggedIn = document.querySelector('.nav-text') !== null;
+
+    if (!isLoggedIn) {
+        Swal.fire({
+            title: '로그인 필요',
+            text: '로그인 후 이용 가능합니다.',
+            icon: 'warning',
+            confirmButtonText: '로그인하기',
+            confirmButtonColor: '#ffd700',
+            cancelButtonText: '취소',
+            showCancelButton: true,
+            customClass: {
+                confirmButton: 'swal-confirm-btn',
+                cancelButton: 'swal-cancel-btn'
+            }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '/login';
+                }
+            });
+        } else {
+            window.location.href = '/support';
+        }
+    }
+
+    // SweetAlert2 공통 함수
+    function showAlert(message, type = 'info') {
+        Swal.fire({
+            title: type === 'success' ? '성공' : '알림',
+            text: message,
+            icon: type,
+            confirmButtonText: '확인',
+            confirmButtonColor: '#ffd700',
+            customClass: {
+                confirmButton: 'swal-confirm-btn'
             }
         });
     }
