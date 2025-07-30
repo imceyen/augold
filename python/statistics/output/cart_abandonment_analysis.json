@@ -1,17 +1,17 @@
 {
   "metadata": {
-    "analysis_time": "2025-07-29 11:23:52",
+    "analysis_time": "2025-07-30 09:38:17",
     "base_time": "2025-07-28 14:19:15",
-    "threshold_hours": 24,
+    "threshold_hours": 12,
     "version": "1.0"
   },
   "summary": {
     "total": 3000,
-    "abandoned": 2367,
-    "active": 633,
-    "rate": 78.9,
+    "abandoned": 2407,
+    "active": 593,
+    "rate": 80.2,
     "base_time": "2025-07-28 14:19:15",
-    "threshold_hours": 24
+    "threshold_hours": 12
   },
   "charts": {
     "abandonment_donut": {
@@ -23,8 +23,8 @@
           "정상"
         ],
         "values": [
-          2367,
-          633
+          2407,
+          593
         ],
         "colors": [
           "#FF6B6B",
@@ -102,9 +102,9 @@
           "24K"
         ],
         "y": [
-          826,
-          779,
-          762
+          842,
+          790,
+          775
         ],
         "colors": [
           "#FFD93D",
@@ -126,17 +126,17 @@
         ],
         "y": [
           0,
-          0,
+          40,
           184,
           341,
           1842
         ],
         "percentages": [
           0.0,
-          0.0,
-          7.77355302070131,
-          14.406421630756231,
-          77.82002534854246
+          1.6618196925633568,
+          7.644370585791442,
+          14.167012879102616,
+          76.5267968425426
         ],
         "colors": [
           "#FF9999",
@@ -150,10 +150,10 @@
   },
   "insights": {
     "summary": {
-      "total_abandoned": 2367,
-      "avg_hours": 368.0,
+      "total_abandoned": 2407,
+      "avg_hours": 362.2,
       "top_karat": "18K",
-      "top_karat_count": 826,
+      "top_karat_count": 842,
       "peak_hour": 13,
       "avg_abandon_per_customer": 1.7,
       "max_abandon_customer": 7,
@@ -167,8 +167,8 @@
       "고객별 맞춤 추천 시스템 도입"
     ],
     "key_findings": [
-      "총 2,367개 아이템이 평균 368.0시간 후 이탈",
-      "18K 순도가 826건으로 가장 많이 이탈",
+      "총 2,407개 아이템이 평균 362.2시간 후 이탈",
+      "18K 순도가 842건으로 가장 많이 이탈",
       "13시에 장바구니 추가가 가장 활발",
       "고객당 평균 1.7개 아이템 이탈"
     ]
