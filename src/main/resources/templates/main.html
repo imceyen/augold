@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         .gold-gradient {
             background: linear-gradient(135deg, #facc15, #f59e0b);
@@ -69,9 +70,15 @@
             box-sizing: border-box;
         }
 
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f9fafb;
+            color: #374151;
+            line-height: 1.6;
+        }
 
-
-       .header-container {
+        /* 헤더 컨테이너 */
+        .header-container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 20px;
@@ -109,26 +116,48 @@
         .logo-icon {
             width: 40px;
             height: 40px;
-            background: linear-gradient(135deg, #facc15, #f59e0b);
+            background:
+                radial-gradient(circle at 30% 30%, #fff 2px, transparent 2px),
+                linear-gradient(135deg, #ffd700, #ffb300, #ff8c00);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-weight: bold;
+            position: relative;
+            border: 2px solid #ff8c00;
+            animation: iconPulse 2s infinite;
+        }
+
+        .logo-icon span {
             font-size: 18px;
+            color: #8b4513;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.5);
+        }
+
+        @keyframes iconPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
 
         .logo-text h1 {
             font-size: 24px;
             font-weight: bold;
-            background: linear-gradient(135deg, #d97706, #92400e);
+            background: linear-gradient(45deg, #ffd700, #ffb300, #ffd700, #ffb300);
+            background-size: 400% 400%;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
             margin: 0;
             line-height: 1.2;
             font-family: 'Arial', sans-serif;
+            animation: shimmer 3s ease-in-out infinite;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        @keyframes shimmer {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
         }
 
         .logo-text p {
@@ -159,6 +188,7 @@
             color: #d97706;
         }
 
+        /* 🔥 장바구니 배지 (cart.html에서 가져온 완전한 스타일) */
         .cart-badge {
             position: absolute;
             top: -8px;
@@ -172,10 +202,16 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            animation: badgePulse 2s infinite;
+        }
+
+        @keyframes badgePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
         }
 
         .hidden {
-            display: none;
+            display: none !important;
         }
 
         /* 반응형 헤더 */
@@ -188,13 +224,257 @@
             .nav-section {
                 gap: 16px;
             }
+
+            .logo-text h1 {
+                font-size: 20px;
+            }
+
+            .logo-icon {
+                width: 35px;
+                height: 35px;
+            }
+
+            .logo-icon span {
+                font-size: 16px;
+            }
         }
-         body {
-        font-family: 'Arial', sans-serif;
-        background-color: #f9fafb;
-        color: #374151;
+
+        /* 추가 효과: 로고 섹션 호버 시 더 화려하게 */
+        .logo-section:hover .logo-icon {
+            animation: iconPulse 1s infinite;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+        }
+
+        .logo-section:hover .logo-text h1 {
+            animation: shimmer 1.5s ease-in-out infinite;
+            filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.8));
+        }
+
+        /* SweetAlert2 커스텀 스타일 */
+        .swal-confirm-btn {
+            background-color: #ffd700 !important;
+            color: #8b4513 !important;
+            font-weight: bold !important;
+        }
+
+        .swal-cancel-btn {
+            background-color: #6b7280 !important;
+            color: white !important;
+        }
+
+        /* 추가 커스텀 호버 효과 */
+        .group:hover .group-hover\:scale-110 {
+            transform: scale(1.1);
+        }
+
+        .group:hover .group-hover\:scale-105 {
+            transform: scale(1.05);
+        }
+
+        .group:hover .group-hover\:-translate-y-1 {
+            transform: translateY(-4px) scale(1.05);
+        }
+
+        /* 부드러운 애니메이션을 위한 추가 스타일 */
+        .transition-all {
+            transition-property: all;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* 호버 시 카드 전체가 살짝 위로 올라오는 효과 */
+        .group:hover {
+            transform: translateY(-8px);
+        }
+
+        .augold-footer {
+        background: linear-gradient(135deg, #1f2937, #111827);
+        color: white;
+        padding: 48px 0;
+        margin-top: auto;
+    }
+
+    .footer-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 16px;
+    }
+
+    .footer-content {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 32px;
+        margin-bottom: 32px;
+    }
+
+    /* 브랜드 섹션 */
+    .footer-brand h3 {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 8px;
+        background: linear-gradient(45deg, #ffd700, #ffb300);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .footer-brand p {
+        color: #9ca3af;
+        font-size: 14px;
         line-height: 1.6;
     }
+
+    /* 섹션 제목 */
+    .footer-section h4 {
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 16px;
+        color: #ffd700;
+        position: relative;
+    }
+
+    .footer-section h4::after {
+        content: '';
+        position: absolute;
+        bottom: -4px;
+        left: 0;
+        width: 30px;
+        height: 2px;
+        background: linear-gradient(90deg, #ffd700, transparent);
+    }
+
+    /* 링크 리스트 */
+    .footer-links {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .footer-links li {
+        margin-bottom: 8px;
+    }
+
+    .footer-links a {
+        color: #9ca3af;
+        text-decoration: none;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        display: inline-block;
+        position: relative;
+    }
+
+    .footer-links a:hover {
+        color: #ffd700;
+        transform: translateX(4px);
+    }
+
+    .footer-links a::before {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 0;
+        height: 1px;
+        background: #ffd700;
+        transition: width 0.3s ease;
+    }
+
+    .footer-links a:hover::before {
+        width: 100%;
+    }
+
+    /* 연락처 정보 */
+    .contact-info p {
+        color: #9ca3af;
+        font-size: 14px;
+        margin-bottom: 4px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .contact-info p::before {
+        content: '📞';
+        font-size: 12px;
+    }
+
+    .contact-info p:nth-child(2)::before {
+        content: '✉️';
+    }
+
+    .contact-info p:nth-child(3)::before,
+    .contact-info p:nth-child(4)::before {
+        content: '🕒';
+    }
+
+    /* 하단 저작권 */
+    .footer-bottom {
+        border-top: 1px solid #374151;
+        margin-top: 32px;
+        padding-top: 32px;
+        text-align: center;
+    }
+
+    .footer-bottom p {
+        color: #6b7280;
+        font-size: 14px;
+        margin: 0;
+    }
+
+    /* 소셜 미디어 아이콘 */
+    .social-links {
+        display: flex;
+        gap: 16px;
+        margin-top: 16px;
+        justify-content: center;
+    }
+
+    .social-links a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        background: #374151;
+        border-radius: 50%;
+        color: #9ca3af;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        font-size: 18px;
+    }
+
+    .social-links a:hover {
+        background: linear-gradient(135deg, #ffd700, #ffb300);
+        color: #1f2937;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+    }
+
+    /* 반응형 디자인 */
+    @media (max-width: 768px) {
+        .augold-footer {
+            padding: 32px 0;
+        }
+
+        .footer-content {
+            grid-template-columns: 1fr;
+            gap: 24px;
+            text-align: center;
+        }
+
+        .footer-section h4::after {
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .footer-links a:hover {
+            transform: none;
+        }
+
+        .social-links {
+            justify-content: center;
+        }
+    }
+
     </style>
 </head>
 <body>
@@ -216,6 +496,7 @@
                 <th:block th:if="${loginName == null}">
                     <a href="/login">로그인</a>
                     <a href="/customer/register">회원가입</a>
+                    <a href="#" onclick="loginRequired()">고객센터</a>
                 </th:block>
 
                 <!-- 로그인 후: 환영 메시지 및 모든 메뉴가 보임 -->
@@ -226,6 +507,7 @@
                     <a href="/mypage">마이페이지</a>
                     <a href="/cart">
                         장바구니
+                        <!-- 🔥 동적 장바구니 개수 배지 -->
                         <span id="cartBadge" class="cart-badge hidden">0</span>
                     </a>
                 </th:block>
@@ -250,12 +532,10 @@
                class="border border-yellow-500 text-yellow-700 px-6 py-3 rounded font-semibold hover:bg-yellow-50">
                 투자 가이드 보기
             </a>
-
         </div>
     </div>
 </section>
 
-<!-- 금 시세 테이블 + 차트 나란히 배치 -->
 <!-- 금 시세 테이블 + 차트 나란히 배치 -->
 <section class="py-24 bg-white">
     <div class="container mx-auto px-4 flex flex-col lg:flex-row gap-8">
@@ -279,13 +559,12 @@
                      th:text="${#numbers.formatInteger(todayPrice.pricePerGram * 3.75 * 1.1, 0, 'COMMA')} + '원'">
                     612,662원
                 </div>
-                <!-- 🔥 순금 팔 때만 동적으로 변경 -->
                 <div class="py-5 text-gray-800"
                      th:text="${#numbers.formatInteger(sellPrice24k, 0, 'COMMA')} + '원'">
                     521,000원
                 </div>
 
-                <!-- 18K (원래대로 유지) -->
+                <!-- 18K -->
                 <div class="py-5">
                     <div><strong>18K 금 시세</strong></div>
                     <div class="text-sm text-gray-500">Gold18k·3.75g</div>
@@ -296,7 +575,7 @@
                     381,382원
                 </div>
 
-                <!-- 14K (원래대로 유지) -->
+                <!-- 14K -->
                 <div class="py-5">
                     <div><strong>14K 금 시세</strong></div>
                     <div class="text-sm text-gray-500">Gold14k·3.75g</div>
@@ -311,14 +590,13 @@
             <p class="text-center text-sm text-gray-500 mt-6">* 시세는 매일 변동됩니다. VAT 포함.</p>
         </div>
 
-        <!-- 차트 영역 (변경 없음) -->
+        <!-- 차트 영역 -->
         <div class="w-full lg:w-1/2 bg-white p-6 rounded-2xl shadow-md">
             <canvas id="goldPriceChart" style="width: 100%; height: 100%;"></canvas>
         </div>
 
     </div>
 </section>
-
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script th:inline="javascript">
@@ -420,8 +698,6 @@
     });
 </script>
 
-
-
 <!-- 카테고리별 상품 -->
 <section class="py-16 bg-white">
     <div class="container mx-auto px-4 text-center">
@@ -467,27 +743,41 @@
         <p class="text-gray-600 mb-8">고객을 위한 추천 상품을 확인해보세요</p>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div th:each="product : ${products}" class="bg-white rounded-2xl shadow hover:shadow-lg transition flex flex-col">
+            <div th:each="product : ${products}" class="bg-white rounded-2xl shadow hover:shadow-xl transition-all duration-300 flex flex-col group">
                 <a th:href="@{/product/{id}(id=${product.productId})}">
                     <div class="relative w-full aspect-square overflow-hidden rounded-t-2xl">
-                        <img th:src="${product.imageUrl}" alt="상품 이미지" class="w-full h-full object-cover" />
-                        <div class="absolute top-3 left-3 bg-pink-500 text-white text-xs font-bold px-2 py-1 rounded-full">추천</div>
+                        <!-- 호버 시 이미지 확대 효과 추가 -->
+                        <img th:src="${product.imageUrl}"
+                             alt="상품 이미지"
+                             class="w-full h-full object-cover transition-transform duration-500 ease-in-out group-hover:scale-110" />
+
+                        <!-- 추천 배지도 호버 시 살짝 움직이는 효과 -->
+                        <div class="absolute top-3 left-3 bg-pink-500 text-white text-xs font-bold px-2 py-1 rounded-full transition-transform duration-300 group-hover:scale-105 group-hover:-translate-y-1">
+                            추천
+                        </div>
+
+                        <!-- 호버 시 나타나는 오버레이 효과 -->
+                        <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300 rounded-t-2xl"></div>
                     </div>
                 </a>
+
                 <div class="p-4 flex flex-col flex-1">
-                    <h3 class="font-semibold text-gray-800 mb-2"
+                    <h3 class="font-semibold text-gray-800 mb-2 transition-colors duration-300 group-hover:text-yellow-600"
                         th:if="${productStat.index == 1}"
                         th:text="'[24K] ' + ${product.productName}">상품명</h3>
 
-                    <h3 class="font-semibold text-gray-800 mb-2"
+                    <h3 class="font-semibold text-gray-800 mb-2 transition-colors duration-300 group-hover:text-yellow-600"
                         th:unless="${productStat.index == 1}"
                         th:text="${product.productName}">상품명</h3>
+
                     <div class="mb-4">
-                        <div class="text-xl font-bold text-gray-900"
+                        <div class="text-xl font-bold text-gray-900 transition-colors duration-300 group-hover:text-yellow-700"
                              th:text="'₩' + ${#numbers.formatInteger(product.finalPrice, 3, 'COMMA')}">가격</div>
                     </div>
+
+                    <!-- 버튼도 호버 시 더 화려하게 -->
                     <a th:href="@{/product/{id}(id=${product.productId})}"
-                       class="mt-auto block w-full text-center bg-gradient-to-r from-yellow-500 to-amber-600 text-white py-2 rounded hover:opacity-90 font-semibold">
+                       class="mt-auto block w-full text-center bg-gradient-to-r from-yellow-500 to-amber-600 text-white py-2 rounded font-semibold transition-all duration-300 hover:from-yellow-400 hover:to-amber-500 hover:shadow-lg hover:-translate-y-1 transform">
                         자세히보기
                     </a>
                 </div>
@@ -497,57 +787,64 @@
 </section>
 
 <!-- Footer -->
-<footer class="bg-gray-900 text-white py-12">
-    <div class="container mx-auto px-4 grid md:grid-cols-4 gap-8">
-        <div>
-            <h3 class="text-xl font-bold mb-2">AuGold</h3>
-            <p class="text-gray-400 text-sm">믿을 수 있는 프리미엄 금 전문 플랫폼</p>
+<footer class="augold-footer">
+    <div class="footer-container">
+        <div class="footer-content">
+            <!-- 브랜드 섹션 -->
+            <div class="footer-brand">
+                <h3>AuGold</h3>
+                <p>믿을 수 있는 프리미엄 금 전문 플랫폼<br>
+                    고품질 골드바부터 럭셔리 주얼리까지<br>
+                    당신의 소중한 투자를 함께합니다.</p>
+            </div>
+
+            <!-- 고객서비스 섹션 -->
+            <div class="footer-section">
+                <h4>고객서비스</h4>
+                <ul class="footer-links">
+                    <li><a href="/order/tracking">주문/배송 조회</a></li>
+                    <li><a href="/support/return">반품/교환</a></li>
+                    <li><a href="/support/faq">FAQ</a></li>
+                    <li><a href="#" onclick="loginRequired()" class="hover:text-white transition-colors duration-200">1:1 문의</a></li>
+                </ul>
+            </div>
+
+            <!-- 회사정보 섹션 -->
+            <div class="footer-section">
+                <h4>회사정보</h4>
+                <ul class="footer-links">
+                    <li><a href="/company/about">회사소개</a></li>
+                    <li><a href="/legal/terms">이용약관</a></li>
+                    <li><a href="/legal/privacy">개인정보처리방침</a></li>
+                    <li><a href="/company/info">사업자정보</a></li>
+                </ul>
+            </div>
+
+            <!-- 연락처 섹션 -->
+            <div class="footer-section">
+                <h4>연락처</h4>
+                <div class="contact-info">
+                    <p>1588-1234</p>
+                    <p>help@augold.co.kr</p>
+                    <p>평일 09:00-18:00</p>
+                    <p>주말/공휴일 휴무</p>
+                </div>
+
+                <!-- 소셜 미디어 링크 -->
+                <div class="social-links">
+                    <a href="#" title="카카오톡">💬</a>
+                    <a href="#" title="인스타그램">📷</a>
+                    <a href="#" title="네이버 블로그">📝</a>
+                </div>
+            </div>
         </div>
-        <div>
-            <h4 class="font-semibold mb-4">고객서비스</h4>
-            <ul class="space-y-2 text-gray-400 text-sm">
-                <li><a href="#" class="hover:text-white transition-colors duration-200">주문/배송 조회</a></li>
-                <li><a href="#" class="hover:text-white transition-colors duration-200">반품/교환</a></li>
-                <li><a href="#" class="hover:text-white transition-colors duration-200">FAQ</a></li>
-                <li><a href="/support" class="hover:text-white transition-colors duration-200">1:1 문의</a></li>
-            </ul>
+
+        <!-- 하단 저작권 -->
+        <div class="footer-bottom">
+            <p>&copy; 2025 AuGold. All rights reserved. | 대표: 임채연 | 사업자등록번호: 123-45-67890</p>
         </div>
-        <div>
-            <h4 class="font-semibold mb-4">회사정보</h4>
-            <ul class="space-y-2 text-gray-400 text-sm">
-                <li><a href="#" class="hover:text-white transition-colors duration-200">회사소개</a></li>
-                <li><a href="#" class="hover:text-white transition-colors duration-200">이용약관</a></li>
-                <li><a href="#" class="hover:text-white transition-colors duration-200">개인정보처리방침</a></li>
-                <li><a href="#" class="hover:text-white transition-colors duration-200">사업자정보</a></li>
-            </ul>
-        </div>
-        <div>
-            <h4 class="font-semibold mb-4">연락처</h4>
-            <p class="text-gray-400 text-sm">1588-1234</p>
-            <p class="text-gray-400 text-sm">help@augold.co.kr</p>
-            <p class="text-gray-400 text-sm">평일 09:00-18:00</p>
-            <p class="text-gray-400 text-sm">주말/공휴일 휴무</p>
-        </div>
-    </div>
-    <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400 text-sm">
-        &copy; 2025 AuGold. All rights reserved.
     </div>
 </footer>
-
-<!-- 알림용 alert 팝업 스크립트 -->
-<script th:inline="javascript">
-    /*<![CDATA[*/
-        var successMessage = [[${successMessage != null}]] ? '[[${successMessage}]]' : null;
-        var passwordUpdated = [[${passwordUpdated != null}]] ? '[[${passwordUpdated}]]' : null;
-        var phoneUpdated = [[${phoneUpdated != null}]] ? '[[${phoneUpdated}]]' : null;
-        var accountDeleted = [[${accountDeleted != null}]] ? '[[${accountDeleted}]]' : null;
-
-        if(successMessage) alert(successMessage);
-        if(passwordUpdated) alert(passwordUpdated);
-        if(phoneUpdated) alert(phoneUpdated);
-        if(accountDeleted) alert(accountDeleted);
-    /*]]>*/
-</script>
 
 <!-- 챗봇 띄우기 버튼 -->
 <button id="chatbot-button">Augold 챗봇 💬</button>
@@ -561,7 +858,75 @@
     <iframe src="http://localhost:8501"></iframe>
 </div>
 
+<!-- 🔥 완전한 JavaScript (cart.html 장바구니 기능 포함) -->
 <script>
+    // 🔥 cart.html에서 가져온 장바구니 개수 기능
+    function updateCartCount() {
+        fetch('/cart/count')
+            .then(response => response.json())
+            .then(count => {
+                const cartBadge = document.getElementById('cartBadge');
+                if (count > 0) {
+                    cartBadge.textContent = count;
+                    cartBadge.classList.remove('hidden');
+                } else {
+                    cartBadge.classList.add('hidden');
+                }
+            })
+            .catch(error => {
+                console.log('장바구니 개수 조회 실패:', error);
+            });
+    }
+
+    // 로그인 필요 알림
+    function loginRequired() {
+        // 로그인 상태 체크 (nav-text 요소 존재 여부로 판단)
+        const isLoggedIn = document.querySelector('.nav-text') !== null;
+
+        if (!isLoggedIn) {
+            Swal.fire({
+                title: '로그인 필요',
+                text: '로그인 후 이용 가능합니다.',
+                icon: 'warning',
+                confirmButtonText: '로그인하기',
+                confirmButtonColor: '#ffd700',
+                cancelButtonText: '취소',
+                showCancelButton: true,
+                customClass: {
+                    confirmButton: 'swal-confirm-btn',
+                    cancelButton: 'swal-cancel-btn'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '/login';
+                }
+            });
+        } else {
+
+            window.location.href = '/support';
+        }
+    }
+
+    // SweetAlert2 공통 함수
+    function showAlert(message, type = 'info') {
+        Swal.fire({
+            title: type === 'success' ? '성공' : '알림',
+            text: message,
+            icon: type,
+            confirmButtonText: '확인',
+            confirmButtonColor: '#ffd700',
+            customClass: {
+                confirmButton: 'swal-confirm-btn'
+            }
+        });
+    }
+
+    // 페이지 로드 시 장바구니 개수 업데이트
+    document.addEventListener('DOMContentLoaded', function() {
+        updateCartCount();
+    });
+
+    // 챗봇 기능
     const button = document.getElementById('chatbot-button');
     const container = document.getElementById('chatbot-container');
     const close = document.getElementById('chatbot-close');
@@ -575,6 +940,21 @@
         container.style.display = 'none';
         button.style.display = 'block';
     };
+</script>
+
+<!-- 🔥 Thymeleaf 알림들을 SweetAlert2로 처리 -->
+<script th:inline="javascript">
+    /*<![CDATA[*/
+        var successMessage = [[${successMessage != null}]] ? '[[${successMessage}]]' : null;
+        var passwordUpdated = [[${passwordUpdated != null}]] ? '[[${passwordUpdated}]]' : null;
+        var phoneUpdated = [[${phoneUpdated != null}]] ? '[[${phoneUpdated}]]' : null;
+        var accountDeleted = [[${accountDeleted != null}]] ? '[[${accountDeleted}]]' : null;
+
+        if(successMessage) showAlert(successMessage, 'success');
+        if(passwordUpdated) showAlert(passwordUpdated, 'success');
+        if(phoneUpdated) showAlert(phoneUpdated, 'success');
+        if(accountDeleted) showAlert(accountDeleted, 'info');
+    /*]]>*/
 </script>
 
 </body>

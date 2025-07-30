@@ -19,14 +19,18 @@ public class SupportController {
     private final CSInquiryRepository inquiryRepository;
     private final SequenceRepository sequenceRepository;
 
+
     @GetMapping
-    public String supportPage(Model model, HttpSession session) {
+    public String supportPage(Model model, HttpSession session, RedirectAttributes redirectAttributes) {
         Customer loginUser = (Customer) session.getAttribute("loginUser");
 
-        if (loginUser != null) {
-            model.addAttribute("loginName", loginUser.getCstmName()); // Customer 엔티티의 이름 필드에 맞게 수정
+        if (loginUser == null) {
+            redirectAttributes.addFlashAttribute("alertMessage", "로그인 후 이용 가능합니다.");
+            redirectAttributes.addFlashAttribute("alertType", "warning");
+            return "redirect:/login";
         }
 
+        model.addAttribute("loginName", loginUser.getCstmName());
         return "member/support";
     }
 

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         /* --- Google Fonts --- */
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
@@ -81,11 +82,203 @@ a { text-decoration: none; color: inherit; }
 /* 아이콘 기본 스타일 */
 .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
 
-/* --- 반응형 디자인 --- */
-@media (max-width: 768px) {
-    .container { padding: 20px 16px; }
-    .login-card { padding: 24px; }
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f9fafb;
+    color: #374151;
+    line-height: 1.6;
+}
+
+/* 헤더 컨테이너 */
+.header-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+header {
+    background: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    border-bottom: 1px solid #e5e7eb;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    font-family: 'Arial', sans-serif;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 0;
+}
+
+/* 로고 섹션 */
+.logo-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    transition: opacity 0.2s;
+}
+
+.logo-section:hover {
+    opacity: 0.8;
+}
+
+/* 로고 아이콘 */
+.logo-icon {
+    width: 40px;
+    height: 40px;
+    background:
+        radial-gradient(circle at 30% 30%, #fff 2px, transparent 2px),
+        linear-gradient(135deg, #ffd700, #ffb300, #ff8c00);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    border: 2px solid #ff8c00;
+    animation: iconPulse 2s infinite;
+}
+
+.logo-icon span {
+    font-size: 18px;
+    color: #8b4513;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(255,255,255,0.5);
+}
+
+@keyframes iconPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+/* 로고 텍스트 */
+.logo-text h1 {
+    font-size: 24px;
+    font-weight: bold;
+    background: linear-gradient(45deg, #ffd700, #ffb300, #ffd700, #ffb300);
+    background-size: 400% 400%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0;
+    line-height: 1.2;
+    font-family: 'Arial', sans-serif;
+    animation: shimmer 3s ease-in-out infinite;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+@keyframes shimmer {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+.logo-text p {
+    font-size: 12px;
+    color: #6b7280;
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+}
+
+/* 네비게이션 섹션 */
+.nav-section {
+    display: flex;
+    gap: 32px;
+    align-items: center;
+}
+
+.nav-section a,
+.nav-section .nav-text {
+    color: #374151;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+    position: relative;
+    font-family: 'Arial', sans-serif;
+    font-size: 16px;
+}
+
+.nav-section a:hover {
+    color: #d97706;
+}
+
+/* 장바구니 배지 */
+.cart-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #ef4444;
+    color: white;
+    font-size: 12px;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hidden {
+    display: none;
+}
+
+/* 반응형 헤더 */
+@media (max-width: 768px) {
+    .header-content {
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .nav-section {
+        gap: 16px;
+    }
+
+    .logo-text h1 {
+        font-size: 20px;
+    }
+
+    .logo-icon {
+        width: 35px;
+        height: 35px;
+    }
+
+    .logo-icon span {
+        font-size: 16px;
+    }
+}
+
+/* 로고 섹션 호버 효과 */
+.logo-section:hover .logo-icon {
+    animation: iconPulse 1s infinite;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+}
+
+.logo-section:hover .logo-text h1 {
+    animation: shimmer 1.5s ease-in-out infinite;
+    filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.8));
+}
+
+/* SweetAlert2 커스텀 스타일 */
+.swal-confirm-btn {
+    background-color: #ffd700 !important;
+    color: #8b4513 !important;
+    font-weight: bold !important;
+}
+
+.swal-cancel-btn {
+    background-color: #6b7280 !important;
+    color: white !important;
+}
+
+
     </style>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -98,13 +291,44 @@ a { text-decoration: none; color: inherit; }
 <body>
 
 <!-- 페이지 헤더 -->
-<header class="page-header">
-    <div class="header-content">
-        <a href="/" class="logo">AuGold</a>
-        <nav class="main-nav">
-            <a href="/customer/register">회원가입</a>
-            <a href="/support">고객센터</a>
-        </nav>
+<header>
+    <div class="header-container">
+        <div class="header-content">
+            <a href="/" class="logo-section">
+                <div class="logo-icon">
+                    <span>A</span>
+                </div>
+                <div class="logo-text">
+                    <h1>AuGold</h1>
+                    <p>프리미엄 금 전문몰</p>
+                </div>
+            </a>
+
+            <nav class="nav-section">
+                <!-- 로그인 전: 로그인, 회원가입, 고객센터(제한) 메뉴 -->
+                <th:block th:if="${loginName == null}">
+                    <a href="/login">로그인</a>
+                    <a href="/customer/register">회원가입</a>
+                    <a href="#" onclick="loginRequired()">고객센터</a>
+                </th:block>
+
+                <!-- 로그인 후: 모든 메뉴 표시 -->
+                <th:block th:if="${loginName != null}">
+                    <span class="nav-text">[[${loginName}]]님 환영합니다</span>
+                    <a href="/logout">로그아웃</a>
+                    <a href="/support">고객센터</a>
+                    <a href="/mypage">마이페이지</a>
+                    <a href="/cart">
+                        장바구니
+                        <!-- 장바구니 개수 배지 (동적 표시) -->
+                        <span id="cartBadge"
+                              class="cart-badge"
+                              th:classappend="${cartCount == null or cartCount == 0} ? 'hidden' : ''"
+                              th:text="${cartCount ?: 0}">0</span>
+                    </a>
+                </th:block>
+            </nav>
+        </div>
     </div>
 </header>
 
@@ -162,6 +386,102 @@ a { text-decoration: none; color: inherit; }
         passwordField.type = isPassword ? 'text' : 'password';
         toggleIcon.textContent = isPassword ? 'visibility' : 'visibility_off';
     }
+</script>
+
+<!-- SweetAlert2 알림만 남기고 기존 alert 제거 -->
+<script th:if="${alertMessage}">
+    const alertType = /*[[${alertType}]]*/ 'info';
+    const alertMessage = /*[[${alertMessage}]]*/ '';
+
+    Swal.fire({
+        title: alertType === 'warning' ? '로그인 필요' : '알림',
+        text: alertMessage,
+        icon: alertType,
+        confirmButtonText: '확인',
+        confirmButtonColor: '#ffd700',
+        customClass: {
+            confirmButton: 'swal-confirm-btn'
+        }
+    });
+</script>
+
+<script>
+    function loginRequired() {
+        Swal.fire({
+            title: '로그인 필요',
+            text: '로그인 후 이용 가능합니다.',
+            icon: 'warning',
+            confirmButtonText: '로그인하기',
+            confirmButtonColor: '#ffd700',
+            cancelButtonText: '취소',
+            showCancelButton: true,
+            customClass: {
+                confirmButton: 'swal-confirm-btn',
+                cancelButton: 'swal-cancel-btn'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = '/login';
+            }
+        });
+    }
+
+    // 범용 SweetAlert2 알림 함수
+    function showAlert(message, type = 'info', title = null) {
+        const titles = {
+            'success': '성공',
+            'error': '오류',
+            'warning': '경고',
+            'info': '알림'
+        };
+
+        Swal.fire({
+            title: title || titles[type] || '알림',
+            text: message,
+            icon: type,
+            confirmButtonText: '확인',
+            confirmButtonColor: '#ffd700',
+            customClass: {
+                confirmButton: 'swal-confirm-btn'
+            }
+        });
+    }
+
+    // 장바구니 배지 업데이트 함수
+    function updateCartBadge(count) {
+        const badge = document.getElementById('cartBadge');
+        if (badge) {
+            if (count > 0) {
+                badge.textContent = count;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+    }
+
+    // AJAX로 장바구니 개수 가져오기 (선택사항)
+    function fetchCartCount() {
+        // 로그인한 사용자에게만 적용
+        const isLoggedIn = document.querySelector('.nav-text') !== null;
+
+        if (isLoggedIn) {
+            fetch('/api/cart/count')
+                .then(response => response.json())
+                .then(data => {
+                    updateCartBadge(data.count);
+                })
+                .catch(error => {
+                    console.error('장바구니 개수 조회 실패:', error);
+                });
+        }
+    }
+
+    // 페이지 로드 완료 후 실행
+    document.addEventListener('DOMContentLoaded', function() {
+        // 필요시 장바구니 개수 새로고침
+        // fetchCartCount();
+    });
 </script>
 
 </body>
