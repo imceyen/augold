@@ -25,6 +25,10 @@ public class AdminStatisticsController {
     @Value("${graph.salesAnalysisScriptPath.path}")
     private String salesAnalysisScriptPath;
 
+    // ✅ [추가된 부분] 순이익 분석 스크립트 경로를 application.properties에서 가져옵니다.
+    @Value("${graph.profitAnalysisScript.path}")
+    private String profitAnalysisScriptPath;
+
     @Value("${graph.scriptPath.path}")
     private String goldPriceScriptPath;
 
@@ -43,7 +47,7 @@ public class AdminStatisticsController {
         return "admin/admin";
     }
 
-    // ✅ 매출 분석 API
+    // ✅ 매출 분석 API (기존 코드)
     @GetMapping("/api/statistics/sales-analysis")
     @ResponseBody
     public ResponseEntity<?> getSalesAnalysis(
@@ -64,7 +68,7 @@ public class AdminStatisticsController {
 
             ProcessBuilder pb = new ProcessBuilder(
                     pythonExecutable,
-                    salesAnalysisScriptPath,
+                    salesAnalysisScriptPath, // 매출 분석 스크립트
                     freq,
                     String.valueOf(predict)
             );
@@ -75,11 +79,11 @@ public class AdminStatisticsController {
             try (BufferedReader reader = new BufferedReader(
                     new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
                 String line;
-                System.out.println("=== Python Script Log ===");
+                System.out.println("=== Python Sales Script Log ===");
                 while ((line = reader.readLine()) != null) {
                     System.out.println(line);
                 }
-                System.out.println("=========================");
+                System.out.println("================================");
             }
 
             boolean finished = process.waitFor(2, TimeUnit.MINUTES);
@@ -102,6 +106,68 @@ public class AdminStatisticsController {
                     .body(Map.of("error", "매출 분석 중 오류 발생: " + e.getMessage()));
         }
     }
+
+    // ✅ [추가된 부분] 순이익 분석 API
+    @GetMapping("/api/statistics/profit-analysis")
+    @ResponseBody
+    public ResponseEntity<?> getProfitAnalysis(
+            @RequestParam String unit,
+            @RequestParam(defaultValue = "false") boolean predict
+    ) {
+        try {
+            String freq = switch (unit.toLowerCase()) {
+                case "year" -> "Y";
+                case "month" -> "M";
+                case "week" -> "W";
+                case "day" -> "D";
+                default -> "M";
+            };
+
+            // 결과 파일 이름을 profit_analysis_...json 으로 변경
+            String outputFileName = String.format("profit_analysis_%s.json", freq);
+            String outputPath = "python/statistics/output/" + outputFileName;
+
+            ProcessBuilder pb = new ProcessBuilder(
+                    pythonExecutable,
+                    profitAnalysisScriptPath, // 순이익 분석 스크립트
+                    freq,
+                    String.valueOf(predict)
+            );
+
+            pb.redirectErrorStream(true);
+            Process process = pb.start();
+
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
+                String line;
+                System.out.println("=== Python Profit Script Log ===");
+                while ((line = reader.readLine()) != null) {
+                    System.out.println(line);
+                }
+                System.out.println("================================");
+            }
+
+            boolean finished = process.waitFor(2, TimeUnit.MINUTES);
+            if (!finished || process.exitValue() != 0) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(Map.of("error", "Python 스크립트 실행 실패 또는 타임아웃"));
+            }
+
+            File resultFile = new File(outputPath);
+            if (!resultFile.exists()) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(Map.of("error", "예측 결과 파일이 존재하지 않습니다."));
+            }
+
+            String json = Files.readString(resultFile.toPath());
+            return ResponseEntity.ok(json);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "순이익 분석 중 오류 발생: " + e.getMessage()));
+        }
+    }
+
 
     // ✅ 금 시세 예측
     @GetMapping("/api/statistics/gold-price-forecast")
@@ -133,6 +199,7 @@ public class AdminStatisticsController {
 
     // ✅ 공통 Python 스크립트 실행 함수
     private ResponseEntity<Map<String, Object>> executePythonScript(String scriptPath) {
+        // (이 부분은 수정 없음)
         try {
             File outputFile = File.createTempFile("stats_output_", ".json");
 

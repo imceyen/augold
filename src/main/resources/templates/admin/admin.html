@@ -196,7 +196,7 @@
         color: #1565c0;
         text-decoration: underline;
     }
-    
+
     /* 상품 등록 버튼 호버 효과 */
     .tab-content button[onclick="toggleForm()"]:hover {
         background: #1565c0 !important;
@@ -342,6 +342,7 @@
     <!-- 통계 하위 탭 버튼 -->
     <div class="stats-subtab-bar">
       <button class="stats-subtab-btn" onclick="showStatsSubTab('salesAnalysis', event)">매출 분석 및 예측</button>
+      <button class="stats-subtab-btn" onclick="showStatsSubTab('profitAnalysis', event)">순이익 분석 및 예측</button>
       <button class="stats-subtab-btn active" onclick="showStatsSubTab('goldPrice', event)">금 시세 분석 및 예측</button>
       <button class="stats-subtab-btn" onclick="showStatsSubTab('demographics', event)">성별/연령대별 매출/구매패턴 분석</button>
       <button class="stats-subtab-btn" onclick="showStatsSubTab('orderTrends', event)">판매날짜 기반 주문 트렌드 분석</button>
@@ -349,9 +350,9 @@
       <button class="stats-subtab-btn" onclick="showStatsSubTab('cartAbandonment', event)">장바구니 이탈 분석</button>
     </div>
 
+    <!-- 매출 분석 탭 -->
     <div id="salesAnalysis" class="stats-subtab-content active">
       <h3>매출 분석 및 예측</h3>
-
       <!-- 컨트롤 영역 -->
       <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 20px;">
         <div>
@@ -369,16 +370,13 @@
           </label>
         </div>
       </div>
-
       <!-- 로딩 메시지 -->
       <div id="salesAnalysisLoading" style="text-align: center; padding: 40px; font-size: 1.1em; display: none;">
         데이터를 불러오는 중입니다...
       </div>
-
-      <!-- [신규] 표와 차트를 담는 Flex 컨테이너 -->
+      <!-- 표와 차트를 담는 Flex 컨테이너 -->
       <div style="display: flex; gap: 20px; width: 100%;">
-
-        <!-- [신규] 왼쪽: 데이터 표 -->
+        <!-- 왼쪽: 데이터 표 -->
         <div id="salesTableContainer" style="flex: 1; max-height: 500px; overflow-y: auto; display: none;">
           <table style="width: 100%; border-collapse: collapse;">
             <thead>
@@ -388,22 +386,65 @@
               <th id="forecastHeader" style="padding: 8px; border: 1px solid #ddd; text-align: left;">예측 매출</th>
             </tr>
             </thead>
-            <tbody id="salesTableBody">
-            <!-- 데이터가 여기에 동적으로 추가됩니다 -->
-            </tbody>
+            <tbody id="salesTableBody"></tbody>
           </table>
         </div>
-
         <!-- 오른쪽: 차트 -->
         <div style="flex: 2; position: relative; height:500px;">
           <canvas id="salesChart"></canvas>
         </div>
+      </div>
+    </div>
 
+    <!-- 순이익 분석 탭 -->
+    <div id="profitAnalysis" class="stats-subtab-content">
+      <h3>순이익 분석 및 예측</h3>
+      <!-- 컨트롤 영역 -->
+      <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 20px;">
+        <div>
+          <label for="profit_unit">분석 단위:</label>
+          <select id="profit_unit" onchange="loadProfitAnalysis()">
+            <option value="day">일</option>
+            <option value="week">주</option>
+            <option value="month" selected>월</option>
+            <option value="year">연</option>
+          </select>
+        </div>
+        <div>
+          <label>
+            <input type="checkbox" id="profit_toggleForecast" onchange="loadProfitAnalysis()" checked> 예측값 표시
+          </label>
+        </div>
+      </div>
+      <!-- 로딩 메시지 -->
+      <div id="profitAnalysisLoading" style="text-align: center; padding: 40px; font-size: 1.1em; display: none;">
+        데이터를 불러오는 중입니다...
+      </div>
+      <!-- 표와 차트를 담는 Flex 컨테이너 -->
+      <div style="display: flex; gap: 20px; width: 100%;">
+        <!-- 왼쪽: 데이터 표 -->
+        <div id="profitTableContainer" style="flex: 1; max-height: 500px; overflow-y: auto; display: none;">
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+            <tr style="background-color: #f2f2f2;">
+              <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">기간</th>
+              <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">실제 순이익</th>
+              <th id="profit_forecastHeader" style="padding: 8px; border: 1px solid #ddd; text-align: left;">예측 순이익</th>
+            </tr>
+            </thead>
+            <!-- ✅ [수정된 부분] > 문자 제거 -->
+            <tbody id="profitTableBody"></tbody>
+          </table>
+        </div>
+        <!-- 오른쪽: 차트 -->
+        <div style="flex: 2; position: relative; height:500px;">
+          <canvas id="profitChart"></canvas>
+        </div>
       </div>
     </div>
 
 
-    <div id="orderTrends" class="stats-subtab-content active">
+    <div id="orderTrends" class="stats-subtab-content">
       <h3>판매날짜 기반 주문 트렌드 분석</h3>
       <p>주문 날짜 데이터를 기반으로 요일별, 월별 매출 트렌드를 분석한 결과입니다.</p>
 
@@ -426,7 +467,7 @@
       </div>
     </div>
 
-    <div id="goldPrice" class="stats-subtab-content active">
+    <div id="goldPrice" class="stats-subtab-content">
       <div id="loadingMessage" style="text-align: center; padding: 50px; font-size: 1.2em;">
         데이터를 불러오는 중입니다...
       </div>
@@ -841,6 +882,7 @@
   let categoryProfitLoaded = false;
   let demographicsLoaded = false;
   let cartAbandonmentLoaded = false;
+  let profitAnalysisLoaded = false; // ✅ [추가된 부분]
 
   /**
    * 메인 탭 전환 함수
@@ -901,6 +943,13 @@
 
       } else if (subTabId === 'cartAbandonment') {
       console.log('🛒 장바구니 이탈 분석 탭 활성화');
+      } else if (subTabId === 'salesAnalysis' && document.getElementById('salesAnalysis').classList.contains('active')) {
+          loadSalesAnalysis();
+      }
+      // ✅ [추가된 부분] 순이익 분석 탭을 처음 열 때 데이터 로드
+      else if (subTabId === 'profitAnalysis' && !profitAnalysisLoaded) {
+          loadProfitAnalysis();
+          profitAnalysisLoaded = true;
       }
 
 
@@ -1660,13 +1709,180 @@ margin: {
 
 
   document.addEventListener('DOMContentLoaded', () => {
-    if (document.getElementById('salesAnalysis').classList.contains('active')) {
+    // salesAnalysis 탭이 초기에 활성화 되어 있다면, 데이터를 로드합니다.
+    const salesAnalysisTab = document.getElementById('salesAnalysis');
+    if (salesAnalysisTab && salesAnalysisTab.classList.contains('active')) {
       loadSalesAnalysis();
     }
-  });
+
+    // ✅ [추가된 부분] profitAnalysis 탭이 초기에 활성화 되어 있다면, 데이터를 로드합니다.
+    const profitAnalysisTab = document.getElementById('profitAnalysis');
+    if (profitAnalysisTab && profitAnalysisTab.classList.contains('active')) {
+      loadProfitAnalysis();
+    }
+});
 </script>
 
 
+<!-- ✅ [추가된 부분] 순이익 분석을 위한 스크립트 -->
+<script>
+  let profitChartInstance = null;
+
+  /**
+   * 서버에서 순이익 분석 데이터를 가져와 차트와 테이블을 그리는 메인 함수
+   */
+  function loadProfitAnalysis() {
+    const unit = document.getElementById('profit_unit').value;
+    const showForecast = document.getElementById('profit_toggleForecast').checked;
+    const loadingDiv = document.getElementById('profitAnalysisLoading');
+    const chartCanvas = document.getElementById('profitChart');
+    const tableDiv = document.getElementById('profitTableContainer');
+
+    document.getElementById('profit_toggleForecast').disabled = false;
+    const predictParam = showForecast;
+
+    loadingDiv.style.display = 'block';
+    chartCanvas.style.display = 'none';
+    tableDiv.style.display = 'none';
+
+    // ✅ API 경로를 profit-analysis로 변경
+    fetch(`/api/statistics/profit-analysis?unit=${unit}&predict=${predictParam}`)
+      .then(res => {
+        if (!res.ok) throw new Error(`서버 응답 오류 (${res.status})`);
+        return res.json();
+      })
+      .then(data => {
+        if (data.error) throw new Error(data.error);
+
+        let processedData = data;
+
+        if (showForecast) {
+          const lastActualIndex = data.findLastIndex(d => d.y !== null && d.y !== undefined);
+          if (lastActualIndex !== -1) {
+            const predictionLengths = { year: 2, month: 2, week: 2, day: 5 };
+            const predictionCount = predictionLengths[unit];
+            const endIndex = lastActualIndex + 1 + predictionCount;
+            processedData = data.slice(0, endIndex);
+          }
+        }
+
+        let filteredData = processedData;
+        const dataLength = processedData.length;
+
+        if (unit === 'week' && dataLength > 53) {
+            filteredData = processedData.slice(dataLength - 53);
+        } else if (unit === 'day' && dataLength > 31) {
+            filteredData = processedData.slice(dataLength - 31);
+        } else if (unit === 'month') {
+            filteredData = processedData.filter(d => d.ds >= '2024-01');
+        }
+
+        loadingDiv.style.display = 'none';
+        chartCanvas.style.display = 'block';
+        tableDiv.style.display = 'block';
+
+        drawProfitChart(filteredData);
+        drawProfitTable(filteredData);
+      })
+      .catch(err => {
+        loadingDiv.style.display = 'block';
+        loadingDiv.innerText = `데이터 로딩 실패: ${err.message}`;
+        loadingDiv.style.color = 'red';
+        console.error('순이익 분석 데이터 로딩 실패:', err);
+      });
+  }
+
+  /**
+   * 데이터를 받아 순이익 Chart.js 차트를 그리는 함수
+   */
+  function drawProfitChart(data) {
+    const showForecast = document.getElementById('profit_toggleForecast').checked;
+    const unit = document.getElementById('profit_unit').value;
+
+    if (profitChartInstance) {
+      profitChartInstance.destroy();
+    }
+
+    const labels = data.map(d => d.ds);
+    const actualData = data.map(d => d.y);
+    const forecastData = data.map(d => (d.yhat !== undefined && d.yhat !== null) ? d.yhat : null);
+
+    const datasets = [{
+      label: "실제 순이익", // ✅ 레이블 변경
+      data: actualData,
+      borderColor: "rgba(75, 192, 192, 1)",   // ✅ 색상 변경 (초록 계열)
+      backgroundColor: "rgba(75, 192, 192, 0.5)",
+      type: 'bar',
+      order: 2
+    }];
+
+    if (showForecast && forecastData.some(d => d !== null)) {
+      datasets.push({
+        label: "예측 순이익", // ✅ 레이블 변경
+        data: forecastData,
+        borderColor: "rgba(255, 159, 64, 1)", // ✅ 색상 변경 (주황 계열)
+        backgroundColor: "rgba(255, 159, 64, 0)",
+        type: 'line',
+        fill: false,
+        tension: 0.1,
+        order: 1
+      });
+    }
+
+    const ctx = document.getElementById('profitChart').getContext('2d');
+    profitChartInstance = new Chart(ctx, {
+      type: 'bar',
+      data: { labels: labels, datasets: datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            ticks: {
+              callback: function(value) {
+                return value.toLocaleString() + '원';
+              }
+            }
+          }
+        },
+        plugins: {
+          tooltip: { mode: 'index', intersect: false },
+          title: {
+            display: true,
+            font: { size: 16 },
+            text: `순이익 분석 및 예측 (${{year:'연',month:'월',week:'주',day:'일'}[unit]} 단위)` // ✅ 제목 변경
+          }
+        }
+      }
+    });
+  }
+
+  /**
+   * 데이터를 받아 순이익 HTML 테이블을 그리는 함수
+   */
+  function drawProfitTable(data) {
+    const tableBody = document.getElementById('profitTableBody');
+    const showForecast = document.getElementById('profit_toggleForecast').checked;
+
+    tableBody.innerHTML = '';
+    const reversedData = [...data].reverse();
+
+    reversedData.forEach(d => {
+      const row = document.createElement('tr');
+      const yValue = d.y !== null && d.y !== undefined ? d.y.toLocaleString() + '원' : 'N/A';
+      let yhatValue = 'N/A';
+
+      if (showForecast) {
+        yhatValue = d.yhat !== null && d.yhat !== undefined ? d.yhat.toLocaleString() + '원' : '-';
+      }
+
+      row.innerHTML = `<td>${d.ds}</td><td>${yValue}</td>${showForecast ? `<td>${yhatValue}</td>` : ''}`;
+      tableBody.appendChild(row);
+    });
+
+    document.getElementById('profit_forecastHeader').style.display = showForecast ? '' : 'none';
+  }
+</script>
 
 
 <script>
