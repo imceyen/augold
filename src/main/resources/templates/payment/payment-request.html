@@ -163,7 +163,7 @@
         // 결제 금액 설정
         const amount = {
             currency: "KRW",
-            value: totalAmount,
+            value: Math.round(totalAmount),
         };
 
         try {
