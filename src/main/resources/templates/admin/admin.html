@@ -441,9 +441,9 @@
 
     <!-- 📊 성별·연령대별 매출 차트 영역 -->
     <div id="demographics" class="stats-subtab-content">
-      <p>성별 및 연령대별 매출 분석 시각화 결과입니다.</p>
+      <!--<p>성별 및 연령대별 매출 분석 시각화 결과입니다.</p>-->
       <div id="sexAgeLoading" style="text-align: center; padding: 40px; font-size: 1.1em;">
-        데이터를 불러오는 중입니다...
+        <!-- 데이터를 불러오는 중입니다...-->
       </div>
 
       <!-- Plotly 차트들 -->
@@ -457,6 +457,7 @@
         <div id="bottomProductsChart" style="flex:1; min-width:500px; max-width:700px; height:520px;"></div>
       </div>
     </div>
+
 
 
 
@@ -1151,81 +1152,81 @@
           });
   }
 
-  // 성별/연령대별 차트 (탭 클릭 시에만 로드)
-  function loadDemographicsChart() {
-    const loadingDiv = document.getElementById("sexAgeLoading");
-    const plotDivMale = document.getElementById("genderAgeChartPlotMale");
-    const plotDivFemale = document.getElementById("genderAgeChartPlotFemale");
-    if (!loadingDiv || !plotDivMale || !plotDivFemale) {
-      console.error("[성별/연령대] 필요한 div가 없습니다.");
-      return;
+// 성별/연령대별 차트 (탭 클릭 시에만 로드)
+    function loadDemographicsChart() {
+      const loadingDiv = document.getElementById("sexAgeLoading");
+      const plotDivMale = document.getElementById("genderAgeChartPlotMale");
+      const plotDivFemale = document.getElementById("genderAgeChartPlotFemale");
+      if (!loadingDiv || !plotDivMale || !plotDivFemale) {
+        console.error("[성별/연령대] 필요한 div가 없습니다.");
+        return;
+      }
+      fetch("/temp_output.json")
+        .then(response => response.json())
+        .then(data => {
+          if (!data || !data.male || !data.female) {
+            loadingDiv.innerText = "데이터가 없습니다.";
+            return;
+          }
+          const maleData = data.male;
+          const femaleData = data.female;
+
+          const ageGroups = [...new Set([...maleData, ...femaleData].map(d => d.Age_Group))];
+          const categories = [...new Set([...maleData, ...femaleData].map(d => d.Category))];
+
+          // 🔹 남성 데이터 시리즈 생성
+          const maleSeries = categories.map(category => {
+            return {
+              x: ageGroups,
+              y: ageGroups.map(ageGroup => {
+                const item = maleData.find(d => d.Age_Group === ageGroup && d.Category === category);
+                return item ? item.Total_Price : 0;
+              }),
+              name: `${category}`,
+              type: 'bar'
+            };
+          });
+
+          // 🔹 여성 데이터 시리즈 생성
+          const femaleSeries = categories.map(category => {
+            return {
+              x: ageGroups,
+              y: ageGroups.map(ageGroup => {
+                const item = femaleData.find(d => d.Age_Group === ageGroup && d.Category === category);
+                return item ? item.Total_Price : 0;
+              }),
+              name: `${category}`,
+              type: 'bar'
+            };
+          });
+
+          // 🔹 공통 레이아웃
+          const baseLayout = {
+            barmode: 'group',
+            xaxis: { title: '연령대' },
+            yaxis: { title: '총 매출 (원)' },
+            legend: { orientation: 'h' },
+            height: 450
+          };
+
+          // 🔹 남성/여성 각각의 차트로 나란히 출력
+          Plotly.newPlot("genderAgeChartPlotMale", maleSeries, {
+            ...baseLayout,
+            title: '👨 남성 연령대별 · 카테고리별 매출'
+          });
+          Plotly.newPlot("genderAgeChartPlotFemale", femaleSeries, {
+            ...baseLayout,
+            title: '👩 여성 연령대별 · 카테고리별 매출'
+          });
+
+          // 🔹 로딩 메시지 숨기기
+          loadingDiv.style.display = "none";
+        })
+        .catch(error => {
+          loadingDiv.innerText = "데이터 로딩 중 오류가 발생했습니다.";
+          console.error("❌ JSON 로딩 오류:", error);
+        });
     }
-    fetch("/temp_output.json")
-      .then(response => response.json())
-      .then(data => {
-        if (!data || !data.male || !data.female) {
-          loadingDiv.innerText = "데이터가 없습니다.";
-          return;
-        }
-        const maleData = data.male;
-        const femaleData = data.female;
-
-        const ageGroups = [...new Set([...maleData, ...femaleData].map(d => d.Age_Group))];
-        const categories = [...new Set([...maleData, ...femaleData].map(d => d.Category))];
-
-        // 🔹 남성 데이터 시리즈 생성
-        const maleSeries = categories.map(category => {
-          return {
-            x: ageGroups,
-            y: ageGroups.map(ageGroup => {
-              const item = maleData.find(d => d.Age_Group === ageGroup && d.Category === category);
-              return item ? item.Total_Price : 0;
-            }),
-            name: `${category}`,
-            type: 'bar'
-          };
-        });
-
-        // 🔹 여성 데이터 시리즈 생성
-        const femaleSeries = categories.map(category => {
-          return {
-            x: ageGroups,
-            y: ageGroups.map(ageGroup => {
-              const item = femaleData.find(d => d.Age_Group === ageGroup && d.Category === category);
-              return item ? item.Total_Price : 0;
-            }),
-            name: `${category}`,
-            type: 'bar'
-          };
-        });
-
-        // 🔹 공통 레이아웃
-        const baseLayout = {
-          barmode: 'group',
-          xaxis: { title: '연령대' },
-          yaxis: { title: '총 매출 (원)' },
-          legend: { orientation: 'h' },
-          height: 450
-        };
-
-        // 🔹 남성/여성 각각의 차트로 나란히 출력
-        Plotly.newPlot("genderAgeChartPlotMale", maleSeries, {
-          ...baseLayout,
-          title: '👨 남성 연령대별 · 카테고리별 매출'
-        });
-        Plotly.newPlot("genderAgeChartPlotFemale", femaleSeries, {
-          ...baseLayout,
-          title: '👩 여성 연령대별 · 카테고리별 매출'
-        });
-
-        // 🔹 로딩 메시지 숨기기
-        loadingDiv.style.display = "none";
-      })
-      .catch(error => {
-        loadingDiv.innerText = "데이터 로딩 중 오류가 발생했습니다.";
-        console.error("❌ JSON 로딩 오류:", error);
-      });
-  }
 </script>
 
 <script>
@@ -1320,8 +1321,6 @@
       });
   }
 
-  // 초기 실행
-  fetchAndDrawChart();
 </script>
 
 
@@ -1746,81 +1745,77 @@ margin: {
 
       }); // ← fetch("/temp_output.json") 체인 닫기
 
-    function loadDemographicsChart() {
-      const loadingDiv = document.getElementById("sexAgeLoading");
-      const malePlotDiv = document.getElementById("genderAgeChartPlotMale");
-      const femalePlotDiv = document.getElementById("genderAgeChartPlotFemale");
+           function loadDemographicsChart() {
+            const loadingDiv = document.getElementById("sexAgeLoading");
+            const malePlotDiv = document.getElementById("genderAgeChartPlotMale");
+            const femalePlotDiv = document.getElementById("genderAgeChartPlotFemale");
 
-      fetch("/api/statistics/sex-age-chart")
-        .then(response => response.json())
-        .then(data => {
-          if (!data || !data.male || !data.female) {
-            loadingDiv.innerText = "데이터가 없습니다.";
-            return;
-          }
+            fetch("/api/statistics/sex-age-chart")
+                .then(response => response.json())
+                .then(data => {
+                    if (!data || !data.male || !data.female) {
+                        loadingDiv.innerText = "데이터가 없습니다.";
+                        return;
+                    }
 
-          const maleData = data.male;
-          const femaleData = data.female;
+                    const maleData = data.male;
+                    const femaleData = data.female;
+                    const ageGroups = [...new Set([...maleData, ...femaleData].map(d => d.Age_Group))].sort();
+                    const categories = [...new Set([...maleData, ...femaleData].map(d => d.Category))];
 
-          const ageGroups = [...new Set([...maleData, ...femaleData].map(d => d.Age_Group))];
-          const categories = [...new Set([...maleData, ...femaleData].map(d => d.Category))];
+                    // 남자 차트 트레이스 생성
+                    const maleTraces = categories.map(category => ({
+                        x: ageGroups,
+                        y: ageGroups.map(ageGroup => {
+                            const item = maleData.find(d => d.Age_Group === ageGroup && d.Category === category);
+                            return item ? item.Total_Price / 100000000 : 0; // 억 단위
+                        }),
+                        name: category,
+                        type: 'bar',
+                        marker: { color: colorMap[category] || '#cccccc' }
+                    }));
 
-          // 남자 차트
-          const maleTraces = categories.map(category => ({
-            x: ageGroups,
-            y: ageGroups.map(ageGroup => {
-              const item = maleData.find(d => d.Age_Group === ageGroup && d.Category === category);
-              return item ? item.Total_Price / 100000000 : 0;
-            }),
-            name: category,
-            type: 'bar'
-          }));
+                    // 여자 차트 트레이스 생성
+                    const femaleTraces = categories.map(category => ({
+                        x: ageGroups,
+                        y: ageGroups.map(ageGroup => {
+                            const item = femaleData.find(d => d.Age_Group === ageGroup && d.Category === category);
+                            return item ? item.Total_Price / 100000000 : 0; // 억 단위
+                        }),
+                        name: category,
+                        type: 'bar',
+                        marker: { color: colorMap[category] || '#cccccc' }
+                    }));
 
-          // 여자 차트
-          const femaleTraces = categories.map(category => ({
-            x: ageGroups,
-            y: ageGroups.map(ageGroup => {
-              const item = femaleData.find(d => d.Age_Group === ageGroup && d.Category === category);
-              return item ? item.Total_Price / 100000000 : 0;
-            }),
-            name: category,
-            type: 'bar'
-          }));
+                    // 남/녀 차트 공통 레이아웃 함수
+                    const layout = gender => ({
+                        barmode: 'stack', // 누적 막대 그래프
+                        title: `${gender} · 연령대별 카테고리 매출 (단위: 억 원)`,
+                        xaxis: { title: '연령대' },
+                        yaxis: { title: '총 매출 (억 원)', tickformat: ',' },
+                        legend: { orientation: 'h', x: 0.5, y: -0.25, xanchor: 'center', yanchor: 'top' },
+                        margin: { t: 60, b: 100 },
+                        height: 500
+                    });
 
-          renderTopBottomSummaryCharts(maleData, femaleData);
+                    // 남/녀 차트 그리기
+                    Plotly.newPlot(malePlotDiv, maleTraces, layout("👨 남성"));
+                    Plotly.newPlot(femalePlotDiv, femaleTraces, layout("👩 여성"));
 
-          // 공통 레이아웃
-          const layout = gender => ({
-            barmode: 'stack',
-            title: `${gender} · 연령대별 카테고리 매출 (단위: 억 원)`,
-            xaxis: { title: '연령대' },
-            yaxis: { title: '총 매출 (억 원)', tickformat: ',' },
-            legend: {
-              orientation: 'h',
-              x: 0.5,
-              y: -0.25,
-              xanchor: 'center',
-              yanchor: 'top'
-            },
-            margin: { t: 60, b: 100 },
-            height: 500
-          });
+                    // 선호도 Top/Bottom 차트 그리기 함수 호출
+                    renderTopBottomSummaryCharts(maleData, femaleData);
 
-          Plotly.newPlot(malePlotDiv, maleTraces, layout("👨 남성"));
-          Plotly.newPlot(femalePlotDiv, femaleTraces, layout("👩 여성"));
+                    // 모든 차트가 그려진 후 로딩 메시지 숨기기
+                    loadingDiv.style.display = "none";
+                })
+                .catch(error => {
+                    loadingDiv.innerText = "데이터 로딩 중 오류가 발생했습니다.";
+                    console.error("❌ JSON 로딩 오류:", error);
+                });
+        }
 
-          // Top/Bottom 차트 렌더링
-          if (data.top_bottom) {
-            renderTopBottomCharts(data.top_bottom);
-          }
-
-          loadingDiv.style.display = "none";
-        })
-        .catch(error => {
-          loadingDiv.innerText = "데이터 로딩 중 오류가 발생했습니다.";
-          console.error("❌ JSON 로딩 오류:", error);
-        });
-    }
+        // 4. 페이지가 로드되면 차트 로딩 함수를 실행
+        document.addEventListener('DOMContentLoaded', loadDemographicsChart);
 
   });
 </script>
