@@ -1,19 +1,17 @@
 from flask import Flask
 import subprocess
+import os
 
 app = Flask(__name__)
 
 @app.route('/run-rpa')
 def run_rpa():
     try:
-        # Brity RPA 실행 파일 경로
-        brity_path = r"C:\Users\4Class_13\AppData\Roaming\Brity RPA Designer\BrityRPA_Designer.exe"
+        # 현재 파일과 같은 디렉토리에 있는 run_rpa.bat 파일 경로
+        bat_path = os.path.join(os.path.dirname(__file__), 'run_rpa.bat')
 
-        # 프로젝트 파일 경로
-        proj_path = r"C:\ncsGlobal\FinalProject\augold\RPA\파이널프로젝트\파이널프로젝트.proj"
-
-        # RPA 실행
-        subprocess.Popen([brity_path, proj_path], shell=True)
+        # .bat 파일 실행
+        subprocess.Popen([bat_path], shell=True)
 
         return "RPA 실행 성공"
     except Exception as e:
