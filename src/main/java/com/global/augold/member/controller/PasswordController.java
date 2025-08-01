@@ -22,9 +22,14 @@ public class PasswordController {
     // 최종 URL: GET /password
     @GetMapping
     public String showPasswordForm(HttpSession session, Model model) {
-        if (session.getAttribute("loginUser") == null) {
+        Customer loginUser = (Customer) session.getAttribute("loginUser");
+        if (loginUser == null) {
             return "redirect:/login";
         }
+
+        // 로그인 이름을 모델에 추가 → 헤더에서 사용
+        model.addAttribute("loginName", loginUser.getCstmName());
+
         // 리다이렉트된 메시지가 있다면 뷰로 전달
         if (model.containsAttribute("errorMessage")) {
             model.addAttribute("errorMessage", model.getAttribute("errorMessage"));
@@ -32,6 +37,7 @@ public class PasswordController {
         if (model.containsAttribute("successMessage")) {
             model.addAttribute("successMessage", model.getAttribute("successMessage"));
         }
+
         return "member/password";
     }
 
@@ -41,12 +47,15 @@ public class PasswordController {
                                  @RequestParam String newPassword,
                                  @RequestParam String confirmPassword,
                                  HttpSession session,
-                                 RedirectAttributes redirectAttributes) {
+                                 RedirectAttributes redirectAttributes,
+                                 Model model) {
 
         Customer loginUser = (Customer) session.getAttribute("loginUser");
         if (loginUser == null) {
             return "redirect:/login";
         }
+
+        model.addAttribute("loginName", loginUser.getCstmName());
 
         // [신규] 새 비밀번호가 현재 비밀번호와 동일한지 확인하는 로직 추가
         if (currentPassword.equals(newPassword)) {
@@ -70,6 +79,6 @@ public class PasswordController {
         customerService.updatePassword(loginUser.getCstmNumber(), newPassword);
 
         redirectAttributes.addFlashAttribute("successMessage", "비밀번호가 성공적으로 수정되었습니다.");
-        return "redirect:/"; // 성공 시 마이페이지로 이동
+        return "redirect:/info/member/information"; // 성공 시 마이페이지로 이동
     }
 }

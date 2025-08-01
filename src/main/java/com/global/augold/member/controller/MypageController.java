@@ -30,6 +30,7 @@ public class MypageController {
         if (loginUser == null) {
             return "redirect:/login";
         }
+
         model.addAttribute("user", loginUser);
         model.addAttribute("loginName", loginUser.getCstmName());
         return "member/mypage";
@@ -44,11 +45,13 @@ public class MypageController {
      * 회원 정보 수정을 위해 비밀번호 확인 페이지를 요청합니다. (GET /member/confirm)
      */
     @GetMapping("/member/confirm")
-    public String showConfirmPasswordForm(HttpSession session) {
-        if (session.getAttribute("loginUser") == null) {
+    public String showConfirmPasswordForm(HttpSession session, Model model) {
+        Customer loginUser = (Customer) session.getAttribute("loginUser");
+        if (loginUser == null) {
             return "redirect:/login";
         }
-        // templates/member/confirm.html 뷰를 반환합니다.
+
+        model.addAttribute("loginName", loginUser.getCstmName());
         return "member/confirm";
     }
 
@@ -83,14 +86,18 @@ public class MypageController {
      * 비밀번호 확인 성공 후, 실제 회원 정보 수정 페이지를 보여줍니다. (GET /member/information)
      */
     @GetMapping("/member/information")
-    public String showInformationPage(HttpSession session) {
-        if (session.getAttribute("loginUser") == null) {
-            // 중간에 세션이 만료되었을 경우를 대비
+    public String showInformationPage(HttpSession session, Model model) {
+        Customer loginUser = (Customer) session.getAttribute("loginUser");
+        if (loginUser == null) {
+            // 세션 만료 또는 비로그인 상태
             return "redirect:/login";
         }
-        // templates/member/information.html 뷰를 반환합니다.
+
+        model.addAttribute("loginName", loginUser.getCstmName());
         return "member/information";
     }
+
+
 
 
     // =================================================================
@@ -104,6 +111,7 @@ public class MypageController {
         if (loginUser == null) {
             return "redirect:/login";
         }
+        model.addAttribute("loginName", loginUser.getCstmName());
 
         List<CSInquiry> inquiries;
 
@@ -123,9 +131,12 @@ public class MypageController {
     @GetMapping("/mypage/inquiries/{inqNumber}")
     public String inquiryDetail(@PathVariable String inqNumber, HttpSession session, Model model) {
         Customer loginUser = (Customer) session.getAttribute("loginUser");
+
         if (loginUser == null) {
             return "redirect:/login";
         }
+
+        model.addAttribute("loginName", loginUser.getCstmName());
 
         CSInquiry inquiry = inquiryRepository.findById(inqNumber).orElse(null);
         if (inquiry == null || !inquiry.getCstmNumber().equals(loginUser.getCstmNumber())) {
@@ -140,6 +151,8 @@ public class MypageController {
     public String editInquiryForm(@PathVariable String inqNumber, HttpSession session, Model model) {
         Customer loginUser = (Customer) session.getAttribute("loginUser");
         if (loginUser == null) return "redirect:/login";
+
+        model.addAttribute("loginName", loginUser.getCstmName());
 
         CSInquiry inquiry = inquiryRepository.findById(inqNumber).orElse(null);
         if (inquiry == null || !inquiry.getCstmNumber().equals(loginUser.getCstmNumber())) {
@@ -183,7 +196,14 @@ public class MypageController {
     }
 
     @GetMapping("/mypage/inquiries/{inqNumber}/confirm")
-    public String confirmPasswordForm(@PathVariable String inqNumber, Model model) {
+    public String confirmPasswordForm(@PathVariable String inqNumber, HttpSession session, Model model) {
+
+        Customer loginUser = (Customer) session.getAttribute("loginUser");
+        if (loginUser == null) {
+            return "redirect:/login";
+        }
+
+        model.addAttribute("loginName", loginUser.getCstmName());
         model.addAttribute("inqNumber", inqNumber);
         return "member/mypage_inquiry_confirm";
     }

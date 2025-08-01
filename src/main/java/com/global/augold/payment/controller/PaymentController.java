@@ -1,5 +1,6 @@
 package com.global.augold.payment.controller;
 
+import com.global.augold.order.service.OrderService;
 import com.global.augold.payment.service.PaymentService;
 import com.global.augold.payment.service.PaymentService.PaymentPageData;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
 
 import jakarta.servlet.http.HttpSession;
 import java.math.BigDecimal;
@@ -23,6 +25,7 @@ import java.util.Map;
 public class PaymentController {
 
     private final PaymentService paymentService;
+    private final OrderService orderService;
 
     /**
      * 결제 요청 페이지
@@ -41,6 +44,8 @@ public class PaymentController {
 
             String cstmNumber = loginUser.getCstmNumber();
 
+            model.addAttribute("loginName", loginUser.getCstmName());
+
             // 결제 페이지 데이터 생성
             PaymentPageData paymentData = paymentService.createPaymentPageData(orderNumber, cstmNumber);
 
@@ -53,6 +58,10 @@ public class PaymentController {
             model.addAttribute("customerPhone", paymentData.getCustomerPhone());
             model.addAttribute("customerKey", paymentData.getCustomerKey());
             model.addAttribute("orderItems", paymentData.getOrderItems());
+
+            // 🔥 바로구매 여부 확인하여 모델에 추가
+            boolean isDirectBuy = paymentService.isDirectBuyOrder(orderNumber);
+            model.addAttribute("isDirectBuy", isDirectBuy);
 
             log.info("결제 페이지 요청 처리 완료: 주문번호={}, 고객번호={}", orderNumber, cstmNumber);
             return "payment/payment-request";
@@ -72,8 +81,13 @@ public class PaymentController {
     public String tossPaymentSuccess(@RequestParam String paymentKey,
                                      @RequestParam String orderId,
                                      @RequestParam String amount,
+                                     HttpSession session,
                                      Model model) {
         try {
+            Customer loginUser = (Customer) session.getAttribute("loginUser");
+            if (loginUser != null) {
+                model.addAttribute("loginName", loginUser.getCstmName());
+            }
             log.info("토스페이먼츠 결제 성공 콜백: paymentKey={}, orderId={}, amount={}",
                     paymentKey, orderId, amount);
 
@@ -97,8 +111,13 @@ public class PaymentController {
     @GetMapping("/toss/fail")
     public String tossPaymentFail(@RequestParam String code,
                                   @RequestParam String message,
+                                  HttpSession session,
                                   Model model) {
         try {
+            Customer loginUser = (Customer) session.getAttribute("loginUser");
+            if (loginUser != null) {
+                model.addAttribute("loginName", loginUser.getCstmName());
+            }
             log.warn("토스페이먼츠 결제 실패: code={}, message={}", code, message);
 
             // URL 파라미터를 템플릿에 전달 (JavaScript에서 사용)
@@ -247,6 +266,119 @@ public class PaymentController {
             response.put("message", "주문 정보 조회에 실패했습니다.");
 
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    @PostMapping("/api/handle-failed-direct-buy")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> handleFailedDirectBuy(@RequestBody Map<String, Object> requestData,
+                                                                     HttpSession session) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            Customer loginUser = (Customer) session.getAttribute("loginUser");
+            if (loginUser == null) {
+                response.put("success", false);
+                response.put("message", "로그인이 필요합니다.");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+            }
+
+            String orderNumber = (String) requestData.get("orderNumber");
+            String action = (String) requestData.get("action"); // "addToCart" or "goHome"
+
+            if ("addToCart".equals(action)) {
+                // 🔥 주문 상품들을 장바구니에 추가하고 주문 취소
+                boolean result = paymentService.moveFailedOrderToCart(orderNumber, loginUser.getCstmNumber());
+
+                if (result) {
+                    response.put("success", true);
+                    response.put("message", "상품이 장바구니에 추가되었습니다.");
+                    response.put("redirectUrl", "/cart");
+                } else {
+                    response.put("success", false);
+                    response.put("message", "장바구니 추가에 실패했습니다.");
+                }
+            } else {
+                // 🔥 그냥 주문만 취소하고 홈으로
+                paymentService.cancelFailedOrder(orderNumber, loginUser.getCstmNumber());
+                response.put("success", true);
+                response.put("message", "주문이 취소되었습니다.");
+                response.put("redirectUrl", "/");
+            }
+
+            log.info("바로구매 결제 실패 처리: 주문번호={}, 액션={}, 고객={}",
+                    orderNumber, action, loginUser.getCstmNumber());
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            log.error("바로구매 결제 실패 처리 실패: {}", e.getMessage(), e);
+
+            response.put("success", false);
+            response.put("message", "처리 중 오류가 발생했습니다.");
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    /**
+     * 주문이 바로구매인지 확인하는 API
+     * URL: GET /payment/api/is-direct-buy/{orderNumber}
+     */
+    @GetMapping("/api/is-direct-buy/{orderNumber}")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> isDirectBuyOrder(@PathVariable String orderNumber,
+                                                                HttpSession session) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            Customer loginUser = (Customer) session.getAttribute("loginUser");
+            if (loginUser == null) {
+                response.put("success", false);
+                response.put("message", "로그인이 필요합니다.");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+            }
+
+            // 🔥 주문의 상품 개수로 바로구매 여부 판단 (간단한 방법)
+            boolean isDirectBuy = paymentService.isDirectBuyOrder(orderNumber);
+
+            response.put("success", true);
+            response.put("isDirectBuy", isDirectBuy);
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            log.error("바로구매 주문 확인 실패: {}", e.getMessage(), e);
+
+            response.put("success", false);
+            response.put("message", "확인 중 오류가 발생했습니다.");
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    // PaymentController에서
+    @GetMapping("/cancel-and-add-to-cart")
+    public String cancelOrderAndAddToCart(@RequestParam String orderNumber,
+                                          HttpSession session) {
+        try {
+            Customer loginUser = (Customer) session.getAttribute("loginUser");
+            if (loginUser == null) {
+                return "redirect:/login";
+            }
+
+            // 🔥 기존 OrderController API 활용
+            boolean result = orderService.moveOrderToCart(orderNumber, loginUser.getCstmNumber());
+
+            if (result) {
+                return "redirect:/cart?added=true&from=payment";
+            } else {
+                return "redirect:/cart?error=add_failed";
+            }
+
+        } catch (Exception e) {
+            log.error("결제 취소 후 장바구니 추가 실패: {}", e.getMessage(), e);
+            return "redirect:/cart?error=system";
         }
     }
 }

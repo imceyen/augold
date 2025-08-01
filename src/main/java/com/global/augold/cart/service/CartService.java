@@ -3,8 +3,10 @@ package com.global.augold.cart.service;
 import com.global.augold.cart.dto.CartDTO;
 import com.global.augold.cart.entity.Cart;
 import com.global.augold.cart.repository.CartRepository;
+import com.global.augold.order.service.OrderService;
 import com.global.augold.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.global.augold.product.entity.Product;
@@ -25,6 +27,9 @@ public class CartService {
     private final CartRepository cartRepository;
     private final ProductRepository productRepository;
     private final GoldPriceService goldPriceService;
+    @Lazy
+    private final OrderService orderService;
+
 
 
     public String addToCart(String cstmNumber, String productId, int quantity, String karatCode, double finalPrice) {
@@ -218,6 +223,16 @@ public class CartService {
                 totalDelete += deleted;
             }
             return totalDelete > 0;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public boolean addOrderItemsToCart(String orderNumber, String cstmNumber) {
+        try {
+            // OrderService에 위임하여 주문을 장바구니로 이동
+            return orderService.moveOrderToCart(orderNumber, cstmNumber);
+
         } catch (Exception e) {
             return false;
         }

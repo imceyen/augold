@@ -13,13 +13,25 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/info")
 public class InformationController {
 
+    @GetMapping("/member/information")
+    public String showInformationPage(HttpSession session, Model model) {
+        Customer loginUser = (Customer) session.getAttribute("loginUser");
+        if (loginUser == null) {
+            return "redirect:/login";
+        }
+
+        model.addAttribute("loginName", loginUser.getCstmName());
+        return "member/information";
+    }
+
     @GetMapping("/address")
     public String showAddressPage(HttpSession session, Model model) {
         Customer loginUser = (Customer) session.getAttribute("loginUser");
         if (loginUser == null) {
             return "redirect:/login";
         }
-        model.addAttribute("user", loginUser);
+
+        model.addAttribute("loginName", loginUser.getCstmName());
         return "member/address"; // templates/member/address.html
     }
 
@@ -30,7 +42,7 @@ public class InformationController {
         if (loginUser == null) {
             return "redirect:/login";
         }
-        model.addAttribute("user", loginUser);
+        model.addAttribute("loginName", loginUser.getCstmName());
         return "member/phone"; // templates/member/phone.html
     }
 }
