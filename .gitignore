@@ -38,3 +38,6 @@ out/
 
 # Spring Boot sensitive properties
 src/main/resources/application.properties
+
+
+/python/statistics/output/

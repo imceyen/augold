@@ -1,0 +1,57 @@
+<Project id="d1398655-038e-4853-b072-7e5f7487923e" namespace="" name="파이널프로젝트" category="project" workType="foreground" version="1.00" lastPublishedDate="" lastPublishedBy="" createdDate="2025-07-24 11:48:02" createdBy="" latestProcess="T_피벗테이블제작" designerVersion="3.1.125.00602" DesignedBy="">
+  <SharedTask isExpended="false" />
+  <NormalTask isExpended="true">
+    <LinkItem id="d7e5bde1-6fec-4353-96d1-4b2dedd58b9a" category="NormalTask" isChanged="Y" desc="" stepCount="2" name="T_엑셀실행">
+      <Properties />
+    </LinkItem>
+    <LinkItem id="e7e4ae13-d9f6-409c-8b7d-889c06f61d67" category="NormalTask" isChanged="Y" desc="" stepCount="6" name="T_엑셀저장">
+      <Properties />
+    </LinkItem>
+    <LinkItem id="b8b69055-b3ac-4b92-8f88-2a16bceea2c3" category="NormalTask" isChanged="Y" desc="" stepCount="3" name="T_파이썬실행">
+      <Properties />
+    </LinkItem>
+    <LinkItem id="257b6898-0bff-4c01-acec-46fc75976276" category="NormalTask" isChanged="Y" desc="" stepCount="2" name="T_폴더및파일정리">
+      <Properties />
+    </LinkItem>
+    <LinkItem id="4c6491ed-283e-4898-a4ab-f183cd014670" category="NormalTask" isChanged="Y" desc="" stepCount="18" name="T_피벗테이블제작">
+      <Properties />
+    </LinkItem>
+  </NormalTask>
+  <Event isExpended="false" />
+  <Process isExpended="true">
+    <LinkItem id="70705e89-ddfc-4b2c-846b-d9d066ff0882" category="Process" isChanged="Y" desc="default process" stepCount="5" name="P_파이널프로젝트">
+      <Properties />
+    </LinkItem>
+  </Process>
+  <CustomLibraries isExpended="false" />
+  <LibraryTemplate isExpended="false" />
+  <Resources isExpended="false" />
+  <RemoteProcess isExpended="false" />
+  <RecorderData isExpended="false" />
+  <Asset />
+  <Library />
+  <Variables>
+    <Variable name="ExcelHandle" scope="Global" valueType="Any" formatType="Any" initValue="" desc="" colorValue="#FF00C897" showMarker="False" />
+    <Variable name="ExcelFilePath" scope="Global" valueType="Any" formatType="Any" initValue="" desc="" colorValue="#FF243763" showMarker="False" />
+    <Variable name="PythonFolderPath" scope="Global" valueType="Any" formatType="Any" initValue="" desc="" colorValue="#FFEB455F" showMarker="False" />
+    <Variable name="FileName" scope="Global" valueType="Any" formatType="Any" initValue="" desc="" colorValue="#FFFFB100" showMarker="False" />
+  </Variables>
+  <Properties>
+    <Property key="PlayOption_StepInterval" controlType="Int32" valueType="System.Int32" formatType="Integer" required="False" visible="True" readonly="False" encrypted="False" isChanged="N" value="1" />
+    <Property key="PlayOption_DisableDrawBounds" controlType="Boolean" valueType="System.Boolean" formatType="Boolean" required="False" visible="True" readonly="False" encrypted="False" isChanged="N" value="False" />
+    <Property key="PlayOption_InvokeFirst" controlType="Boolean" valueType="System.Boolean" formatType="Boolean" required="False" visible="True" readonly="False" encrypted="False" isChanged="N" value="False" />
+    <Property key="PlayOption_AllowUploadDumpScreenResult" controlType="Boolean" valueType="System.Boolean" formatType="Boolean" required="False" visible="True" readonly="False" encrypted="False" isChanged="N" value="False" />
+  </Properties>
+  <DisplayLibraries>
+    <string>Flow</string>
+    <string>Win</string>
+    <string>Net</string>
+    <string>Excel</string>
+    <string>Desktop</string>
+    <string>Chrome</string>
+    <string>ImageRecognition</string>
+    <string>DataConverter</string>
+    <string>Python</string>
+    <string>OpenAI</string>
+  </DisplayLibraries>
+</Project>
