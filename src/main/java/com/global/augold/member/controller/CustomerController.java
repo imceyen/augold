@@ -39,35 +39,30 @@ public class CustomerController {
      */
     @PostMapping("/register")
     public String register(
-            @ModelAttribute Customer customer, // 사용자가 입력한 폼 데이터를 받습니다.
-            @RequestParam String postcode,
-            @RequestParam String address,
-            @RequestParam String detailAddress,
+            @ModelAttribute Customer customer,
+            @RequestParam(required = false) String postcode,
+            @RequestParam(required = false) String address,
+            @RequestParam(required = false) String detailAddress,
             RedirectAttributes redirectAttributes) {
 
-        // 주소 필드를 하나의 문자열로 합칩니다.
+        // 주소가 null인지 체크
+        if (postcode == null || address == null || detailAddress == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "주소 정보를 모두 입력해주세요.");
+            return "redirect:/customer/register";
+        }
+
         String fullAddr = postcode + " " + address + " " + detailAddress;
         customer.setCstmAddr(fullAddr);
+        System.out.println("Full Address: " + fullAddr);
 
         try {
-            // 서비스 레이어의 회원가입 로직을 호출합니다.
             customerService.register(customer);
-
-            // 성공 시: 로그인 페이지로 리다이렉트하며 성공 메시지를 전달합니다.
             redirectAttributes.addFlashAttribute("message", "회원가입이 성공적으로 완료되었습니다. 로그인해주세요.");
-            return "redirect:/login"; // 로그인 페이지 경로로 수정하는 것을 권장
-
-        } catch (IllegalArgumentException e) {
-            // 실패 시: (예: 아이디 중복) 다시 회원가입 폼으로 리다이렉트합니다.
-
-            // 1. 서비스에서 발생한 에러 메시지를 Flash Attribute로 전달합니다.
-            //    Flash Attribute는 리다이렉트 후 딱 한 번만 사용되고 사라집니다.
+            return "redirect:/login";
+        } catch (Exception e) {
+            e.printStackTrace();
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-
-            // 2. 사용자가 입력했던 데이터(customer 객체)도 함께 전달하여,
-            //    폼에 기존 입력 내용이 사라지지 않도록 합니다.
             redirectAttributes.addFlashAttribute("customer", customer);
-
             return "redirect:/customer/register";
         }
     }

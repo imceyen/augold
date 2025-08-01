@@ -167,7 +167,7 @@ header {
     justify-content: center;
     align-items: flex-start;
     padding: 40px 20px;
-    margin-bottom: 100px;
+    margin-bottom: 250px;
 }
 
 /* --- 로그인 카드 --- */
@@ -510,6 +510,28 @@ header {
                     <p>프리미엄 금 전문몰</p>
                 </div>
             </a>
+
+            <nav class="nav-section">
+                <!-- 로그인 전: 로그인, 회원가입 메뉴만 보임 -->
+                <th:block th:if="${loginName == null}">
+                    <a href="/login">로그인</a>
+                    <a href="/customer/register">회원가입</a>
+                    <a href="#" onclick="loginRequired()">고객센터</a>
+                </th:block>
+
+                <!-- 로그인 후: 환영 메시지 및 모든 메뉴가 보임 -->
+                <th:block th:if="${loginName != null}">
+                    <span class="nav-text">[[${loginName}]]님 환영합니다</span>
+                    <a href="/logout">로그아웃</a>
+                    <a href="/support">고객센터</a>
+                    <a href="/mypage">마이페이지</a>
+                    <a href="/cart">
+                        장바구니
+                        <!-- 동적 장바구니 개수 배지 -->
+                        <span id="cartBadge" class="cart-badge hidden">0</span>
+                    </a>
+                </th:block>
+            </nav>
         </div>
     </div>
 </header>
@@ -722,6 +744,26 @@ header {
         // 필요시 장바구니 개수 새로고침
         // fetchCartCount();
     });
+</script>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+        // 회원가입 성공 메시지 처리
+        var successMessage = [[${message != null}]] ? '[[${message}]]' : null;
+
+        if(successMessage) {
+            Swal.fire({
+                icon: 'success',
+                title: '회원가입 완료!',
+                text: successMessage,
+                confirmButtonText: '로그인하기',
+                confirmButtonColor: '#ffd700',
+                customClass: {
+                    confirmButton: 'swal-confirm-btn'
+                }
+            });
+        }
+    /*]]>*/
 </script>
 
 </body>
