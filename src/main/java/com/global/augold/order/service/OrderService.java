@@ -631,12 +631,5 @@ public class OrderService {
             throw new RuntimeException("주문 취소에 실패했습니다: " + e.getMessage());
         }
     }
-
-    public String addToCartForDirectBuy(String cstmNumber, String productId, int quantity, String karatCode) {
-        // 🔥 CartService로 완전 위임
-        return cartService.addToCartForDirectBuy(cstmNumber, productId, quantity, karatCode);
-    }
-
-
-
+    
 }
