@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+
 @Controller
 @RequiredArgsConstructor
 public class PhoneController {
@@ -30,6 +31,8 @@ public class PhoneController {
         if (loginUser == null) {
             return "redirect:/login";
         }
+
+        model.addAttribute("loginName", loginUser.getCstmName());
 
         // 3. [가장 중요한 부분] HTML 파일에서 사용할 수 있도록 loginUser 정보를 "loginUser"라는 이름으로 모델에 담아줍니다.
         model.addAttribute("loginUser", loginUser);
@@ -68,6 +71,6 @@ public class PhoneController {
 
         // 성공 메시지와 함께 메인 페이지로 이동
         redirectAttributes.addFlashAttribute("successMessage", "연락처가 성공적으로 수정되었습니다.");
-        return "redirect:/";
+        return "redirect:/info/member/information";
     }
 }

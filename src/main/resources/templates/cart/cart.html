@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <title>AuGold 장바구니</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
     <!-- SweetAlert2 CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.5/sweetalert2.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.5/sweetalert2.min.css">
@@ -20,8 +22,6 @@
             color: #374151;
             line-height: 1.6;
         }
-
-
 
         /* 헤더 컨테이너 */
         .header-container {
@@ -301,6 +301,7 @@
         /* 메인 콘텐츠 */
         main {
             padding: 32px 0;
+            margin-bottom: 64px;
         }
 
         .page-header {
@@ -758,6 +759,21 @@
             color: #d97706;
             font-weight: 600;
         }
+
+        .mb-8 { margin-bottom: 2rem; }
+        .text-3xl { font-size: 1.875rem; }
+        .font-bold { font-weight: 700; }
+        .text-gray-900 { color: #111827; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .flex { display: flex; }
+        .items-center { align-items: center; }
+        .space-x-2 > * + * { margin-left: 0.5rem; }
+        .text-sm { font-size: 0.875rem; }
+        .text-gray-600 { color: #4b5563; }
+        .text-yellow-600 { color: #d97706; }
+        .font-semibold { font-weight: 600; }
+
+
     </style>
 </head>
 <body>
@@ -797,6 +813,19 @@
 </header>
 
 <main>
+    <div class="header-container">
+        <div class="mb-8" >
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">주문서 작성</h1>
+            <div class="flex items-center space-x-2 text-sm text-gray-600">
+                <span class="text-yellow-600 font-semibold">장바구니</span>
+                <span>→</span>
+                <span>주문서 작성</span>
+                <span>→</span>
+                <span>결제</span>
+            </div>
+        </div>
+    </div>
+
     <div class="header-container">
         <div class="page-header">
             <h2 class="page-title">장바구니</h2>
@@ -960,7 +989,7 @@
 
                 <!-- 소셜 미디어 링크 -->
                 <div class="social-links">
-                    <a href="#" title="카카오톡">💬</a>
+                    <a href="https://open.kakao.com/o/gLyAOSJh" title="카카오톡">💬</a>
                     <a href="#" title="인스타그램">📷</a>
                     <a href="#" title="네이버 블로그">📝</a>
                 </div>

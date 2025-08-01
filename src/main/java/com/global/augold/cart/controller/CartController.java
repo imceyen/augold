@@ -1,4 +1,3 @@
-
 package com.global.augold.cart.controller;
 
 import com.global.augold.cart.dto.CartDTO;
@@ -171,6 +170,39 @@ public class CartController {
             return ResponseEntity.ok(result ? "success" : "failure");
         } catch (RuntimeException e) {
             return ResponseEntity.status(401).body("login_required");
+        }
+    }
+
+    @PostMapping("/add-from-order")
+    @ResponseBody
+    public ResponseEntity<?> addFromFailedOrder(@RequestParam String orderNumber,
+                                                HttpSession session) {
+        try {
+            String cstmNumber = getCstmNumberFromSession(session);
+
+            if (cstmNumber == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("success", false, "message", "로그인이 필요합니다."));
+            }
+
+            // OrderService를 통해 주문 상품들을 장바구니에 추가
+            boolean result = cartService.addOrderItemsToCart(orderNumber, cstmNumber);
+
+            if (result) {
+                return ResponseEntity.ok(Map.of(
+                        "success", true,
+                        "message", "상품들이 장바구니에 추가되었습니다."
+                ));
+            } else {
+                return ResponseEntity.badRequest().body(Map.of(
+                        "success", false,
+                        "message", "장바구니 추가에 실패했습니다."
+                ));
+            }
+
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("success", false, "message", e.getMessage()));
         }
     }
 }

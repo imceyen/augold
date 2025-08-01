@@ -36,6 +36,7 @@ public class AddressController {
             RedirectAttributes redirectAttributes
     ) {
         Customer loginUser = (Customer) session.getAttribute("loginUser");
+
         if (loginUser == null) {
             return "redirect:/login";
         }
@@ -52,7 +53,7 @@ public class AddressController {
         customerRepository.save(loginUser);
 
         redirectAttributes.addFlashAttribute("successMessage", "주소가 성공적으로 변경되었습니다.");
-        return "redirect:/";
+        return "redirect:/info/member/information";
     }
 
 }

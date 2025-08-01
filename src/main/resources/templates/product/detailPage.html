@@ -863,6 +863,191 @@ function showAlert(message, type = 'info') {
     });
 }
 
+
+function processDirectBuy(productId, quantity) {
+    // 로딩 표시
+    Swal.fire({
+        title: '주문 준비 중...',
+        html: '<div class="swal2-loading-container"><div class="swal2-loading"></div></div>',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    // 🔥 가격 계산 로직을 함수 내부로 이동
+    function getCurrentPrice() {
+        const priceText = document.getElementById('price');
+        let unitPrice = Math.round(parseFloat(priceText?.dataset.price)) || 0;
+
+        const karatSelect = document.getElementById('karatSelect');
+        const weightSelect = document.getElementById('weightSelect');
+
+        let selectedPrice = unitPrice;
+
+        if (karatSelect && karatSelect.selectedOptions.length > 0 && karatSelect.value) {
+            const karatPrice = Math.round(parseFloat(karatSelect.selectedOptions[0].dataset.price));
+            if (!isNaN(karatPrice)) selectedPrice = karatPrice;
+        }
+
+        if (weightSelect && weightSelect.selectedOptions.length > 0 && weightSelect.value) {
+            const weightPrice = Math.round(parseFloat(weightSelect.selectedOptions[0].dataset.price));
+            if (!isNaN(weightPrice)) selectedPrice = weightPrice;
+        }
+
+        return selectedPrice;
+    }
+
+    // 바로구매를 위한 임시 주문 데이터 준비
+    const formData = new FormData();
+    formData.append('productId', productId);
+    formData.append('quantity', quantity);
+    formData.append('finalPrice', getCurrentPrice());
+
+    const karatSelect = document.getElementById('karatSelect');
+    if (karatSelect?.value) {
+        formData.append('karatCode', karatSelect.value);
+    }
+
+    // 🔥 CSRF 없이 API 호출
+    fetch('/order/direct-buy/prepare', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        console.log('🔥 Response status:', response.status);
+        console.log('🔥 Response headers:', response.headers);
+
+        if (!response.ok) {
+            return response.text().then(text => {
+                console.error('🔥 Error response:', text);
+                throw new Error(`HTTP error! status: ${response.status}, body: ${text}`);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('🔥 Response data:', data);
+        Swal.close();
+
+        if (data.success) {
+            console.log('🔥 Success! Redirecting to:', '/order/direct-buy?tempOrderId=' + data.tempOrderId);
+            window.location.href = '/order/direct-buy?tempOrderId=' + data.tempOrderId;
+        } else {
+            throw new Error(data.message || '임시 주문 생성 실패');
+        }
+    })
+    .catch(error => {
+        console.error('🔥 바로구매 처리 오류:', error);
+        Swal.close();
+
+        Swal.fire({
+            icon: 'error',
+            title: '주문 처리 실패',
+            text: '바로 구매 처리 중 오류가 발생했습니다: ' + error.message,
+            confirmButtonColor: '#ef4444'
+        });
+    });
+}
+
+// 장바구니 추가 성공 알림 함수
+function showCartAddedAlert(quantity, karatCode, finalPrice) {
+    const productName = document.querySelector('h1.text-4xl')?.textContent || '상품';
+    const productImage = document.getElementById('mainImage')?.src || '';
+    const totalPrice = finalPrice * quantity;
+    const karatDisplay = karatCode ? ` (${karatCode})` : '';
+
+    Swal.fire({
+        icon: 'success',
+        title: '<strong>🛒 장바구니에 담았습니다!</strong>',
+        html: `
+            <div style="display: flex; align-items: center; gap: 20px; padding: 20px;">
+                <div style="flex-shrink: 0;">
+                    <img src="${productImage}"
+                         style="width: 120px; height: 120px; object-fit: cover; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                </div>
+                <div style="flex: 1; text-align: left;">
+                    <h4 style="color: #374151; font-weight: bold; margin: 0 0 15px 0; font-size: 18px;">
+                        ${productName}${karatDisplay}
+                    </h4>
+                    <div style="background: #fef3c7; padding: 12px; border-radius: 8px;">
+                        <p style="color: #92400e; margin: 5px 0; font-size: 14px;">
+                            <strong>수량:</strong> ${quantity}개
+                        </p>
+                        ${karatCode ? `
+                        <p style="color: #92400e; margin: 5px 0; font-size: 14px;">
+                            <strong>순도:</strong> ${karatCode}
+                        </p>
+                        ` : ''}
+                        <hr style="border: 0; border-top: 1px solid #fcd34d; margin: 8px 0;">
+                        <p style="color: #78350f; margin: 5px 0; font-size: 16px; font-weight: bold;">
+                            <strong>총 금액:</strong> ₩${totalPrice.toLocaleString()}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        `,
+        showConfirmButton: true,
+        showCancelButton: true,
+        confirmButtonText: '<i class="fas fa-shopping-cart"></i> 장바구니 보기',
+        cancelButtonText: '<i class="fas fa-shopping-bag"></i> 계속 쇼핑',
+        confirmButtonColor: '#f59e0b',
+        cancelButtonColor: '#6b7280',
+        reverseButtons: true,
+        timer: 5000,
+        timerProgressBar: true,
+        backdrop: 'rgba(0,0,0,0.4)',
+        width: '500px',
+        showClass: {
+            popup: 'animate__animated animate__fadeInDown'
+        },
+        hideClass: {
+            popup: 'animate__animated animate__fadeOutUp'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = '/cart';
+        }
+    });
+}
+
+// 에러 처리 함수
+function handleCartError(errorType) {
+    switch(errorType) {
+        case 'out_of_stock':
+            Swal.fire({
+                icon: 'warning',
+                title: '재고 부족',
+                text: '현재 재고가 부족하여 장바구니에 담을 수 없습니다.',
+                confirmButtonColor: '#ef4444'
+            });
+            break;
+        case 'login_required':
+            Swal.fire({
+                icon: 'info',
+                title: '로그인 필요',
+                text: '장바구니 담기를 위해 로그인이 필요합니다.',
+                confirmButtonColor: '#f59e0b',
+                confirmButtonText: '로그인하기'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const returnUrl = encodeURIComponent(window.location.pathname);
+                    window.location.href = `/login?returnUrl=${returnUrl}`;
+                }
+            });
+            break;
+        default:
+            Swal.fire({
+                icon: 'error',
+                title: '오류 발생',
+                text: '알 수 없는 오류가 발생했습니다.',
+                confirmButtonColor: '#ef4444'
+            });
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     // 🆕 페이지 로드 시 장바구니 개수 업데이트
     updateCartCount();
@@ -1116,7 +1301,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // 🔥 바로 구매하기 버튼 이벤트 - 수정된 부분
+    // 🔥 바로 구매하기 버튼 이벤트
     document.getElementById('buyNowBtn')?.addEventListener('click', function() {
         const quantity = parseInt(document.getElementById('quantityInput').value);
         let productId;
@@ -1234,156 +1419,11 @@ document.addEventListener('DOMContentLoaded', function () {
             cancelButtonColor: '#6b7280'
         }).then((result) => {
             if (result.isConfirmed) {
-                // 🔥 바로 구매 처리 - 장바구니 추가 → 즉시 주문 생성
+                // 🔥 바로 구매 처리 - 장바구니 건드리지 않고 임시 주문 생성
                 processDirectBuy(productId, quantity);
             }
         });
     });
-
-    // 🔥 바로 구매 처리 함수 - 새로 추가
-    function processDirectBuy(productId, quantity) {
-        // 1단계: 장바구니에 추가
-        const formData = new FormData();
-        formData.append('productId', productId);
-        formData.append('quantity', quantity);
-        formData.append('finalPrice', getSelectedPrice());
-
-        if (karatSelect?.value) {
-            formData.append('karatCode', karatSelect.value);
-        }
-
-        fetch('/cart/add', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // 2단계: 바로 주문 생성 (해당 상품만 선택)
-                createDirectOrder(productId);
-            }
-        });
-    }
-
-    // 🔥 바로 주문 생성 함수 - 새로 추가
-    function createDirectOrder(productId) {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '/order/create';
-
-        // 선택된 상품 ID만 전달
-        const selectedProductsInput = document.createElement('input');
-        selectedProductsInput.type = 'hidden';
-        selectedProductsInput.name = 'selectedProducts';
-        selectedProductsInput.value = productId;
-        form.appendChild(selectedProductsInput);
-
-        // 🔥 바로구매 플래그 (기본 배송정보 사용)
-        const directBuyInput = document.createElement('input');
-        directBuyInput.type = 'hidden';
-        directBuyInput.name = 'directBuy';
-        directBuyInput.value = 'true';
-        form.appendChild(directBuyInput);
-
-        document.body.appendChild(form);
-        form.submit();
-    }
-
-    // 장바구니 추가 성공 알림 함수
-    function showCartAddedAlert(quantity, karatCode, finalPrice) {
-        const productName = document.querySelector('h1.text-4xl')?.textContent || '상품';
-        const productImage = document.getElementById('mainImage')?.src || '';
-        const totalPrice = finalPrice * quantity;
-        const karatDisplay = karatCode ? ` (${karatCode})` : '';
-
-        Swal.fire({
-            icon: 'success',
-            title: '<strong>🛒 장바구니에 담았습니다!</strong>',
-            html: `
-                <div style="display: flex; align-items: center; gap: 20px; padding: 20px;">
-                    <div style="flex-shrink: 0;">
-                        <img src="${productImage}"
-                             style="width: 120px; height: 120px; object-fit: cover; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                    </div>
-                    <div style="flex: 1; text-align: left;">
-                        <h4 style="color: #374151; font-weight: bold; margin: 0 0 15px 0; font-size: 18px;">
-                            ${productName}${karatDisplay}
-                        </h4>
-                        <div style="background: #fef3c7; padding: 12px; border-radius: 8px;">
-                            <p style="color: #92400e; margin: 5px 0; font-size: 14px;">
-                                <strong>수량:</strong> ${quantity}개
-                            </p>
-                            ${karatCode ? `
-                            <p style="color: #92400e; margin: 5px 0; font-size: 14px;">
-                                <strong>순도:</strong> ${karatCode}
-                            </p>
-                            ` : ''}
-                            <hr style="border: 0; border-top: 1px solid #fcd34d; margin: 8px 0;">
-                            <p style="color: #78350f; margin: 5px 0; font-size: 16px; font-weight: bold;">
-                                <strong>총 금액:</strong> ₩${totalPrice.toLocaleString()}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            `,
-            showConfirmButton: true,
-            showCancelButton: true,
-            confirmButtonText: '<i class="fas fa-shopping-cart"></i> 장바구니 보기',
-            cancelButtonText: '<i class="fas fa-shopping-bag"></i> 계속 쇼핑',
-            confirmButtonColor: '#f59e0b',
-            cancelButtonColor: '#6b7280',
-            reverseButtons: true,
-            timer: 5000,
-            timerProgressBar: true,
-            backdrop: 'rgba(0,0,0,0.4)',
-            width: '500px',
-            showClass: {
-                popup: 'animate__animated animate__fadeInDown'
-            },
-            hideClass: {
-                popup: 'animate__animated animate__fadeOutUp'
-            }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                window.location.href = '/cart';
-            }
-        });
-    }
-
-    // 에러 처리 함수
-    function handleCartError(errorType) {
-        switch(errorType) {
-            case 'out_of_stock':
-                Swal.fire({
-                    icon: 'warning',
-                    title: '재고 부족',
-                    text: '현재 재고가 부족하여 장바구니에 담을 수 없습니다.',
-                    confirmButtonColor: '#ef4444'
-                });
-                break;
-            case 'login_required':
-                Swal.fire({
-                    icon: 'info',
-                    title: '로그인 필요',
-                    text: '장바구니 담기를 위해 로그인이 필요합니다.',
-                    confirmButtonColor: '#f59e0b',
-                    confirmButtonText: '로그인하기'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        const returnUrl = encodeURIComponent(window.location.pathname);
-                        window.location.href = `/login?returnUrl=${returnUrl}`;
-                    }
-                });
-                break;
-            default:
-                Swal.fire({
-                    icon: 'error',
-                    title: '오류 발생',
-                    text: '알 수 없는 오류가 발생했습니다.',
-                    confirmButtonColor: '#ef4444'
-                });
-        }
-    }
 
     function getSelectedPrice() {
         let selectedPrice = unitPrice;
@@ -1501,7 +1541,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // 기본 선택값 있을 경우 초기화
         if (karatSelect.options.length > 1) {
-
             karatSelect.dispatchEvent(new Event('change'));
         }
     }

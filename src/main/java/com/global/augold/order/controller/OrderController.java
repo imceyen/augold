@@ -18,6 +18,12 @@ import java.util.Map;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.stream.Collectors;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ResponseBody;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.ArrayList;
 
 import jakarta.servlet.http.HttpSession;
 import java.util.List;
@@ -48,6 +54,7 @@ public class OrderController {
             }
 
             String cstmNumber = loginUser.getCstmNumber();
+            model.addAttribute("loginName", loginUser.getCstmName());
 
             // 🔥 전체 장바구니에서 상품 목록 가져오기
             List<CartDTO> allCartItems = cartService.getCartList(cstmNumber);
@@ -306,6 +313,8 @@ public class OrderController {
                 return "redirect:/login";
             }
 
+            model.addAttribute("loginName", loginUser.getCstmName());
+
             // 고객의 주문 목록 조회
             List<Order> orders = orderService.getCustomerOrders(loginUser.getCstmNumber());
             model.addAttribute("orders", orders);
@@ -349,4 +358,195 @@ public class OrderController {
             return "redirect:/order/" + orderNumber + "?error=update";
         }
     }
+
+    @PostMapping("/direct-buy/prepare")
+    @ResponseBody
+    public ResponseEntity<?> prepareDirectBuy(@RequestParam String productId,
+                                              @RequestParam int quantity,
+                                              @RequestParam double finalPrice,
+                                              @RequestParam(required = false) String karatCode,
+                                              HttpSession session) {
+        try {
+            Customer loginUser = (Customer) session.getAttribute("loginUser");
+            if (loginUser == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("success", false, "message", "로그인이 필요합니다."));
+            }
+
+            // 🔥 간단한 임시 주문 ID 생성
+            String tempOrderId = "TEMP_" + System.currentTimeMillis() + "_" + loginUser.getCstmNumber();
+
+            // 🔥 임시 주문 데이터 생성
+            Map<String, Object> tempOrderData = new HashMap<>();
+            tempOrderData.put("productId", productId);
+            tempOrderData.put("quantity", quantity);
+            tempOrderData.put("finalPrice", finalPrice);
+            tempOrderData.put("karatCode", karatCode);
+            tempOrderData.put("customerId", loginUser.getCstmNumber());
+            tempOrderData.put("customerName", loginUser.getCstmName());
+            tempOrderData.put("customerPhone", loginUser.getCstmPhone());
+            tempOrderData.put("customerAddr", loginUser.getCstmAddr());
+            tempOrderData.put("createdAt", System.currentTimeMillis());
+
+            // 🔥 세션에 임시 주문 데이터 저장 (30분 후 만료)
+            session.setAttribute("tempOrder_" + tempOrderId, tempOrderData);
+            session.setMaxInactiveInterval(30 * 60); // 30분
+
+            log.info("바로구매 임시 주문 생성: tempOrderId={}, 고객={}, 상품={}",
+                    tempOrderId, loginUser.getCstmNumber(), productId);
+
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "tempOrderId", tempOrderId,
+                    "message", "임시 주문이 생성되었습니다."
+            ));
+
+        } catch (Exception e) {
+            log.error("바로구매 임시 주문 생성 실패: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("success", false, "message", "임시 주문 생성에 실패했습니다."));
+        }
+    }
+
+    /**
+     * 바로구매 주문 페이지
+     * URL: GET /order/direct-buy?tempOrderId=TEMP_XXX
+     */
+    @GetMapping("/direct-buy")
+    public String directBuyOrderPage(@RequestParam String tempOrderId,
+                                     HttpSession session,
+                                     Model model) {
+        try {
+            Customer loginUser = (Customer) session.getAttribute("loginUser");
+            if (loginUser == null) {
+                log.warn("로그인되지 않은 사용자의 바로구매 주문 요청");
+                return "redirect:/login?returnUrl=/cart";
+            }
+            model.addAttribute("loginName", loginUser.getCstmName());
+
+            //  간단하게 세션에서 데이터 가져오기
+            Object sessionData = session.getAttribute("tempOrder_" + tempOrderId);
+            if (sessionData == null) {
+                log.warn("임시 주문 데이터 없음 또는 만료: tempOrderId={}", tempOrderId);
+                return "redirect:/cart?error=expired";
+            }
+
+            //  간단한 캐스팅 (경고 무시)
+            @SuppressWarnings("unchecked")
+            Map<String, Object> tempOrderData = (Map<String, Object>) sessionData;
+
+            //  임시 주문 정보를 CartDTO 형태로 변환 (기존 메서드 사용)
+            List<CartDTO> orderItems = orderService.createDirectBuyCartItems(tempOrderData);
+
+            //  총 금액 계산
+            double totalAmount = (Double) tempOrderData.get("finalPrice") * (Integer) tempOrderData.get("quantity");
+            int totalQuantity = (Integer) tempOrderData.get("quantity");
+
+            //  모델에 데이터 설정
+            model.addAttribute("cartItems", orderItems);
+            model.addAttribute("totalAmount", totalAmount);
+            model.addAttribute("totalQuantity", totalQuantity);
+            model.addAttribute("customerName", loginUser.getCstmName());
+            model.addAttribute("customerPhone", loginUser.getCstmPhone());
+            model.addAttribute("customerAddr", loginUser.getCstmAddr());
+            model.addAttribute("tempOrderId", tempOrderId);
+            model.addAttribute("isDirectBuy", true);
+
+            log.info("바로구매 주문 페이지 요청: tempOrderId={}, 고객={}", tempOrderId, loginUser.getCstmNumber());
+
+            return "order/order";
+
+        } catch (Exception e) {
+            log.error("바로구매 주문 페이지 요청 실패: {}", e.getMessage(), e);
+            return "redirect:/cart?error=system";
+        }
+    }
+
+    /**
+     * 바로구매 주문 생성 (결제 페이지로 이동)
+     * URL: POST /order/direct-buy/create
+     */
+    @PostMapping("/direct-buy/create")
+    public String createDirectBuyOrder(@RequestParam String tempOrderId,
+                                       @ModelAttribute OrderCreateRequest orderRequest,
+                                       HttpSession session) {
+        try {
+            Customer loginUser = (Customer) session.getAttribute("loginUser");
+            if (loginUser == null) {
+                return "redirect:/login?returnUrl=/cart";
+            }
+
+            // 🔥 간단하게 세션에서 데이터 가져오기
+            Object sessionData = session.getAttribute("tempOrder_" + tempOrderId);
+            if (sessionData == null) {
+                log.warn("임시 주문 데이터 없음: tempOrderId={}", tempOrderId);
+                return "redirect:/cart?error=expired";
+            }
+
+            // 🔥 간단한 캐스팅 (경고 무시)
+            @SuppressWarnings("unchecked")
+            Map<String, Object> tempOrderData = (Map<String, Object>) sessionData;
+
+            String cstmNumber = loginUser.getCstmNumber();
+            orderRequest.setCstmNumber(cstmNumber);
+
+            // 🔥 기존 OrderService 메서드 사용
+            String orderNumber = orderService.createDirectBuyOrder(tempOrderData, orderRequest);
+
+            // 🔥 임시 주문 데이터 삭제 (사용 완료)
+            session.removeAttribute("tempOrder_" + tempOrderId);
+
+            log.info("바로구매 주문 생성 완료: 주문번호={}, tempOrderId={}", orderNumber, tempOrderId);
+
+            return "redirect:/payment/request?orderNumber=" + orderNumber;
+
+        } catch (OrderService.StockShortageException e) {
+            log.error("❌ 재고 부족 예외: {}", e.getMessage());
+            return "redirect:/order/direct-buy?tempOrderId=" + tempOrderId + "&error=stock";
+        } catch (Exception e) {
+            log.error("바로구매 주문 생성 실패: {}", e.getMessage(), e);
+            return "redirect:/order/direct-buy?tempOrderId=" + tempOrderId + "&error=create";
+        }
+    }
+
+    /**
+     * 결제 실패 시 장바구니 추가 API
+     * URL: POST /order/payment-failed/add-to-cart
+     */
+    @PostMapping("/payment-failed/add-to-cart")
+    @ResponseBody
+    public ResponseEntity<?> addFailedPaymentToCart(@RequestParam String orderNumber,
+                                                    HttpSession session) {
+        try {
+            Customer loginUser = (Customer) session.getAttribute("loginUser");
+            if (loginUser == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("success", false, "message", "로그인이 필요합니다."));
+            }
+
+            // 🔥 주문을 장바구니에 추가하고 주문 취소
+            boolean result = orderService.moveOrderToCart(orderNumber, loginUser.getCstmNumber());
+
+            if (result) {
+                log.info("결제 실패 상품 장바구니 추가 완료: 주문번호={}, 고객={}", orderNumber, loginUser.getCstmNumber());
+
+                return ResponseEntity.ok(Map.of(
+                        "success", true,
+                        "message", "상품이 장바구니에 추가되었습니다."
+                ));
+            } else {
+                return ResponseEntity.badRequest().body(Map.of(
+                        "success", false,
+                        "message", "장바구니 추가에 실패했습니다."
+                ));
+            }
+
+        } catch (Exception e) {
+            log.error("결제 실패 장바구니 추가 실패: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("success", false, "message", "장바구니 추가에 실패했습니다."));
+        }
+    }
+
+
 }

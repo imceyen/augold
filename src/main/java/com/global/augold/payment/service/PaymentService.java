@@ -13,8 +13,10 @@ import com.global.augold.product.entity.Product;
 import com.global.augold.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.global.augold.order.service.OrderService;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -34,6 +36,9 @@ public class PaymentService {
     private final ProductRepository productRepository;
     private final TossPaymentsService tossPaymentsService;
     private final CartService cartService;
+    @Lazy
+    private final OrderService orderService;
+
 
     /**
      * 결제 페이지 데이터 생성
@@ -333,5 +338,49 @@ public class PaymentService {
 
         public String getImageUrl() { return imageUrl; }
         public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+    }
+
+    // PaymentService에 추가할 메서드들 (기존 메서드는 그대로 두고 이것들만 추가)
+
+    /**
+     * 결제 실패한 바로구매 주문을 장바구니로 이동
+     */
+    public boolean moveFailedOrderToCart(String orderNumber, String cstmNumber) {
+        try {
+            // OrderService에 위임
+            return orderService.moveOrderToCart(orderNumber, cstmNumber);
+
+        } catch (Exception e) {
+            log.error("결제 실패 주문 장바구니 이동 실패: 주문번호={}, 오류={}", orderNumber, e.getMessage(), e);
+            return false;
+        }
+    }
+
+    /**
+     * 결제 실패한 주문 취소
+     */
+    public void cancelFailedOrder(String orderNumber, String cstmNumber) {
+        try {
+            // OrderService에 위임
+            orderService.cancelFailedOrder(orderNumber, cstmNumber);
+
+        } catch (Exception e) {
+            log.error("결제 실패 주문 취소 실패: 주문번호={}, 오류={}", orderNumber, e.getMessage(), e);
+            throw new RuntimeException("주문 취소에 실패했습니다: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 주문이 바로구매인지 확인
+     */
+    public boolean isDirectBuyOrder(String orderNumber) {
+        try {
+            // OrderService에 위임
+            return orderService.isDirectBuyOrder(orderNumber);
+
+        } catch (Exception e) {
+            log.error("바로구매 주문 확인 실패: 주문번호={}", orderNumber);
+            return false;
+        }
     }
 }

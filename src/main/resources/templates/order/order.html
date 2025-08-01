@@ -8,6 +8,349 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f9fafb;
+            color: #374151;
+            line-height: 1.6;
+        }
+
+        /* --- 헤더 --- */
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border-bottom: 1px solid #e5e7eb;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 0;
+        }
+
+        /* 로고 섹션 */
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+
+        .logo-section:hover {
+            opacity: 0.8;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background:
+                radial-gradient(circle at 30% 30%, #fff 2px, transparent 2px),
+                linear-gradient(135deg, #ffd700, #ffb300, #ff8c00);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            border: 2px solid #ff8c00;
+            animation: iconPulse 2s infinite;
+        }
+
+        .logo-icon span {
+            font-size: 18px;
+            color: #8b4513;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.5);
+        }
+
+        @keyframes iconPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .logo-text h1 {
+            font-size: 24px;
+            font-weight: bold;
+            background: linear-gradient(45deg, #ffd700, #ffb300, #ffd700, #ffb300);
+            background-size: 400% 400%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0;
+            line-height: 1.2;
+            font-family: 'Arial', sans-serif;
+            animation: shimmer 3s ease-in-out infinite;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        @keyframes shimmer {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .logo-text p {
+            font-size: 12px;
+            color: #6b7280;
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+        }
+
+        /* 네비게이션 섹션 */
+        .nav-section {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+
+        .nav-section a,
+        .nav-section .nav-text {
+            color: #374151;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+            position: relative;
+            font-family: 'Arial', sans-serif;
+            font-size: 16px;
+        }
+
+        .nav-section a:hover {
+            color: #d97706;
+        }
+
+        /* 장바구니 배지 */
+        .cart-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ef4444;
+            color: white;
+            font-size: 12px;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* 로고 섹션 호버 효과 */
+        .logo-section:hover .logo-icon {
+            animation: iconPulse 1s infinite;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+        }
+
+        .logo-section:hover .logo-text h1 {
+            animation: shimmer 1.5s ease-in-out infinite;
+            filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.8));
+        }
+
+        .form-footer {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 14px;
+            color: #6b7886;
+            border-top: 1px solid #f2f4f6;
+            padding-top: 20px;
+        }
+
+        .form-footer a {
+            color: #007aff;
+            font-weight: 600;
+            margin-left: 6px;
+        }
+
+        /* 아이콘 기본 스타일 */
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+
+        /* --- 푸터 --- */
+        .augold-footer {
+            background: linear-gradient(135deg, #1f2937, #111827);
+            color: white;
+            padding: 48px 0;
+            margin-top: auto;
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 32px;
+            margin-bottom: 32px;
+        }
+
+        .footer-brand h3 {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            background: linear-gradient(45deg, #ffd700, #ffb300);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .footer-brand p {
+            color: #9ca3af;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .footer-section h4 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #ffd700;
+            position: relative;
+        }
+
+        .footer-section h4::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 30px;
+            height: 2px;
+            background: linear-gradient(90deg, #ffd700, transparent);
+        }
+
+        .footer-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .footer-links li {
+            margin-bottom: 8px;
+        }
+
+        .footer-links a {
+            color: #9ca3af;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            display: inline-block;
+            position: relative;
+        }
+
+        .footer-links a:hover {
+            color: #ffd700;
+            transform: translateX(4px);
+        }
+
+        .contact-info p {
+            color: #9ca3af;
+            font-size: 14px;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid #374151;
+            margin-top: 32px;
+            padding-top: 32px;
+            text-align: center;
+        }
+
+        .footer-bottom p {
+            color: #6b7280;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 16px;
+            margin-top: 16px;
+            justify-content: center;
+        }
+
+        .social-links a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: #374151;
+            border-radius: 50%;
+            color: #9ca3af;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 18px;
+        }
+
+        .social-links a:hover {
+            background: linear-gradient(135deg, #ffd700, #ffb300);
+            color: #1f2937;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+        }
+
+        /* SweetAlert2 커스텀 스타일 */
+        .swal-confirm-btn {
+            background-color: #ffd700 !important;
+            color: #8b4513 !important;
+            font-weight: bold !important;
+        }
+
+        .swal-cancel-btn {
+            background-color: #6b7280 !important;
+            color: white !important;
+        }
+
+        /* 반응형 디자인 */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .nav-section {
+                gap: 16px;
+            }
+
+            .logo-text h1 {
+                font-size: 20px;
+            }
+
+            .logo-icon {
+                width: 35px;
+                height: 35px;
+            }
+
+            .logo-icon span {
+                font-size: 16px;
+            }
+        }
         .gold-gradient {
             background: linear-gradient(135deg, #facc15, #f59e0b);
         }
@@ -69,22 +412,51 @@
             border-radius: 8px !important;
             font-weight: 600 !important;
         }
+
+
+
+        .swal2-popup-wide {
+            width: 500px !important;
+            max-width: 90vw !important;
+        }
+
     </style>
 </head>
 <body class="bg-gray-50">
 <!-- 헤더 -->
-<header class="bg-white shadow-sm border-b border-gray-200">
-    <div class="max-w-7xl mx-auto px-6 py-4">
-        <div class="flex items-center justify-between">
-            <a href="/" class="flex items-center space-x-3">
-                <div class="w-10 h-10 gold-gradient rounded-full flex items-center justify-center">
-                    <span class="text-white font-bold">A</span>
+<header>
+    <div class="header-container">
+        <div class="header-content">
+            <a href="/" class="logo-section">
+                <div class="logo-icon">
+                    <span>A</span>
                 </div>
-                <span class="text-xl font-bold text-gray-800">AuGold</span>
+                <div class="logo-text">
+                    <h1>AuGold</h1>
+                    <p>프리미엄 금 전문몰</p>
+                </div>
             </a>
-            <nav class="flex space-x-6">
-                <a href="/cart" class="text-gray-600 hover:text-yellow-600 transition-colors">장바구니</a>
-                <a href="/mypage" class="text-gray-600 hover:text-yellow-600 transition-colors">마이페이지</a>
+
+            <nav class="nav-section">
+                <!-- 로그인 전: 로그인, 회원가입 메뉴만 보임 -->
+                <th:block th:if="${loginName == null}">
+                    <a href="/login">로그인</a>
+                    <a href="/customer/register">회원가입</a>
+                    <a href="#" onclick="loginRequired()">고객센터</a>
+                </th:block>
+
+                <!-- 로그인 후: 환영 메시지 및 모든 메뉴가 보임 -->
+                <th:block th:if="${loginName != null}">
+                    <span class="nav-text">[[${loginName}]]님 환영합니다</span>
+                    <a href="/logout">로그아웃</a>
+                    <a href="/support">고객센터</a>
+                    <a href="/mypage">마이페이지</a>
+                    <a href="/cart">
+                        장바구니
+                        <!-- 동적 장바구니 개수 배지 -->
+                        <span id="cartBadge" class="cart-badge hidden">0</span>
+                    </a>
+                </th:block>
             </nav>
         </div>
     </div>
@@ -103,155 +475,378 @@
         </div>
     </div>
 
-    <!-- ✅ OrderCreateRequest DTO로 전송하는 폼 -->
-    <form action="/order/create" method="post" id="orderForm">
-        <input type="hidden" name="selectedProducts" id="selectedProductsInput" value="">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- 주문 상품 정보 -->
-            <div class="lg:col-span-2 space-y-6">
-                <!-- 주문 상품 -->
-                <div class="bg-white rounded-xl shadow-sm border p-6">
-                    <h2 class="text-xl font-bold mb-4">주문 상품</h2>
-
-                    <div class="space-y-4" th:each="item : ${cartItems}">
-                        <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
-                            <img th:src="${item.imageUrl}" alt="상품 이미지"
-                                 class="w-16 h-16 object-cover rounded-lg"
-                                 onerror="this.src='https://via.placeholder.com/64x64/f3f4f6/9ca3af?text=Gold'">
-
-                            <div class="flex-1">
-                                <h3 class="font-semibold text-gray-900" th:text="${item.productName}">상품명</h3>
-                                <div class="text-sm text-gray-600 space-y-1">
-                                    <div th:if="${item.karatName}">
-                                        <span>순도: </span>
-                                        <span th:text="${item.karatName}">18K</span>
-                                    </div>
-                                    <div th:if="${item.goldWeight}">
-                                        <span>금 중량: </span>
-                                        <span th:text="${item.goldWeight + 'g'}">5.2g</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="text-right">
-                                <div class="font-bold text-lg text-gray-900"
-                                     th:text="'₩' + ${#numbers.formatDecimal(item.finalPrice * item.quantity, 0, 'COMMA', 0, 'POINT')}">
-                                    ₩1,200,000
-                                </div>
-                                <div class="text-sm text-gray-600" th:text="${item.quantity + '개'}">1개</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 배송 정보 (OrderCreateRequest 필드들) -->
-                <div class="bg-white rounded-xl shadow-sm border p-6">
-                    <h2 class="text-xl font-bold mb-4">배송 정보</h2>
-
-                    <div class="space-y-4">
-                        <div>
-                            <label for="deliveryAddr" class="block text-sm font-medium text-gray-700 mb-2">
-                                배송 주소 <span class="text-red-500">*</span>
-                            </label>
-                            <textarea
-                                    id="deliveryAddr"
-                                    name="deliveryAddr"
-                                    rows="3"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                                    style="resize: none;"
-                                    placeholder="배송받을 주소를 입력해주세요"
-                                    th:text="${customerAddr}"
-                                    required></textarea>
-                        </div>
-
-                        <div>
-                            <label for="deliveryPhone" class="block text-sm font-medium text-gray-700 mb-2">
-                                연락처 <span class="text-red-500">*</span>
-                            </label>
-                            <input
-                                    type="tel"
-                                    id="deliveryPhone"
-                                    name="deliveryPhone"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                                    placeholder="010-0000-0000"
-                                    th:value="${customerPhone}"
-                                    required>
-                        </div>
-
-                        <div>
-                            <label for="orderMemo" class="block text-sm font-medium text-gray-700 mb-2">
-                                배송 요청사항
-                            </label>
-                            <textarea
-                                    id="orderMemo"
-                                    name="orderMemo"
-                                    rows="2"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                                    placeholder="배송 시 요청사항이 있으시면 입력해주세요 (선택사항)"></textarea>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 주문 요약 -->
-            <div class="lg:col-span-1">
-                <div class="bg-white rounded-xl shadow-sm border p-6 sticky top-6">
-                    <h2 class="text-xl font-bold mb-4">주문 요약</h2>
-
-                    <div class="space-y-3 mb-6">
-                        <div class="flex justify-between text-sm">
-                            <span>상품 개수</span>
-                            <span th:text="${totalQuantity} + '개'">7개</span>
-                        </div>
-                        <div class="flex justify-between text-sm">
-                            <span>상품 금액</span>
-                            <span th:text="'₩' + ${#numbers.formatDecimal(totalAmount, 0, 'COMMA', 0, 'POINT')}">₩2,500,000</span>
-                        </div>
-                        <div class="flex justify-between text-sm">
-                            <span>배송비</span>
-                            <span>무료</span>
-                        </div>
-                        <div class="border-t pt-3 mt-3">
-                            <div class="flex justify-between text-lg font-bold">
-                                <span>총 결제 금액</span>
-                                <span class="text-yellow-600" th:text="'₩' + ${#numbers.formatDecimal(totalAmount, 0, 'COMMA', 0, 'POINT')}">₩2,500,000</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="space-y-3">
-                        <button type="submit" class="w-full btn-primary">
-                            주문하기
-                        </button>
-                        <button type="button" onclick="goBack()" class="w-full btn-secondary">
-                            이전으로
-                        </button>
-                    </div>
-
-                    <!-- 주문 안내 -->
-                    <div class="mt-6 text-xs text-gray-500 space-y-1">
-                        <p>• 주문 후 결제 페이지로 이동합니다</p>
-                        <p>• 결제 완료 후 주문이 확정됩니다</p>
-                        <p>• 배송은 영업일 기준 2-3일 소요됩니다</p>
-                    </div>
+    <!-- 🔥 바로구매 안내 메시지 -->
+    <div th:if="${isDirectBuy != null and isDirectBuy}" class="direct-buy-notice">
+        <div class="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-lg mb-6">
+            <div class="flex items-center">
+                <i class="fas fa-info-circle mr-2"></i>
+                <div>
+                    <p class="font-semibold">바로 구매하기</p>
+                    <p class="text-sm">결제 완료 시 주문이 확정되며, 결제를 취소하면 상품이 장바구니에 추가됩니다.</p>
                 </div>
             </div>
         </div>
-    </form>
+    </div>
+
+    <!-- 🔥 바로구매인지 일반 주문인지 구분하여 form 처리 -->
+    <th:block th:if="${isDirectBuy != null and isDirectBuy}">
+        <!-- 바로구매 주문 폼 -->
+        <form th:action="@{/order/direct-buy/create}" method="post" id="directBuyOrderForm">
+            <input type="hidden" name="tempOrderId" th:value="${tempOrderId}" />
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- 주문 상품 정보 -->
+                <div class="lg:col-span-2 space-y-6">
+                    <!-- 주문 상품 -->
+                    <div class="bg-white rounded-xl shadow-sm border p-6">
+                        <h2 class="text-xl font-bold mb-4">주문 상품</h2>
+
+                        <div class="space-y-4" th:each="item : ${cartItems}">
+                            <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
+                                <img th:src="${item.imageUrl}" alt="상품 이미지"
+                                     class="w-16 h-16 object-cover rounded-lg"
+                                     onerror="this.src='https://via.placeholder.com/64x64/f3f4f6/9ca3af?text=Gold'">
+
+                                <div class="flex-1">
+                                    <h3 class="font-semibold text-gray-900" th:text="${item.productName}">상품명</h3>
+                                    <div class="text-sm text-gray-600 space-y-1">
+                                        <div th:if="${item.karatName}">
+                                            <span>순도: </span>
+                                            <span th:text="${item.karatName}">18K</span>
+                                        </div>
+                                        <div th:if="${item.goldWeight}">
+                                            <span>금 중량: </span>
+                                            <span th:text="${item.goldWeight + 'g'}">5.2g</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="text-right">
+                                    <div class="font-bold text-lg text-gray-900"
+                                         th:text="'₩' + ${#numbers.formatDecimal(item.finalPrice * item.quantity, 0, 'COMMA', 0, 'POINT')}">
+                                        ₩1,200,000
+                                    </div>
+                                    <div class="text-sm text-gray-600" th:text="${item.quantity + '개'}">1개</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 배송 정보 -->
+                    <div class="bg-white rounded-xl shadow-sm border p-6">
+                        <h2 class="text-xl font-bold mb-4">배송 정보</h2>
+
+                        <div class="space-y-4">
+                            <div>
+                                <label for="directBuyDeliveryAddr" class="block text-sm font-medium text-gray-700 mb-2">
+                                    배송 주소 <span class="text-red-500">*</span>
+                                </label>
+                                <textarea
+                                        id="directBuyDeliveryAddr"
+                                        name="deliveryAddr"
+                                        rows="3"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                                        style="resize: none;"
+                                        placeholder="배송받을 주소를 입력해주세요"
+                                        th:text="${customerAddr}"
+                                        required></textarea>
+                            </div>
+
+                            <div>
+                                <label for="directBuyDeliveryPhone" class="block text-sm font-medium text-gray-700 mb-2">
+                                    연락처 <span class="text-red-500">*</span>
+                                </label>
+                                <input
+                                        type="tel"
+                                        id="directBuyDeliveryPhone"
+                                        name="deliveryPhone"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                                        placeholder="010-0000-0000"
+                                        th:value="${customerPhone}"
+                                        required>
+                            </div>
+
+                            <div>
+                                <label for="directBuyOrderMemo" class="block text-sm font-medium text-gray-700 mb-2">
+                                    배송 요청사항
+                                </label>
+                                <textarea
+                                        id="directBuyOrderMemo"
+                                        name="orderMemo"
+                                        rows="2"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                                        placeholder="배송 시 요청사항이 있으시면 입력해주세요 (선택사항)"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 주문 요약 -->
+                <div class="lg:col-span-1">
+                    <div class="bg-white rounded-xl shadow-sm border p-6 sticky top-6">
+                        <h2 class="text-xl font-bold mb-4">주문 요약</h2>
+
+                        <div class="space-y-3 mb-6">
+                            <div class="flex justify-between text-sm">
+                                <span>상품 개수</span>
+                                <span th:text="${totalQuantity} + '개'">7개</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span>상품 금액</span>
+                                <span th:text="'₩' + ${#numbers.formatDecimal(totalAmount, 0, 'COMMA', 0, 'POINT')}">₩2,500,000</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span>배송비</span>
+                                <span>무료</span>
+                            </div>
+                            <div class="border-t pt-3 mt-3">
+                                <div class="flex justify-between text-lg font-bold">
+                                    <span>총 결제 금액</span>
+                                    <span class="text-yellow-600" th:text="'₩' + ${#numbers.formatDecimal(totalAmount, 0, 'COMMA', 0, 'POINT')}">₩2,500,000</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3">
+                            <button type="submit" class="w-full btn-primary">
+                                결제하기
+                            </button>
+                            <button type="button" onclick="goBackDirectBuy()" class="w-full btn-secondary">
+                                이전으로
+                            </button>
+                        </div>
+
+                        <!-- 주문 안내 -->
+                        <div class="mt-6 text-xs text-gray-500 space-y-1">
+                            <p>• 바로구매 주문입니다</p>
+                            <p>• 결제 완료 후 주문이 확정됩니다</p>
+                            <p>• 배송은 영업일 기준 2-3일 소요됩니다</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </th:block>
+
+    <th:block th:if="${isDirectBuy == null or !isDirectBuy}">
+        <!-- 일반 장바구니 주문 폼 -->
+        <form action="/order/create" method="post" id="orderForm">
+            <input type="hidden" name="selectedProducts" id="selectedProductsInput" value="">
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- 주문 상품 정보 -->
+                <div class="lg:col-span-2 space-y-6">
+                    <!-- 주문 상품 -->
+                    <div class="bg-white rounded-xl shadow-sm border p-6">
+                        <h2 class="text-xl font-bold mb-4">주문 상품</h2>
+
+                        <div class="space-y-4" th:each="item : ${cartItems}">
+                            <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
+                                <img th:src="${item.imageUrl}" alt="상품 이미지"
+                                     class="w-16 h-16 object-cover rounded-lg"
+                                     onerror="this.src='https://via.placeholder.com/64x64/f3f4f6/9ca3af?text=Gold'">
+
+                                <div class="flex-1">
+                                    <h3 class="font-semibent text-gray-900" th:text="${item.productName}">상품명</h3>
+                                    <div class="text-sm text-gray-600 space-y-1">
+                                        <div th:if="${item.karatName}">
+                                            <span>순도: </span>
+                                            <span th:text="${item.karatName}">18K</span>
+                                        </div>
+                                        <div th:if="${item.goldWeight}">
+                                            <span>금 중량: </span>
+                                            <span th:text="${item.goldWeight + 'g'}">5.2g</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="text-right">
+                                    <div class="font-bold text-lg text-gray-900"
+                                         th:text="'₩' + ${#numbers.formatDecimal(item.finalPrice * item.quantity, 0, 'COMMA', 0, 'POINT')}">
+                                        ₩1,200,000
+                                    </div>
+                                    <div class="text-sm text-gray-600" th:text="${item.quantity + '개'}">1개</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 배송 정보 (OrderCreateRequest 필드들) -->
+                    <div class="bg-white rounded-xl shadow-sm border p-6">
+                        <h2 class="text-xl font-bold mb-4">배송 정보</h2>
+
+                        <div class="space-y-4">
+                            <div>
+                                <label for="deliveryAddr" class="block text-sm font-medium text-gray-700 mb-2">
+                                    배송 주소 <span class="text-red-500">*</span>
+                                </label>
+                                <textarea
+                                        id="deliveryAddr"
+                                        name="deliveryAddr"
+                                        rows="3"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                                        style="resize: none;"
+                                        placeholder="배송받을 주소를 입력해주세요"
+                                        th:text="${customerAddr}"
+                                        required></textarea>
+                            </div>
+
+                            <div>
+                                <label for="deliveryPhone" class="block text-sm font-medium text-gray-700 mb-2">
+                                    연락처 <span class="text-red-500">*</span>
+                                </label>
+                                <input
+                                        type="tel"
+                                        id="deliveryPhone"
+                                        name="deliveryPhone"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                                        placeholder="010-0000-0000"
+                                        th:value="${customerPhone}"
+                                        required>
+                            </div>
+
+                            <div>
+                                <label for="orderMemo" class="block text-sm font-medium text-gray-700 mb-2">
+                                    배송 요청사항
+                                </label>
+                                <textarea
+                                        id="orderMemo"
+                                        name="orderMemo"
+                                        rows="2"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                                        placeholder="배송 시 요청사항이 있으시면 입력해주세요 (선택사항)"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 주문 요약 -->
+                <div class="lg:col-span-1">
+                    <div class="bg-white rounded-xl shadow-sm border p-6 sticky top-6">
+                        <h2 class="text-xl font-bold mb-4">주문 요약</h2>
+
+                        <div class="space-y-3 mb-6">
+                            <div class="flex justify-between text-sm">
+                                <span>상품 개수</span>
+                                <span th:text="${totalQuantity} + '개'">7개</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span>상품 금액</span>
+                                <span th:text="'₩' + ${#numbers.formatDecimal(totalAmount, 0, 'COMMA', 0, 'POINT')}">₩2,500,000</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span>배송비</span>
+                                <span>무료</span>
+                            </div>
+                            <div class="border-t pt-3 mt-3">
+                                <div class="flex justify-between text-lg font-bold">
+                                    <span>총 결제 금액</span>
+                                    <span class="text-yellow-600" th:text="'₩' + ${#numbers.formatDecimal(totalAmount, 0, 'COMMA', 0, 'POINT')}">₩2,500,000</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3">
+                            <button type="submit" class="w-full btn-primary">
+                                주문하기
+                            </button>
+                            <button type="button" onclick="goBack()" class="w-full btn-secondary">
+                                이전으로
+                            </button>
+                        </div>
+
+                        <!-- 주문 안내 -->
+                        <div class="mt-6 text-xs text-gray-500 space-y-1">
+                            <p>• 주문 후 결제 페이지로 이동합니다</p>
+                            <p>• 결제 완료 후 주문이 확정됩니다</p>
+                            <p>• 배송은 영업일 기준 2-3일 소요됩니다</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </th:block>
 </main>
 
+<footer class="augold-footer">
+    <div class="footer-container">
+        <div class="footer-content">
+            <!-- 브랜드 섹션 -->
+            <div class="footer-brand">
+                <h3>AuGold</h3>
+                <p>믿을 수 있는 프리미엄 금 전문 플랫폼<br>
+                    고품질 골드바부터 럭셔리 주얼리까지<br>
+                    당신의 소중한 투자를 함께합니다.</p>
+            </div>
+
+            <!-- 고객서비스 섹션 -->
+            <div class="footer-section">
+                <h4>고객서비스</h4>
+                <ul class="footer-links">
+                    <li><a href="/order/tracking">주문/배송 조회</a></li>
+                    <li><a href="/support/return">반품/교환</a></li>
+                    <li><a href="/support/faq">FAQ</a></li>
+                    <li><a href="#" onclick="loginRequired()">1:1 문의</a></li>
+                </ul>
+            </div>
+
+            <!-- 회사정보 섹션 -->
+            <div class="footer-section">
+                <h4>회사정보</h4>
+                <ul class="footer-links">
+                    <li><a href="/company/about">회사소개</a></li>
+                    <li><a href="/legal/terms">이용약관</a></li>
+                    <li><a href="/legal/privacy">개인정보처리방침</a></li>
+                    <li><a href="/company/info">사업자정보</a></li>
+                </ul>
+            </div>
+
+            <!-- 연락처 섹션 -->
+            <div class="footer-section">
+                <h4>연락처</h4>
+                <div class="contact-info">
+                    <p>📞 1588-1234</p>
+                    <p>✉️ help@augold.co.kr</p>
+                    <p>🕒 평일 09:00-18:00</p>
+                    <p>🕒 주말/공휴일 휴무</p>
+                </div>
+
+                <!-- 소셜 미디어 링크 -->
+                <div class="social-links">
+                    <a href="https://open.kakao.com/o/gLyAOSJh" title="카카오톡">💬</a>
+                    <a href="#" title="인스타그램">📷</a>
+                    <a href="#" title="네이버 블로그">📝</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 하단 저작권 -->
+        <div class="footer-bottom">
+            <p>&copy; 2025 AuGold. All rights reserved. | 대표: 임채연 | 사업자등록번호: 123-45-67890</p>
+        </div>
+    </div>
+</footer>
+
 <script>
+    // 바로구매용 이전으로 버튼
+    function goBackDirectBuy() {
+        Swal.fire({
+            icon: 'warning',
+            title: '바로구매 취소',
+            html: '바로구매를 취소하시겠습니까?<br>상품 상세페이지로 돌아갑니다.',
+            showCancelButton: true,
+            confirmButtonText: '상품페이지로 이동',
+            cancelButtonText: '계속 진행',
+            confirmButtonColor: '#f59e0b',
+            cancelButtonColor: '#6b7280'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                history.back(); // 이전 페이지(상품 상세)로
+            }
+        });
+    }
 
-    document.addEventListener('DOMContentLoaded', function() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const selectedProducts = urlParams.get('selectedProducts');
-
-        if (selectedProducts) {
-            document.getElementById('selectedProductsInput').value = selectedProducts;
-            console.log('선택된 상품:', selectedProducts);
-        }
-    });
-    // 이전으로 버튼 (SweetAlert2 적용)
+    // 기존 일반주문용 이전으로 버튼
     function goBack() {
         Swal.fire({
             icon: 'warning',
@@ -269,124 +864,184 @@
         });
     }
 
-    // 폼 유효성 검사 (SweetAlert2 적용)
-    document.getElementById('orderForm').addEventListener('submit', function(e) {
-        e.preventDefault(); // 기본 제출 방지
+    // 현재 활성화된 폼 찾기 함수
+    function getCurrentForm() {
+        const directBuyForm = document.getElementById('directBuyOrderForm');
+        const normalForm = document.getElementById('orderForm');
 
-        const deliveryAddr = document.getElementById('deliveryAddr').value.trim();
-        const deliveryPhone = document.getElementById('deliveryPhone').value.trim();
-
-        // 배송 주소 검증
-        if (!deliveryAddr) {
-            Swal.fire({
-                icon: 'warning',
-                title: '배송 주소 입력 필요',
-                text: '배송 주소를 입력해주세요.',
-                confirmButtonText: '확인',
-                confirmButtonColor: '#f59e0b'
-            }).then(() => {
-                document.getElementById('deliveryAddr').focus();
-            });
-            return;
+        // 보이는 폼을 찾아서 반환
+        if (directBuyForm && !directBuyForm.closest('th\\:block[style*="display: none"]')) {
+            return directBuyForm;
         }
+        return normalForm;
+    }
 
-        // 연락처 검증
-        if (!deliveryPhone) {
-            Swal.fire({
-                icon: 'warning',
-                title: '연락처 입력 필요',
-                text: '연락처를 입력해주세요.',
-                confirmButtonText: '확인',
-                confirmButtonColor: '#f59e0b'
-            }).then(() => {
-                document.getElementById('deliveryPhone').focus();
-            });
-            return;
+    // 현재 활성화된 필드들 찾기 함수
+    function getCurrentFields() {
+        const currentForm = getCurrentForm();
+
+        if (currentForm && currentForm.id === 'directBuyOrderForm') {
+            return {
+                deliveryAddr: document.getElementById('directBuyDeliveryAddr'),
+                deliveryPhone: document.getElementById('directBuyDeliveryPhone'),
+                orderMemo: document.getElementById('directBuyOrderMemo'),
+                isDirectBuy: true
+            };
+        } else {
+            return {
+                deliveryAddr: document.getElementById('deliveryAddr'),
+                deliveryPhone: document.getElementById('deliveryPhone'),
+                orderMemo: document.getElementById('orderMemo'),
+                isDirectBuy: false
+            };
         }
+    }
 
-        // 전화번호 형식 검증
-        const phoneRegex = /^01[0-9]-?[0-9]{3,4}-?[0-9]{4}$/;
-        if (!phoneRegex.test(deliveryPhone.replace(/-/g, ''))) {
-            Swal.fire({
-                icon: 'error',
-                title: '전화번호 형식 오류',
-                html: '올바른 전화번호 형식을 입력해주세요.<br><span style="color: #6b7280; font-size: 14px;">예: 010-0000-0000</span>',
-                confirmButtonText: '수정하기',
-                confirmButtonColor: '#f59e0b'
-            }).then(() => {
-                document.getElementById('deliveryPhone').focus();
-            });
-            return;
-        }
+    // 폼 유효성 검사 수정
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const selectedProducts = urlParams.get('selectedProducts');
 
-        // 최종 확인 (SweetAlert2 적용)
-        // DOM에서 금액 찾기
-        const totalAmountElement = document.querySelector('.text-lg.font-bold span:last-child') ||
-                                  document.querySelector('.border-t span:last-child');
-        const totalAmount = totalAmountElement ? totalAmountElement.textContent.trim() : '₩0';
-
-        Swal.fire({
-            icon: 'question',
-            title: '주문 최종 확인',
-            html: `
-                <div style="text-align: left; padding: 10px;">
-                    <div style="margin-bottom: 15px;">
-                        <strong>📍 배송 주소:</strong><br>
-                        <span style="color: #374151; font-size: 14px;">${deliveryAddr}</span>
-                    </div>
-                    <div style="margin-bottom: 15px;">
-                        <strong>📞 연락처:</strong><br>
-                        <span style="color: #374151; font-size: 14px;">${deliveryPhone}</span>
-                    </div>
-                    <div style="margin-bottom: 15px;">
-                        <strong>💰 결제 금액:</strong><br>
-                        <span style="color: #d97706; font-size: 18px; font-weight: bold;">${totalAmount}</span>
-                    </div>
-                    <hr style="margin: 15px 0; border: none; border-top: 1px solid #e5e7eb;">
-                    <p style="color: #6b7280; font-size: 14px; text-align: center;">
-                        입력한 정보로 주문을 진행하시겠습니까?<br>
-                        주문 후 결제 페이지로 이동합니다.
-                    </p>
-                </div>
-            `,
-            showCancelButton: true,
-            confirmButtonText: '주문 진행',
-            cancelButtonText: '수정하기',
-            confirmButtonColor: '#f59e0b',
-            cancelButtonColor: '#6b7280',
-            customClass: {
-                popup: 'swal2-popup-wide'
+        if (selectedProducts) {
+            const selectedProductsInput = document.getElementById('selectedProductsInput');
+            if (selectedProductsInput) {
+                selectedProductsInput.value = selectedProducts;
+                console.log('선택된 상품:', selectedProducts);
             }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // 로딩 표시
+        }
+
+        // 모든 폼에 대해 submit 이벤트 처리
+        const forms = document.querySelectorAll('#orderForm, #directBuyOrderForm');
+
+        forms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault(); // 기본 제출 방지
+
+                const fields = getCurrentFields();
+                const deliveryAddr = fields.deliveryAddr ? fields.deliveryAddr.value.trim() : '';
+                const deliveryPhone = fields.deliveryPhone ? fields.deliveryPhone.value.trim() : '';
+
+                // 배송 주소 검증
+                if (!deliveryAddr) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: '배송 주소 입력 필요',
+                        text: '배송 주소를 입력해주세요.',
+                        confirmButtonText: '확인',
+                        confirmButtonColor: '#f59e0b'
+                    }).then(() => {
+                        if (fields.deliveryAddr) fields.deliveryAddr.focus();
+                    });
+                    return;
+                }
+
+                // 연락처 검증
+                if (!deliveryPhone) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: '연락처 입력 필요',
+                        text: '연락처를 입력해주세요.',
+                        confirmButtonText: '확인',
+                        confirmButtonColor: '#f59e0b'
+                    }).then(() => {
+                        if (fields.deliveryPhone) fields.deliveryPhone.focus();
+                    });
+                    return;
+                }
+
+                // 전화번호 형식 검증
+                const phoneRegex = /^01[0-9]-?[0-9]{3,4}-?[0-9]{4}$/;
+                if (!phoneRegex.test(deliveryPhone.replace(/-/g, ''))) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: '전화번호 형식 오류',
+                        html: '올바른 전화번호 형식을 입력해주세요.<br><span style="color: #6b7280; font-size: 14px;">예: 010-0000-0000</span>',
+                        confirmButtonText: '수정하기',
+                        confirmButtonColor: '#f59e0b'
+                    }).then(() => {
+                        if (fields.deliveryPhone) fields.deliveryPhone.focus();
+                    });
+                    return;
+                }
+
+                // 최종 확인
+                const totalAmountElement = document.querySelector('.text-lg.font-bold span:last-child') ||
+                                          document.querySelector('.border-t span:last-child');
+                const totalAmount = totalAmountElement ? totalAmountElement.textContent.trim() : '₩0';
+
+                const orderType = fields.isDirectBuy ? '바로구매' : '일반주문';
+
                 Swal.fire({
-                    icon: 'info',
-                    title: '주문 처리 중...',
-                    text: '잠시만 기다려주세요.',
-                    timer: 1500,
-                    showConfirmButton: false,
-                    timerProgressBar: true,
-                    allowOutsideClick: false
-                }).then(() => {
-                    // 실제 폼 제출
-                    document.getElementById('orderForm').submit();
+                    icon: 'question',
+                    title: `${orderType} 최종 확인`,
+                    html: `
+                        <div style="text-align: left; padding: 10px;">
+                            <div style="margin-bottom: 15px;">
+                                <strong>📍 배송 주소:</strong><br>
+                                <span style="color: #374151; font-size: 14px;">${deliveryAddr}</span>
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <strong>📞 연락처:</strong><br>
+                                <span style="color: #374151; font-size: 14px;">${deliveryPhone}</span>
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <strong>💰 결제 금액:</strong><br>
+                                <span style="color: #d97706; font-size: 18px; font-weight: bold;">${totalAmount}</span>
+                            </div>
+                            <hr style="margin: 15px 0; border: none; border-top: 1px solid #e5e7eb;">
+                            <p style="color: #6b7280; font-size: 14px; text-align: center;">
+                                입력한 정보로 주문을 진행하시겠습니까?<br>
+                                주문 후 결제 페이지로 이동합니다.
+                            </p>
+                        </div>
+                    `,
+                    showCancelButton: true,
+                    confirmButtonText: '주문 진행',
+                    cancelButtonText: '수정하기',
+                    confirmButtonColor: '#f59e0b',
+                    cancelButtonColor: '#6b7280',
+                    customClass: {
+                        popup: 'swal2-popup-wide'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // 로딩 표시
+                        Swal.fire({
+                            icon: 'info',
+                            title: '주문 처리 중...',
+                            text: '잠시만 기다려주세요.',
+                            timer: 1500,
+                            showConfirmButton: false,
+                            timerProgressBar: true,
+                            allowOutsideClick: false
+                        }).then(() => {
+                            // 실제 폼 제출
+                            form.submit();
+                        });
+                    }
                 });
-            }
+            });
         });
-    });
 
-    // 전화번호 자동 하이픈 추가
-    document.getElementById('deliveryPhone').addEventListener('input', function(e) {
-        let value = e.target.value.replace(/[^0-9]/g, '');
+        // 전화번호 자동 하이픈 추가 (모든 전화번호 필드에 적용)
+        const phoneFields = [
+            document.getElementById('deliveryPhone'),
+            document.getElementById('directBuyDeliveryPhone')
+        ].filter(field => field !== null);
 
-        if (value.length >= 3 && value.length <= 7) {
-            value = value.substring(0, 3) + '-' + value.substring(3);
-        } else if (value.length >= 8) {
-            value = value.substring(0, 3) + '-' + value.substring(3, 7) + '-' + value.substring(7, 11);
-        }
+        phoneFields.forEach(field => {
+            field.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/[^0-9]/g, '');
 
-        e.target.value = value;
+                if (value.length >= 3 && value.length <= 7) {
+                    value = value.substring(0, 3) + '-' + value.substring(3);
+                } else if (value.length >= 8) {
+                    value = value.substring(0, 3) + '-' + value.substring(3, 7) + '-' + value.substring(7, 11);
+                }
+
+                e.target.value = value;
+            });
+        });
     });
 </script>
 
@@ -446,14 +1101,83 @@
             });
         }
     });
+
+    // 장바구니 개수 기능
+    function updateCartCount() {
+        fetch('/cart/count')
+            .then(response => response.json())
+            .then(count => {
+                const cartBadge = document.getElementById('cartBadge');
+                if (count > 0) {
+                    cartBadge.textContent = count;
+                    cartBadge.classList.remove('hidden');
+                } else {
+                    cartBadge.classList.add('hidden');
+                }
+            })
+            .catch(error => {
+                console.log('장바구니 개수 조회 실패:', error);
+            });
+    }
+
+    // 로그인 필요 알림
+    function loginRequired() {
+        const isLoggedIn = document.querySelector('.nav-text') !== null;
+
+        if (!isLoggedIn) {
+            Swal.fire({
+                title: '로그인 필요',
+                text: '로그인 후 이용 가능합니다.',
+                icon: 'warning',
+                confirmButtonText: '로그인하기',
+                confirmButtonColor: '#ffd700',
+                cancelButtonText: '취소',
+                showCancelButton: true,
+                customClass: {
+                    confirmButton: 'swal-confirm-btn',
+                    cancelButton: 'swal-cancel-btn'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '/login';
+                }
+            });
+        } else {
+            window.location.href = '/support';
+        }
+    }
+
+    // SweetAlert2 공통 함수
+    function showAlert(message, type = 'info') {
+        Swal.fire({
+            title: type === 'success' ? '성공' : '알림',
+            text: message,
+            icon: type,
+            confirmButtonText: '확인',
+            confirmButtonColor: '#ffd700',
+            customClass: {
+                confirmButton: 'swal-confirm-btn'
+            }
+        });
+    }
+
+    // 페이지 로드 시 장바구니 개수 업데이트
+    document.addEventListener('DOMContentLoaded', function() {
+        updateCartCount();
+    });
 </script>
 
-<style>
-    /* SweetAlert2 팝업 크기 조정 */
-    .swal2-popup-wide {
-        width: 500px !important;
-        max-width: 90vw !important;
-    }
-</style>
+<!-- 🔥 7단계: Thymeleaf 알림 처리 (페이지별로 필요한 경우) -->
+<script th:inline="javascript">
+    /*<![CDATA[*/
+        var successMessage = [[${successMessage != null}]] ? '[[${successMessage}]]' : null;
+        var errorMessage = [[${errorMessage != null}]] ? '[[${errorMessage}]]' : null;
+
+        if(successMessage) showAlert(successMessage, 'success');
+        if(errorMessage) showAlert(errorMessage, 'error');
+    /*]]>*/
+</script>
+
+
 </body>
 </html>

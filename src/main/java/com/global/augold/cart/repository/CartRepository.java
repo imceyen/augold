@@ -38,6 +38,8 @@ public interface CartRepository extends JpaRepository<Cart, String> {
 
     int countByCstmNumber(String cstmNumber); // 개수 조회
 
+    List<Cart> findByCstmNumberOrderByCartDateDesc(String cstmNumber);
+
     Optional<Cart> findByCstmNumberAndProductIdAndKaratCode(String cstmNumber, String productId, String karatCode);
 
     @Query("SELECT c FROM Cart c WHERE c.cstmNumber = :cstmNumber ORDER BY c.cartDate DESC")
