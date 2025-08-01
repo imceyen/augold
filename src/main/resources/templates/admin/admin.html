@@ -72,6 +72,7 @@
       border-bottom: none;
       margin-bottom: 40px;
       justify-content: center;
+      flex-wrap: wrap;
     }
     .stats-subtab-bar button {
       background: #fff;
@@ -84,7 +85,7 @@
       font-weight: 700;
       cursor: pointer;
       transition: box-shadow 0.18s, border 0.18s, color 0.18s, background 0.18s;
-      margin-bottom: 0;
+      margin-bottom: 10px;
       outline: none;
       letter-spacing: 0.5px;
     }
@@ -144,7 +145,6 @@
         background-color: #dc3545;
         margin-left: 10px;
     }
-    /* 상품관리 표 modern 스타일 */
     #productTable {
         background: #fff;
         border-radius: 8px;
@@ -186,7 +186,6 @@
     #productTable tbody tr:nth-child(even):hover {
         background: #f0f0f0;
     }
-    /* 표 안 링크(상품명) 스타일 */
     #productTable a {
         color: #1976d2;
         text-decoration: none;
@@ -196,18 +195,16 @@
         color: #1565c0;
         text-decoration: underline;
     }
-
-    /* 상품 등록 버튼 호버 효과 */
     .tab-content button[onclick="toggleForm()"]:hover {
         background: #1565c0 !important;
     }
   </style>
 
-
-
-  <!-- 🔷 Plotly.js 업데이트된 버전 -->
+  <!-- Plotly.js (원래 버전 유지) -->
   <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
-
+  <!-- FontAwesome 아이콘 (디자인에 필요하여 추가) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <!-- ▲▲▲ 요청하신 디자인 코드로 교체된 부분 ▲▲▲ -->
 </head>
 
 <body>
@@ -221,7 +218,6 @@
   </div>
 </header>
 
-<!-- 상단 카드형 대시보드 -->
 <div class="dashboard-cards">
   <div class="dashboard-card tab-btn active" onclick="showTab('productTab', event)">
     <i class="fa fa-cube"></i>
@@ -251,95 +247,46 @@
         상품 등록
       </button>
     </div>
-
     <div class="form-container" id="productForm" style="display:none;">
       <form onsubmit="submitProduct(event)" enctype="multipart/form-data">
-        <label>상품 ID:
-          <input type="text" name="productId" readonly>
-        </label><br><br>
-        <label>상품명:
-          <input type="text" name="productName" required>
-        </label><br><br>
+        <label>상품 ID: <input type="text" name="productId" readonly></label><br><br>
+        <label>상품명: <input type="text" name="productName" required></label><br><br>
         <label>카테고리:
-          <select name="ctgrId" required>
-            <option value="">선택</option>
-            <option value="CTGR-00001">CTGR-00001 [주얼리]</option>
-            <option value="CTGR-00002">CTGR-00002 [골드바]</option>
-            <option value="CTGR-00003">CTGR-00003 [기념품]</option>
-          </select>
+          <select name="ctgrId" required><option value="">선택</option><option value="CTGR-00001">CTGR-00001 [주얼리]</option><option value="CTGR-00002">CTGR-00002 [골드바]</option><option value="CTGR-00003">CTGR-00003 [기념품]</option></select>
         </label><br><br>
         <label>서브 카테고리:
-          <select name="subCtgr" required>
-            <option value="">선택</option>
-            <option value="귀걸이">귀걸이</option>
-            <option value="반지">반지</option>
-            <option value="목걸이">목걸이</option>
-            <option value="골드바">골드바</option>
-            <option value="감사패">감사패</option>
-            <option value="돌반지">돌반지</option>
-            <option value="카네이션 기념품">카네이션 기념품</option>
-          </select>
+          <select name="subCtgr" required><option value="">선택</option><option value="귀걸이">귀걸이</option><option value="반지">반지</option><option value="목걸이">목걸이</option><option value="골드바">골드바</option><option value="감사패">감사패</option><option value="돌반지">돌반지</option><option value="카네이션 기념품">카네이션 기념품</option></select>
         </label><br><br>
         <label>금 함량:
-          <select name="karatCode" required>
-            <option value="">선택</option>
-            <option value="14K">14K</option>
-            <option value="18K">18K</option>
-            <option value="24K">24K</option>
-          </select>
+          <select name="karatCode" required><option value="">선택</option><option value="14K">14K</option><option value="18K">18K</option><option value="24K">24K</option></select>
         </label><br><br>
-        <label>금 무게 (g):
-          <input type="number" name="goldWeight" step="0.01" required>
-        </label><br><br>
-        <label>원가:
-          <input type="number" name="basePrice" step="0.01" required>
-        </label><br><br>
-        <label>판매가:
-          <input type="number" name="finalPrice" step="0.01" required>
-        </label><br><br>
-        <label>상품 설명:
-          <input type="text" name="description">
-        </label><br><br>
-        <label>대표 이미지:
-          <input type="file" name="imageFile" accept="image/*" required>
-        </label><br><br>
-        <label>상세 이미지 1:
-          <input type="file" name="detailImage1" accept="image/*">
-        </label><br><br>
-        <label>상세 이미지 2:
-          <input type="file" name="detailImage2" accept="image/*">
-        </label><br><br>
-        <label>상세 이미지 3:
-          <input type="file" name="detailImage3" accept="image/*">
-        </label><br><br>
-        <label>상품 재고 (Inventory):
-          <input type="number" name="productInventory" required>
-        </label><br><br>
-        <label>초기 재고량 (Stock Quantity):
-          <input type="number" name="stockQuantity" value="10" required> <!-- 기본값 10으로 설정 -->
-        </label><br><br>
+        <label>금 무게 (g): <input type="number" name="goldWeight" step="0.01" required></label><br><br>
+        <label>원가: <input type="number" name="basePrice" step="0.01" required></label><br><br>
+        <label>판매가: <input type="number" name="finalPrice" step="0.01" required></label><br><br>
+        <label>상품 설명: <input type="text" name="description"></label><br><br>
+        <label>대표 이미지: <input type="file" name="imageFile" accept="image/*" required></label><br><br>
+        <label>상세 이미지 1: <input type="file" name="detailImage1" accept="image/*"></label><br><br>
+        <label>상세 이미지 2: <input type="file" name="detailImage2" accept="image/*"></label><br><br>
+        <label>상세 이미지 3: <input type="file" name="detailImage3" accept="image/*"></label><br><br>
+        <label>상품 재고 (Inventory): <input type="number" name="productInventory" required></label><br><br>
+        <label>초기 재고량 (Stock Quantity): <input type="number" name="stockQuantity" value="10" required></label><br><br>
         <button type="submit">상품 저장</button>
         <button type="button" class="delete-btn" onclick="deleteProduct()" style="display: none;">상품 삭제</button>
       </form>
     </div>
-
     <table id="productTable">
-      <thead>
-      <tr>
-        <th>ID</th><th>이름</th><th>금 함량</th><th>카테고리</th><th>가격</th><th>무게</th><th>최종가</th><th>서브</th>
-      </tr>
-      </thead>
-      <tbody>
-      <!-- JS로 상품목록 추가 -->
-      </tbody>
+      <thead><tr><th>ID</th><th>이름</th><th>금 함량</th><th>카테고리</th><th>가격</th><th>무게</th><th>최종가</th><th>서브</th></tr></thead>
+      <tbody></tbody>
     </table>
   </div>
 
   <!-- 통계 탭 -->
   <div id="statsTab" class="tab-content">
-    <h3>통계 분석</h3>
-
-    <!-- 통계 하위 탭 버튼 -->
+    <!-- ▼▼▼ 요청하신 디자인 코드로 교체된 부분 ▼▼▼ -->
+    <div style="margin-left: 120px;">
+      <h3 style="margin-bottom: 30px; color: #1976d2; font-size: 24px; font-weight: 600;">통계 분석</h3>
+    </div>
+    <!-- ▲▲▲ 요청하신 디자인 코드로 교체된 부분 ▲▲▲ -->
     <div class="stats-subtab-bar">
       <button class="stats-subtab-btn" onclick="showStatsSubTab('salesAnalysis', event)">매출 분석 및 예측</button>
       <button class="stats-subtab-btn" onclick="showStatsSubTab('profitAnalysis', event)">순이익 분석 및 예측</button>
@@ -350,292 +297,122 @@
       <button class="stats-subtab-btn" onclick="showStatsSubTab('cartAbandonment', event)">장바구니 이탈 분석</button>
     </div>
 
-    <!-- 매출 분석 탭 -->
-    <div id="salesAnalysis" class="stats-subtab-content active">
+    <div id="salesAnalysis" class="stats-subtab-content">
       <h3>매출 분석 및 예측</h3>
-      <!-- 컨트롤 영역 -->
       <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 20px;">
-        <div>
-          <label for="unit">분석 단위:</label>
-          <select id="unit" onchange="loadSalesAnalysis()">
-            <option value="day">일</option>
-            <option value="week">주</option>
-            <option value="month" selected>월</option>
-            <option value="year">연</option>
-          </select>
-        </div>
-        <div>
-          <label>
-            <input type="checkbox" id="toggleForecast" onchange="loadSalesAnalysis()" checked> 예측값 표시
-          </label>
-        </div>
+        <div><label for="unit">분석 단위:</label><select id="unit" onchange="loadSalesAnalysis()"><option value="day">일</option><option value="week">주</option><option value="month" selected>월</option><option value="year">연</option></select></div>
+        <div><label><input type="checkbox" id="toggleForecast" onchange="loadSalesAnalysis()" checked> 예측값 표시</label></div>
       </div>
-      <!-- 로딩 메시지 -->
-      <div id="salesAnalysisLoading" style="text-align: center; padding: 40px; font-size: 1.1em; display: none;">
-        데이터를 불러오는 중입니다...
-      </div>
-      <!-- 표와 차트를 담는 Flex 컨테이너 -->
+      <div id="salesAnalysisLoading" style="text-align: center; padding: 40px; font-size: 1.1em; display: none;">데이터를 불러오는 중입니다...</div>
       <div style="display: flex; gap: 20px; width: 100%;">
-        <!-- 왼쪽: 데이터 표 -->
         <div id="salesTableContainer" style="flex: 1; max-height: 500px; overflow-y: auto; display: none;">
           <table style="width: 100%; border-collapse: collapse;">
-            <thead>
-            <tr style="background-color: #f2f2f2;">
-              <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">기간</th>
-              <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">실제 매출</th>
-              <th id="forecastHeader" style="padding: 8px; border: 1px solid #ddd; text-align: left;">예측 매출</th>
-            </tr>
-            </thead>
+            <thead><tr style="background-color: #f2f2f2;"><th style="padding: 8px; border: 1px solid #ddd; text-align: left;">기간</th><th style="padding: 8px; border: 1px solid #ddd; text-align: left;">실제 매출</th><th id="forecastHeader" style="padding: 8px; border: 1px solid #ddd; text-align: left;">예측 매출</th></tr></thead>
             <tbody id="salesTableBody"></tbody>
           </table>
         </div>
-        <!-- 오른쪽: 차트 -->
-        <div style="flex: 2; position: relative; height:500px;">
-          <canvas id="salesChart"></canvas>
-        </div>
+        <div style="flex: 2; position: relative; height:500px;"><canvas id="salesChart"></canvas></div>
       </div>
     </div>
 
-    <!-- 순이익 분석 탭 -->
     <div id="profitAnalysis" class="stats-subtab-content">
       <h3>순이익 분석 및 예측</h3>
-      <!-- 컨트롤 영역 -->
       <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 20px;">
-        <div>
-          <label for="profit_unit">분석 단위:</label>
-          <select id="profit_unit" onchange="loadProfitAnalysis()">
-            <option value="day">일</option>
-            <option value="week">주</option>
-            <option value="month" selected>월</option>
-            <option value="year">연</option>
-          </select>
-        </div>
-        <div>
-          <label>
-            <input type="checkbox" id="profit_toggleForecast" onchange="loadProfitAnalysis()" checked> 예측값 표시
-          </label>
-        </div>
+        <div><label for="profit_unit">분석 단위:</label><select id="profit_unit" onchange="loadProfitAnalysis()"><option value="day">일</option><option value="week">주</option><option value="month" selected>월</option><option value="year">연</option></select></div>
+        <div><label><input type="checkbox" id="profit_toggleForecast" onchange="loadProfitAnalysis()" checked> 예측값 표시</label></div>
       </div>
-      <!-- 로딩 메시지 -->
-      <div id="profitAnalysisLoading" style="text-align: center; padding: 40px; font-size: 1.1em; display: none;">
-        데이터를 불러오는 중입니다...
-      </div>
-      <!-- 표와 차트를 담는 Flex 컨테이너 -->
+      <div id="profitAnalysisLoading" style="text-align: center; padding: 40px; font-size: 1.1em; display: none;">데이터를 불러오는 중입니다...</div>
       <div style="display: flex; gap: 20px; width: 100%;">
-        <!-- 왼쪽: 데이터 표 -->
         <div id="profitTableContainer" style="flex: 1; max-height: 500px; overflow-y: auto; display: none;">
           <table style="width: 100%; border-collapse: collapse;">
-            <thead>
-            <tr style="background-color: #f2f2f2;">
-              <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">기간</th>
-              <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">실제 순이익</th>
-              <th id="profit_forecastHeader" style="padding: 8px; border: 1px solid #ddd; text-align: left;">예측 순이익</th>
-            </tr>
-            </thead>
-            <!-- ✅ [수정된 부분] > 문자 제거 -->
+            <thead><tr style="background-color: #f2f2f2;"><th style="padding: 8px; border: 1px solid #ddd; text-align: left;">기간</th><th style="padding: 8px; border: 1px solid #ddd; text-align: left;">실제 순이익</th><th id="profit_forecastHeader" style="padding: 8px; border: 1px solid #ddd; text-align: left;">예측 순이익</th></tr></thead>
             <tbody id="profitTableBody"></tbody>
           </table>
         </div>
-        <!-- 오른쪽: 차트 -->
-        <div style="flex: 2; position: relative; height:500px;">
-          <canvas id="profitChart"></canvas>
-        </div>
+        <div style="flex: 2; position: relative; height:500px;"><canvas id="profitChart"></canvas></div>
       </div>
     </div>
-
 
     <div id="orderTrends" class="stats-subtab-content">
       <h3>판매날짜 기반 주문 트렌드 분석</h3>
       <p>주문 날짜 데이터를 기반으로 요일별, 월별 매출 트렌드를 분석한 결과입니다.</p>
-
-      <!-- 로딩 메시지 -->
-      <div id="orderTrendsLoading" style="text-align: center; padding: 40px; font-size: 1.1em;">
-        데이터를 불러오는 중입니다...
-      </div>
-
-      <!-- 차트가 나란히 그려질 영역 -->
+      <div id="orderTrendsLoading" style="text-align: center; padding: 40px; font-size: 1.1em;">데이터를 불러오는 중입니다...</div>
       <div style="display: flex; gap: 30px; justify-content: center; flex-wrap: nowrap;">
-        <!-- 1. 요일별 트렌드 차트 -->
-        <div id="salesWeeklyPlot" style="flex:1; min-width:400px; max-width:600px;">
-          <canvas id="salesWeeklyCanvas"></canvas>
-        </div>
-
-        <!-- 2. 월별 트렌드 차트 -->
-        <div id="yearlyChart" style="flex:1; min-width:400px; max-width:600px;">
-          <canvas id="salesYearlyCanvas"></canvas>
-        </div>
+        <div id="salesWeeklyPlot" style="flex:1; min-width:400px; max-width:600px;"><canvas id="salesWeeklyCanvas"></canvas></div>
+        <div id="yearlyChart" style="flex:1; min-width:400px; max-width:600px;"><canvas id="salesYearlyCanvas"></canvas></div>
       </div>
     </div>
 
-    <div id="goldPrice" class="stats-subtab-content">
-      <div id="loadingMessage" style="text-align: center; padding: 50px; font-size: 1.2em;">
-        데이터를 불러오는 중입니다...
-      </div>
+    <div id="goldPrice" class="stats-subtab-content active">
+      <div id="loadingMessage" style="text-align: center; padding: 50px; font-size: 1.2em;">데이터를 불러오는 중입니다...</div>
       <div id="forecastPlot" class="plot-container" style="width: 90%; max-width: 900px; margin: 20px auto; display: none;"></div>
       <div id="trendPlot" class="plot-container" style="width: 90%; max-width: 900px; margin: 20px auto; display: none;"></div>
       <div id="weeklyPlot" class="plot-container" style="width: 90%; max-width: 900px; margin: 20px auto; display: none;"></div>
     </div>
 
-
-
-
-
-    <!-- 📊 성별·연령대별 매출 차트 영역 -->
     <div id="demographics" class="stats-subtab-content">
-      <!--<p>성별 및 연령대별 매출 분석 시각화 결과입니다.</p>-->
-      <div id="sexAgeLoading" style="text-align: center; padding: 40px; font-size: 1.1em;">
-        <!-- 데이터를 불러오는 중입니다...-->
-      </div>
-
-      <!-- Plotly 차트들 -->
-      <div style="display: flex; gap: 30px; justify-content: center;">
+      <div id="sexAgeLoading" style="text-align: center; padding: 40px; font-size: 1.1em;"></div>
+      <div style="display: flex; gap: 30px; justify-content: center; flex-wrap: wrap;">
         <div id="genderAgeChartPlotMale" style="flex:1; min-width:350px; max-width:600px;"></div>
         <div id="genderAgeChartPlotFemale" style="flex:1; min-width:350px; max-width:600px;"></div>
       </div>
-
-      <div style="display: flex; gap: 40px; justify-content: center; margin-top: 40px;">
+      <div style="display: flex; gap: 40px; justify-content: center; margin-top: 40px; flex-wrap: wrap;">
         <div id="topProductsChart" style="flex:1; min-width:500px; max-width:700px; height:520px;"></div>
         <div id="bottomProductsChart" style="flex:1; min-width:500px; max-width:700px; height:520px;"></div>
       </div>
     </div>
 
-
-
-
-
-    <!-- 카테고리별 이익률 분석/예측 탭 -->
     <div id="categoryProfit" class="stats-subtab-content">
       <p>카테고리별 이익률 분석 및 예측 데이터를 보여주는 영역입니다.</p>
-      <div id="categoryProfitLoading" style="text-align: center; padding: 50px; font-size: 1.2em;">
-        데이터를 불러오는 중입니다...
-      </div>
+      <div id="categoryProfitLoading" style="text-align: center; padding: 50px; font-size: 1.2em;">데이터를 불러오는 중입니다...</div>
       <div id="categoryProfitPlot1" class="plot-container" style="width: 90%; max-width: 900px; margin: 20px auto; display: none;"></div>
       <div id="categoryProfitPlot2" class="plot-container" style="width: 90%; max-width: 900px; margin: 20px auto; display: none;"></div>
       <div id="categoryProfitPlot3" class="plot-container" style="width: 90%; max-width: 900px; margin: 20px auto; display: none;"></div>
     </div>
-  </div>
-  <div id="cartAbandonment" class="stats-subtab-content">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-      <h3>🛒 장바구니 이탈 분석 (인터랙티브)</h3>
-      <div style="display: flex; gap: 15px; align-items: center;">
-        <label>
-          이탈 기준:
-          <select id="abandonmentThreshold">
-            <option value="1" selected>1시간</option>
-            <option value="2">2시간</option>
-            <option value="6">6시간</option>
-            <option value="12">12시간</option>
-            <option value="24">24시간</option>
-          </select>
-        </label>
-        <button id="executeAnalysisBtn" onclick="executeInteractiveCartAnalysis()"
-                style="padding: 10px 20px; background-color: #4ECDC4; color: white; border: none; border-radius: 5px; cursor: pointer;">
-          📊 분석 실행
-        </button>
-        <button onclick="loadExistingAnalysis()"
-                style="padding: 10px 15px; background-color: #17a2b8; color: white; border: none; border-radius: 5px; cursor: pointer;">
-          📂 기존 결과 로드
-        </button>
-      </div>
-    </div>
 
-    <!-- 로딩 영역 -->
-    <div id="interactiveAnalysisLoading" style="display: none; text-align: center; padding: 40px; border: 2px dashed #ddd; border-radius: 10px; margin-bottom: 20px;">
-      <div style="font-size: 20px; margin-bottom: 10px;">🔄</div>
-      <div style="font-size: 16px; color: #666;">장바구니 이탈 분석 실행 중...</div>
-      <div style="font-size: 14px; color: #999; margin-top: 5px;">JSON 데이터 생성 중입니다</div>
-    </div>
-
-    <!-- 요약 통계 카드 -->
-    <div id="interactiveSummaryCards" style="display: none;">
-      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 30px;">
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px; text-align: center;">
-          <div style="font-size: 24px; font-weight: bold;" id="iTotalItems">-</div>
-          <div style="font-size: 14px; opacity: 0.9;">총 아이템</div>
-        </div>
-        <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 20px; border-radius: 8px; text-align: center;">
-          <div style="font-size: 24px; font-weight: bold;" id="iAbandonedItems">-</div>
-          <div style="font-size: 14px; opacity: 0.9;">이탈 아이템</div>
-        </div>
-        <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 20px; border-radius: 8px; text-align: center;">
-          <div style="font-size: 24px; font-weight: bold;" id="iActiveItems">-</div>
-          <div style="font-size: 14px; opacity: 0.9;">활성 아이템</div>
-        </div>
-        <div style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; padding: 20px; border-radius: 8px; text-align: center;">
-          <div style="font-size: 24px; font-weight: bold;" id="iAbandonmentRate">-</div>
-          <div style="font-size: 14px; opacity: 0.9;">이탈률</div>
+    <div id="cartAbandonment" class="stats-subtab-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+        <h3>🛒 장바구니 이탈 분석 (인터랙티브)</h3>
+        <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+          <label>이탈 기준: <select id="abandonmentThreshold"><option value="1" selected>1시간</option><option value="2">2시간</option><option value="6">6시간</option><option value="12">12시간</option><option value="24">24시간</option></select></label>
+          <button id="executeAnalysisBtn" onclick="executeInteractiveCartAnalysis()" style="padding: 10px 20px; background-color: #4ECDC4; color: white; border: none; border-radius: 5px; cursor: pointer;">📊 분석 실행</button>
+          <button onclick="loadExistingAnalysis()" style="padding: 10px 15px; background-color: #17a2b8; color: white; border: none; border-radius: 5px; cursor: pointer;">📂 기존 결과 로드</button>
         </div>
       </div>
-    </div>
-
-    <!-- 인터랙티브 차트 영역 -->
-    <div id="interactiveCharts" style="display: none;">
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
-        <!-- 이탈률 도넛차트 -->
-        <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-          <div id="interactiveAbandonmentChart" style="height: 400px;"></div>
-        </div>
-
-        <!-- 시간대별 라인차트 -->
-        <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-          <div id="interactiveHourlyChart" style="height: 400px;"></div>
+      <div id="interactiveAnalysisLoading" style="display: none; text-align: center; padding: 40px; border: 2px dashed #ddd; border-radius: 10px; margin-bottom: 20px;">
+        <div style="font-size: 20px; margin-bottom: 10px;">🔄</div><div style="font-size: 16px; color: #666;">장바구니 이탈 분석 실행 중...</div><div style="font-size: 14px; color: #999; margin-top: 5px;">JSON 데이터 생성 중입니다</div>
+      </div>
+      <div id="interactiveSummaryCards" style="display: none;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px;">
+          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px; text-align: center;"><div style="font-size: 24px; font-weight: bold;" id="iTotalItems">-</div><div style="font-size: 14px; opacity: 0.9;">총 아이템</div></div>
+          <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 20px; border-radius: 8px; text-align: center;"><div style="font-size: 24px; font-weight: bold;" id="iAbandonedItems">-</div><div style="font-size: 14px; opacity: 0.9;">이탈 아이템</div></div>
+          <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 20px; border-radius: 8px; text-align: center;"><div style="font-size: 24px; font-weight: bold;" id="iActiveItems">-</div><div style="font-size: 14px; opacity: 0.9;">활성 아이템</div></div>
+          <div style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; padding: 20px; border-radius: 8px; text-align: center;"><div style="font-size: 24px; font-weight: bold;" id="iAbandonmentRate">-</div><div style="font-size: 14px; opacity: 0.9;">이탈률</div></div>
         </div>
       </div>
-
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
-        <!-- 순도별 바차트 -->
-        <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-          <div id="interactiveKaratChart" style="height: 400px;"></div>
-        </div>
-
-        <!-- 이탈 시간 분포 -->
-        <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-          <div id="interactiveTimeChart" style="height: 400px;"></div>
+      <div id="interactiveCharts" style="display: none;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(45%, 1fr)); gap: 20px; margin-bottom: 30px;">
+          <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"><div id="interactiveAbandonmentChart" style="height: 400px;"></div></div>
+          <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"><div id="interactiveHourlyChart" style="height: 400px;"></div></div>
+          <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"><div id="interactiveKaratChart" style="height: 400px;"></div></div>
+          <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"><div id="interactiveTimeChart" style="height: 400px;"></div></div>
         </div>
       </div>
-    </div>
-
-    <!-- 다양한 시간대별 이탈률 비교 -->
-    <div id="thresholdComparison" style="display: none; margin-bottom: 30px;">
-      <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-        <h4 style="margin-bottom: 15px;">📊 다양한 기준별 이탈률 비교</h4>
-        <div id="thresholdComparisonChart" style="height: 400px;"></div>
+      <div id="thresholdComparison" style="display: none; margin-bottom: 30px;">
+        <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"><h4 style="margin-bottom: 15px;">📊 다양한 기준별 이탈률 비교</h4><div id="thresholdComparisonChart" style="height: 400px;"></div></div>
       </div>
-    </div>
-
-    <!-- 인사이트 및 액션 아이템 -->
-    <div id="interactiveInsights" style="display: none;">
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-        <!-- 핵심 인사이트 -->
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px;">
-          <h4 style="margin-bottom: 15px;">💡 핵심 발견사항</h4>
-          <div id="keyFindings" style="line-height: 1.8; font-size: 14px;">
-            <!-- JavaScript로 채워집니다 -->
-          </div>
-        </div>
-
-        <!-- 즉시 실행 액션 -->
-        <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 20px; border-radius: 8px;">
-          <h4 style="margin-bottom: 15px;">🎯 추천 액션</h4>
-          <div id="recommendations" style="line-height: 1.8; font-size: 14px;">
-            <!-- JavaScript로 채워집니다 -->
-          </div>
+      <div id="interactiveInsights" style="display: none;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px;"><h4 style="margin-bottom: 15px;">💡 핵심 발견사항</h4><div id="keyFindings" style="line-height: 1.8; font-size: 14px;"></div></div>
+          <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 20px; border-radius: 8px;"><h4 style="margin-bottom: 15px;">🎯 추천 액션</h4><div id="recommendations" style="line-height: 1.8; font-size: 14px;"></div></div>
         </div>
       </div>
-    </div>
-
-    <!-- 에러 영역 -->
-    <div id="interactiveAnalysisError" style="display: none; padding: 20px; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 8px; color: #721c24;">
-      <h4>❌ 분석 오류</h4>
-      <div id="interactiveErrorContent"></div>
+      <div id="interactiveAnalysisError" style="display: none; padding: 20px; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 8px; color: #721c24;"><h4>❌ 분석 오류</h4><div id="interactiveErrorContent"></div></div>
     </div>
   </div>
-
-
 
   <div id="receiptTab" class="tab-content">
     <h3>영수증 등록</h3>
-
     <div style="margin-top: 20px; border: 1px solid #ccc; padding: 20px; border-radius: 8px;">
       <h2>영수증 등록 RPA</h2>
       <button onclick="runRPA()" style="padding: 10px 20px; font-size: 16px;">RPA 실행</button>
@@ -645,72 +422,62 @@
 
   <div id="inquiryTab" class="tab-content">
     <h3>문의 답변</h3>
-
     <table id="inquiryTable">
-      <thead>
-      <tr>
-        <th>#</th>
-        <th>회원번호</th>
-        <th>제목</th>
-        <th>처리상태</th>
-        <th>문의일시</th>
-      </tr>
-      </thead>
-      <tbody>
-      <!-- JS가 이 영역을 채웁니다 -->
-      </tbody>
+      <thead><tr><th>#</th><th>회원번호</th><th>제목</th><th>처리상태</th><th>문의일시</th></tr></thead>
+      <tbody></tbody>
     </table>
   </div>
+</div>
 
-  <script>
-    function runRPA() {
-        const status = document.getElementById("rpaStatus");
-        status.textContent = "실행 요청 중...";
+<script>
+  function runRPA() {
+      const status = document.getElementById("rpaStatus");
+      status.textContent = "실행 요청 중...";
 
-        fetch("http://localhost:5001/run-rpa")
-            .then(res => res.text())
-            .then(msg => {
-                status.textContent = "✅ " + msg;
-                status.style.color = "green";
-            })
-            .catch(err => {
-            });
-    }
-
-    /**
-     * 문의 목록을 서버에서 가져와 표에 채운다
-     */
-    function fetchInquiries() {
-      fetch('/api/inquiries')
-        .then(res => {
-          if (!res.ok) throw new Error("문의 목록을 불러오지 못했습니다.");
-          return res.json();
-        })
-        .then(data => {
-          const tbody = document.querySelector("#inquiryTable tbody");
-          tbody.innerHTML = "";  // 기존 내용 초기화
-
-          data.forEach((inq, index) => {
-            const row = `
-              <tr>
-                <td>${index + 1}</td>
-                <td>${inq.cstmNumber}</td>
-                <td>
-                 <a href="/admin/inquiry/${inq.inqNumber}">${inq.inqTitle}</a>
-                </td>
-                <td>${inq.inqStatus}</td>
-                <td>${new Date(inq.inqDate).toLocaleString()}</td>
-              </tr>
-            `;
-            tbody.insertAdjacentHTML("beforeend", row);
+      fetch("http://localhost:5001/run-rpa")
+          .then(res => res.text())
+          .then(msg => {
+              status.textContent = "✅ " + msg;
+              status.style.color = "green";
+          })
+          .catch(err => {
           });
-        })
-        .catch(err => {
-          console.error(err);
-          alert(err.message);
+  }
+
+  /**
+   * 문의 목록을 서버에서 가져와 표에 채운다
+   */
+  function fetchInquiries() {
+    fetch('/api/inquiries')
+      .then(res => {
+        if (!res.ok) throw new Error("문의 목록을 불러오지 못했습니다.");
+        return res.json();
+      })
+      .then(data => {
+        const tbody = document.querySelector("#inquiryTable tbody");
+        tbody.innerHTML = "";  // 기존 내용 초기화
+
+        data.forEach((inq, index) => {
+          const row = `
+            <tr>
+              <td>${index + 1}</td>
+              <td>${inq.cstmNumber}</td>
+              <td>
+               <a href="/admin/inquiry/${inq.inqNumber}">${inq.inqTitle}</a>
+              </td>
+              <td>${inq.inqStatus}</td>
+              <td>${new Date(inq.inqDate).toLocaleString()}</td>
+            </tr>
+          `;
+          tbody.insertAdjacentHTML("beforeend", row);
         });
-    }
-  </script>
+      })
+      .catch(err => {
+        console.error(err);
+        alert(err.message);
+      });
+  }
+</script>
 
 </div>
 
