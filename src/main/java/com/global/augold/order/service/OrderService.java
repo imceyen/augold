@@ -34,9 +34,6 @@ public class OrderService {
     private final OrderItemRepository orderItemRepository;
     private final ProductRepository productRepository;
     private final CartRepository cartRepository;
-    @Lazy
-    private final CartService cartService;
-
 
     @Autowired
     private EntityManager entityManager;
@@ -631,5 +628,5 @@ public class OrderService {
             throw new RuntimeException("주문 취소에 실패했습니다: " + e.getMessage());
         }
     }
-    
+
 }
