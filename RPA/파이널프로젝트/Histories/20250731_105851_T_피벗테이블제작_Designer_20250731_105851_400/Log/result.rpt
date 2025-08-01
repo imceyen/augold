@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Result id="4c6491ed-283e-4898-a4ab-f183cd014670" name="T_피벗테이블제작" result="Stop" detail="Process: T_피벗테이블제작&#xA;Step: KeyInput (12/18)&#xA;&#xA;Stopped by User" start="2025-07-31T01:58:54.252" end="2025-07-31T01:58:57.209" jobId="Designer_20250731_105851_400">
+  <Step id="S91ef4141751d4b48b333e2c6df3bfb55" taskName="T_피벗테이블제작" type="Win" name="KeyInput" displayName="KeyInput" callDepth="1" depth="1" num="12" result="Stop" start="2025-07-31T01:58:54.323" end="2025-07-31T01:58:57.207" displayTime="2.9s">
+    <Variables />
+    <Properties setIndex="0">
+      <Property value="" runtimeType="String" key="Options_OnError" displayKey="On Error" visible="true" required="false" />
+      <Property value="" runtimeType="String" key="Key_Description" displayKey="Description" visible="true" required="false" />
+      <Property value="&lt;Too Long&gt; End,,Back,,Back,,Back,,D,,U,,D,,T,,N,,W,M,-W,-M,D,,Space,,C,J,-C,-J,F,L,-F,-L,Space,,S,O,-S,-O,D,U,- ... 7 more" runtimeType="StringBuilder" key="Keyboard_KeyInput" displayKey="KeyInput" visible="true" required="true" />
+      <Property value="1000" runtimeType="Integer" key="Options_BeforeDelay" displayKey="Before Delay(ms)" visible="true" required="false" />
+      <Property value="500" runtimeType="Integer" key="Options_AfterDelay" displayKey="After Delay(ms)" visible="true" required="false" />
+      <Property value="100" runtimeType="Integer" key="Options_Interval" displayKey="Interval(ms)" visible="true" required="false" />
+      <Property value="true" runtimeType="Boolean" key="Keyboard_ClearKeyState" displayKey="Restore KeyState" visible="true" required="false" />
+    </Properties>
+  </Step>
+  <JobInfo>
+    <Info name="Bot Version" value="3.1.125.00602" />
+    <Info name="Resolution" value="1920 x 1200" />
+    <Info name="Language" value="한국어 (대한민국)" />
+    <Info name="BotID" value="S-DESIGNER-2C7SL" />
+  </JobInfo>
+</Result>

@@ -635,13 +635,12 @@
 
   <div id="receiptTab" class="tab-content">
     <h3>영수증 등록</h3>
-    <form id="receiptForm" enctype="multipart/form-data" onsubmit="uploadReceipt(event)">
-      <h4>영수증 이미지 업로드</h4>
-      <input type="file" name="receiptImage" accept="image/*" required><br><br>
-      <button type="submit">업로드</button>
-    </form>
 
-    <div id="ocrResult" style="margin-top: 20px;"></div>
+    <div style="margin-top: 20px; border: 1px solid #ccc; padding: 20px; border-radius: 8px;">
+      <h2>영수증 등록 RPA</h2>
+      <button onclick="runRPA()" style="padding: 10px 20px; font-size: 16px;">RPA 실행</button>
+      <p id="rpaStatus" style="margin-top: 10px;"></p>
+    </div>
   </div>
 
   <div id="inquiryTab" class="tab-content">
@@ -664,7 +663,19 @@
   </div>
 
   <script>
+    function runRPA() {
+        const status = document.getElementById("rpaStatus");
+        status.textContent = "실행 요청 중...";
 
+        fetch("http://localhost:5001/run-rpa")
+            .then(res => res.text())
+            .then(msg => {
+                status.textContent = "✅ " + msg;
+                status.style.color = "green";
+            })
+            .catch(err => {
+            });
+    }
 
     /**
      * 문의 목록을 서버에서 가져와 표에 채운다

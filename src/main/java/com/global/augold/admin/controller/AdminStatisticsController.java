@@ -41,6 +41,9 @@ public class AdminStatisticsController {
     @Value("${graph.sexage.script.path}")
     private String sexAgeScriptPath;
 
+    @Value("${rpa.server.path}")
+    private String rpaServerPath;
+
     // ✅ 관리자 페이지
     @GetMapping("/admin/main")
     public String adminMainPage() {
@@ -238,4 +241,42 @@ public class AdminStatisticsController {
             );
         }
     }
+    @GetMapping("/api/rpa/run")
+    @ResponseBody
+    public ResponseEntity<?> runRpaScript() {
+        try {
+            ProcessBuilder pb = new ProcessBuilder(
+                    pythonExecutable,  // 보통은 .py 파일 실행 시
+                    rpaServerPath      // rpa_serve.py 또는 exe 경로
+            );
+
+            pb.redirectErrorStream(true); // 표준 에러 → 표준 출력으로
+            Process process = pb.start();
+
+            // 로그 확인용 출력
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
+                String line;
+                System.out.println("=== RPA 실행 로그 ===");
+                while ((line = reader.readLine()) != null) {
+                    System.out.println(line);
+                }
+                System.out.println("=======================");
+            }
+
+            boolean finished = process.waitFor(2, TimeUnit.MINUTES);
+            if (!finished || process.exitValue() != 0) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(Map.of("error", "RPA 스크립트 실행 실패 또는 타임아웃"));
+            }
+
+            return ResponseEntity.ok(Map.of("message", "RPA 스크립트 실행 완료"));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "RPA 실행 중 오류 발생: " + e.getMessage()));
+        }
+    }
+
 }
