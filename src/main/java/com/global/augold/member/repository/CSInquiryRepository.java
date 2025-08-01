@@ -14,6 +14,8 @@ public interface CSInquiryRepository extends JpaRepository<CSInquiry, String> {
 
     List<CSInquiry> findByCstmNumberOrderByInqDateDesc(String cstmNumber);
 
+    void deleteByCstmNumber(String cstmNumber);
+
     List<CSInquiry> findByCstmNumberAndInqTitleContainingIgnoreCaseOrderByInqDateDesc(String cstmNumber, String keyword);
 
 }
