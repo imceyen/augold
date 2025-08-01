@@ -41,3 +41,4 @@ src/main/resources/application.properties
 
 
 /python/statistics/output/
+/python/receipt/run_rpa.bat
