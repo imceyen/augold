@@ -202,9 +202,10 @@
 
   <!-- Plotly.js (원래 버전 유지) -->
   <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+  <!-- Chart.js 추가 -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <!-- FontAwesome 아이콘 (디자인에 필요하여 추가) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-  <!-- ▲▲▲ 요청하신 디자인 코드로 교체된 부분 ▲▲▲ -->
 </head>
 
 <body>
@@ -282,11 +283,9 @@
 
   <!-- 통계 탭 -->
   <div id="statsTab" class="tab-content">
-    <!-- ▼▼▼ 요청하신 디자인 코드로 교체된 부분 ▼▼▼ -->
     <div style="margin-left: 120px;">
       <h3 style="margin-bottom: 30px; color: #1976d2; font-size: 24px; font-weight: 600;">통계 분석</h3>
     </div>
-    <!-- ▲▲▲ 요청하신 디자인 코드로 교체된 부분 ▲▲▲ -->
     <div class="stats-subtab-bar">
       <button class="stats-subtab-btn" onclick="showStatsSubTab('salesAnalysis', event)">매출 분석 및 예측</button>
       <button class="stats-subtab-btn" onclick="showStatsSubTab('profitAnalysis', event)">순이익 분석 및 예측</button>
@@ -365,9 +364,9 @@
     <div id="categoryProfit" class="stats-subtab-content">
       <p>카테고리별 이익률 분석 및 예측 데이터를 보여주는 영역입니다.</p>
       <div id="categoryProfitLoading" style="text-align: center; padding: 50px; font-size: 1.2em;">데이터를 불러오는 중입니다...</div>
-      <div id="categoryProfitPlot1" class="plot-container" style="width: 90%; max-width: 900px; margin: 20px auto; display: none;"></div>
-      <div id="categoryProfitPlot2" class="plot-container" style="width: 90%; max-width: 900px; margin: 20px auto; display: none;"></div>
-      <div id="categoryProfitPlot3" class="plot-container" style="width: 90%; max-width: 900px; margin: 20px auto; display: none;"></div>
+      <div id="categoryProfitPlot1" class="plot-container" style="width: 90%; max-width: 900px; margin: 20px auto; display: none;"><canvas id="categoryProfitChart1"></canvas></div>
+      <div id="categoryProfitPlot2" class="plot-container" style="width: 90%; max-width: 900px; margin: 20px auto; display: none;"><canvas id="categoryProfitChart2"></canvas></div>
+      <div id="categoryProfitPlot3" class="plot-container" style="width: 90%; max-width: 900px; margin: 20px auto; display: none;"><canvas id="categoryProfitChart3"></canvas></div>
     </div>
 
     <div id="cartAbandonment" class="stats-subtab-content">
@@ -444,9 +443,9 @@
           });
   }
 
-  /**
-   * 문의 목록을 서버에서 가져와 표에 채운다
-   */
+
+   <!--문의 목록을 서버에서 가져와 표에 채운다-->
+
   function fetchInquiries() {
     fetch('/api/inquiries')
       .then(res => {
@@ -455,7 +454,7 @@
       })
       .then(data => {
         const tbody = document.querySelector("#inquiryTable tbody");
-        tbody.innerHTML = "";  // 기존 내용 초기화
+        tbody.innerHTML = "";
 
         data.forEach((inq, index) => {
           const row = `
@@ -478,8 +477,6 @@
       });
   }
 </script>
-
-</div>
 
 <script>
   // 상품 관리 관련 변수 및 함수
@@ -508,9 +505,6 @@
 
       // 문의 관리 초기화
       fetchInquiries();
-
-      // 기본 탭 설정 (여기서는 상품 관리 탭이 기본으로 활성화됨)
-      // 만약 다른 탭을 기본으로 하고 싶다면 이 부분을 수정할 수 있습니다.
   });
 
   function fetchProducts() {
@@ -562,10 +556,8 @@
     event.preventDefault();
     const form = event.target;
     const formData = new FormData(form);
-    // const url = editing ? `/api/products/${editProductId}` : '/api/products';
     const url = '/api/products';
 
-    // fetch 요청의 method는 항상 'POST'가 됩니다.
     fetch(url, { method: 'POST', body: formData })
         .then(res => {
             if (res.ok) {
@@ -574,7 +566,6 @@
                 toggleForm(false);
                 fetchProducts();
             } else {
-                // 서버에서 오는 에러 메시지를 보여주면 더 좋습니다.
                 res.text().then(text => alert("저장 실패: " + text));
             }
         })
@@ -660,7 +651,11 @@
   let categoryProfitLoaded = false;
   let demographicsLoaded = false;
   let cartAbandonmentLoaded = false;
-  let profitAnalysisLoaded = false; // ✅ [추가된 부분]
+  let profitAnalysisLoaded = false;
+
+  // Chart.js 차트 변수들
+  let demographicsCharts = {};
+  let categoryProfitCharts = {};
 
   /**
    * 메인 탭 전환 함수
@@ -676,7 +671,6 @@
 
       // '통계' 탭을 처음 열 때 기본 하위 탭 로직 실행
       if (tabId === 'statsTab') {
-          // '판매날짜 기반 주문 트렌드 분석'을 기본 하위 탭으로 설정
           const defaultSubTabButton = document.querySelector('.stats-subtab-btn[onclick*="orderTrends"]');
           if (defaultSubTabButton && !defaultSubTabButton.classList.contains('active')) {
               showStatsSubTab('orderTrends', { currentTarget: defaultSubTabButton });
@@ -685,14 +679,13 @@
   }
 
   /**
-   * 통계 하위 탭 전환 함수 (모든 하위 탭에 대해 한 번에 하나만 active)
+   * 통계 하위 탭 전환 함수
    */
   function showStatsSubTab(subTabId, event) {
       // 모든 하위 탭 버튼과 컨텐츠 비활성화
       document.querySelectorAll('.stats-subtab-bar button').forEach(btn => btn.classList.remove('active'));
       document.querySelectorAll('.stats-subtab-content').forEach(content => content.classList.remove('active'));
 
-      // null 체크 추가
       const subTabDiv = document.getElementById(subTabId);
       if (!subTabDiv) {
           console.error(`[showStatsSubTab] id="${subTabId}"인 div가 없습니다.`);
@@ -718,19 +711,14 @@
       } else if (subTabId === 'demographics' && !demographicsLoaded) {
           loadDemographicsChart();
           demographicsLoaded = true;
-
       } else if (subTabId === 'cartAbandonment') {
-      console.log('🛒 장바구니 이탈 분석 탭 활성화');
+          console.log('🛒 장바구니 이탈 분석 탭 활성화');
       } else if (subTabId === 'salesAnalysis' && document.getElementById('salesAnalysis').classList.contains('active')) {
           loadSalesAnalysis();
-      }
-      // ✅ [추가된 부분] 순이익 분석 탭을 처음 열 때 데이터 로드
-      else if (subTabId === 'profitAnalysis' && !profitAnalysisLoaded) {
+      } else if (subTabId === 'profitAnalysis' && !profitAnalysisLoaded) {
           loadProfitAnalysis();
           profitAnalysisLoaded = true;
       }
-
-
   }
 
   // --- 차트 로드 함수들 ---
@@ -914,153 +902,500 @@
           });
   }
 
-
-  // ... 다른 스크립트 함수들 ...
-
-  // '통계' 탭이 처음 열릴 때 기본으로 '판매날짜 기반 주문 트렌드 분석'을 로드하도록 설정
-  // showTab 함수 내부에 아래와 비슷한 로직이 이미 있을 수 있습니다.
-  if (tabId === 'statsTab' && !orderTrendsLoaded) {
-      // orderTrendsLoaded 플래그를 사용하여 한 번만 로드하도록 함
-      showStatsSubTab('orderTrends', { currentTarget: document.querySelector('.stats-subtab-btn[onclick*="orderTrends"]') });
-      orderTrendsLoaded = true; // 로드되었음을 표시
-  }
-
-  // 카테고리별 이익률 분석 및 예측 데이터 로드 및 그래프 그리기 함수
+  // 카테고리별 이익률 분석 및 예측 데이터 로드 및 그래프 그리기 함수 (Chart.js로 변경)
   function loadCategoryProfit() {
-      const plotDiv = document.getElementById("categoryProfitPlot");
       const loadingDiv = document.getElementById("categoryProfitLoading");
-      if (!plotDiv || !loadingDiv) {
-          console.error("[categoryProfit] 필요한 div가 없습니다.");
-          return;
-      }
-      plotDiv.style.display = "none";
-      loadingDiv.style.display = "block";
+      const plotDiv1 = document.getElementById("categoryProfitPlot1");
+      const plotDiv2 = document.getElementById("categoryProfitPlot2");
+      const plotDiv3 = document.getElementById("categoryProfitPlot3");
 
-      fetch('/api/statistics/category-profit')
-          .then(res => res.json())
-          .then(data => {
-              if (!data || !data.monthly || !data.forecast) {
-                  loadingDiv.innerText = "데이터가 없습니다.";
-                  return;
-              }
-              const months = data.monthly.map(item => item.Month);
-              const margins = data.monthly.map(item => item.Profit_Margin);
-              const forecast = data.forecast;
+      loadingDiv.style.display = 'block';
+      plotDiv1.style.display = 'none';
+      plotDiv2.style.display = 'none';
+      plotDiv3.style.display = 'none';
 
-              loadingDiv.style.display = "none";
-              plotDiv.style.display = "block";
+      // 기존 차트 제거
+      if (categoryProfitCharts.chart1) categoryProfitCharts.chart1.destroy();
+      if (categoryProfitCharts.chart2) categoryProfitCharts.chart2.destroy();
+      if (categoryProfitCharts.chart3) categoryProfitCharts.chart3.destroy();
 
-              Plotly.newPlot("categoryProfitPlot", [
-                  {
-                      x: months,
-                      y: margins,
-                      mode: 'lines+markers',
-                      name: '이익률',
-                      line: { color: 'green' }
+      fetch('/category_profit_dashboard.json')
+        .then(res => res.json())
+        .then(data => {
+           console.log('받은 데이터:', data);
+           if (!data || !Array.isArray(data.category_sales) || !Array.isArray(data.category_margin)) {
+              console.error('category_sales 또는 category_margin 데이터가 없거나 배열이 아닙니다.');
+              return;  // 여기서 함수 종료해서 이후 에러 방지
+          }
+
+          loadingDiv.style.display = 'none';
+          plotDiv1.style.display = 'block';
+          plotDiv2.style.display = 'block';
+          plotDiv3.style.display = 'block';
+
+          const sales = data.category_sales;
+          const margin = data.category_margin;
+          const ts = data.category_timeseries;
+          const forecast = data.category_forecast;
+
+          // 차트 1: 카테고리별 총 판매금액 (Chart.js)
+          const ctx1 = document.getElementById('categoryProfitChart1').getContext('2d');
+          categoryProfitCharts.chart1 = new Chart(ctx1, {
+              type: 'bar',
+              data: {
+                  labels: sales.map(d => d.Category),
+                  datasets: [{
+                      label: '총 판매금액',
+                      data: sales.map(d => d.total_price),
+                      backgroundColor: 'goldenrod',
+                      borderColor: 'darkgoldenrod',
+                      borderWidth: 1
+                  }]
+              },
+              options: {
+                  responsive: true,
+                  plugins: {
+                      title: {
+                          display: true,
+                          text: '카테고리별 총 판매금액',
+                          font: { size: 16, weight: 'bold' }
+                      }
                   },
-                  {
-                      x: [forecast.month],
-                      y: [forecast.predicted_margin],
-                      mode: 'markers+text',
-                      name: '예측값',
-                      marker: { size: 10, color: 'red' },
-                      text: ['예측'],
-                      textposition: 'top center'
+                  scales: {
+                      y: {
+                          beginAtZero: true,
+                          title: {
+                              display: true,
+                              text: '총 판매금액 (원)'
+                          },
+                          ticks: {
+                              callback: function(value) {
+                                  return new Intl.NumberFormat('ko-KR').format(value) + '원';
+                              }
+                          }
+                      }
                   }
-              ], {
-                  title: '카테고리별 이익률 분석 및 7월 예측',
-                  xaxis: { title: '월' },
-                  yaxis: { title: '이익률' }
-              });
-          })
-          .catch(err => {
-              loadingDiv.innerText = "데이터 로딩 중 오류가 발생했습니다.";
-              console.error('이익률 분석 불러오기 실패:', err);
+              }
           });
+
+          // 차트 2: 카테고리별 평균 이익률 (Chart.js)
+          const ctx2 = document.getElementById('categoryProfitChart2').getContext('2d');
+          categoryProfitCharts.chart2 = new Chart(ctx2, {
+              type: 'bar',
+              data: {
+                  labels: margin.map(d => d.Category),
+                  datasets: [{
+                      label: '평균 이익률',
+                      data: margin.map(d => d.avg_profit_margin * 100), // 퍼센트로 변환
+                      backgroundColor: 'seagreen',
+                      borderColor: 'darkseagreen',
+                      borderWidth: 1
+                  }]
+              },
+              options: {
+                  responsive: true,
+                  plugins: {
+                      title: {
+                          display: true,
+                          text: '카테고리별 평균 이익률',
+                          font: { size: 16, weight: 'bold' }
+                      }
+                  },
+                  scales: {
+                      y: {
+                          beginAtZero: true,
+                          title: {
+                              display: true,
+                              text: '평균 이익률 (%)'
+                          },
+                          ticks: {
+                              callback: function(value) {
+                                  return value.toFixed(2) + '%';
+                              }
+                          }
+                      }
+                  }
+              }
+          });
+
+          // 차트 3: 카테고리별 순이익 시계열 + 예측 (Chart.js)
+          const netprofit_ts = data.category_netprofit_timeseries;
+          const netprofit_forecast = data.category_netprofit_forecast;
+
+          const np_categories = [...new Set(netprofit_ts.map(d => d.Category))];
+          const categoryColors = {
+              "골드바": "rgb(54, 162, 235)",
+              "기념품": "rgb(255, 159, 64)",
+              "주얼리": "rgb(75, 192, 192)"
+          };
+
+          const datasets = [];
+
+          // 시계열 데이터
+          np_categories.forEach(cat => {
+              const catData = netprofit_ts.filter(d => d.Category === cat);
+              datasets.push({
+                  label: cat,
+                  data: catData.map(d => ({ x: d.Month, y: d.Net_Profit })),
+                  borderColor: categoryColors[cat],
+                  backgroundColor: categoryColors[cat] + '33',
+                  tension: 0.1,
+                  fill: false
+              });
+          });
+
+          // 예측 데이터 (점으로 표시)
+          netprofit_forecast.forEach(f => {
+              datasets.push({
+                  label: `${f.Category} 예측`,
+                  data: [{ x: f.Month, y: f.Predicted_Net_Profit }],
+                  backgroundColor: categoryColors[f.Category],
+                  borderColor: categoryColors[f.Category],
+                  pointRadius: 8,
+                  pointHoverRadius: 10,
+                  showLine: false
+              });
+          });
+
+          const ctx3 = document.getElementById('categoryProfitChart3').getContext('2d');
+          categoryProfitCharts.chart3 = new Chart(ctx3, {
+              type: 'line',
+              data: { datasets: datasets },
+              options: {
+                  responsive: true,
+                  plugins: {
+                      title: {
+                          display: true,
+                          text: '카테고리별 순이익 시계열 및 예측 (2025년 7월)',
+                          font: { size: 16, weight: 'bold' }
+                      }
+                  },
+                  scales: {
+                      x: {
+                          type: 'category',
+                          title: {
+                              display: true,
+                              text: '월'
+                          }
+                      },
+                      y: {
+                          title: {
+                              display: true,
+                              text: '순이익 (원)'
+                          },
+                          ticks: {
+                              callback: function(value) {
+                                  return new Intl.NumberFormat('ko-KR').format(value) + '원';
+                              }
+                          }
+                      }
+                  }
+              }
+          });
+        })
+        .catch(err => {
+          loadingDiv.innerText = "데이터 로딩 중 오류가 발생했습니다.";
+          console.error('이익률 분석 불러오기 실패:', err);
+        });
   }
 
-// 성별/연령대별 차트 (탭 클릭 시에만 로드)
-    function loadDemographicsChart() {
+  // 성별/연령대별 차트 (Chart.js로 변경)
+  function loadDemographicsChart() {
       const loadingDiv = document.getElementById("sexAgeLoading");
       const plotDivMale = document.getElementById("genderAgeChartPlotMale");
       const plotDivFemale = document.getElementById("genderAgeChartPlotFemale");
+      const topProductsDiv = document.getElementById("topProductsChart");
+      const bottomProductsDiv = document.getElementById("bottomProductsChart");
+
       if (!loadingDiv || !plotDivMale || !plotDivFemale) {
-        console.error("[성별/연령대] 필요한 div가 없습니다.");
-        return;
+          console.error("[성별/연령대] 필요한 div가 없습니다.");
+          return;
       }
-      fetch("/temp_output.json")
-        .then(response => response.json())
-        .then(data => {
-          if (!data || !data.male || !data.female) {
-            loadingDiv.innerText = "데이터가 없습니다.";
-            return;
-          }
-          const maleData = data.male;
-          const femaleData = data.female;
 
-          const ageGroups = [...new Set([...maleData, ...femaleData].map(d => d.Age_Group))];
-          const categories = [...new Set([...maleData, ...femaleData].map(d => d.Category))];
+      loadingDiv.style.display = 'block';
+      loadingDiv.innerText = '데이터를 불러오는 중입니다...';
 
-          // 🔹 남성 데이터 시리즈 생성
-          const maleSeries = categories.map(category => {
-            return {
-              x: ageGroups,
-              y: ageGroups.map(ageGroup => {
-                const item = maleData.find(d => d.Age_Group === ageGroup && d.Category === category);
-                return item ? item.Total_Price : 0;
-              }),
-              name: `${category}`,
-              type: 'bar'
-            };
+      fetch("/demographics_dashboard.json")
+          .then(response => response.json())
+          .then(data => {
+              if (!data || !data.male || !data.female) {
+                  loadingDiv.innerText = "데이터가 없습니다.";
+                  return;
+              }
+
+              const maleData = data.male;
+              const femaleData = data.female;
+              const allData = [...maleData, ...femaleData];
+
+              // 연령대와 카테고리 추출
+              const ageGroups = [...new Set(allData.map(d => d.Age_Group))].sort();
+              const categories = [...new Set(allData.map(d => d.Category))];
+
+              // HTML에 Canvas 요소 추가
+              plotDivMale.innerHTML = '<canvas id="maleChart" width="400" height="300"></canvas>';
+              plotDivFemale.innerHTML = '<canvas id="femaleChart" width="400" height="300"></canvas>';
+              topProductsDiv.innerHTML = '<canvas id="topChart" width="400" height="200"></canvas>';
+              bottomProductsDiv.innerHTML = '<canvas id="bottomChart" width="400" height="200"></canvas>';
+
+              // 기존 차트 삭제
+              if (demographicsCharts.male) demographicsCharts.male.destroy();
+              if (demographicsCharts.female) demographicsCharts.female.destroy();
+              if (demographicsCharts.top) demographicsCharts.top.destroy();
+              if (demographicsCharts.bottom) demographicsCharts.bottom.destroy();
+
+              // 1. 남성 차트
+              const maleCtx = document.getElementById('maleChart').getContext('2d');
+              const maleDatasets = categories.map((category, index) => {
+                  const colors = ['#3498db', '#2ecc71', '#f39c12', '#e74c3c', '#9b59b6'];
+                  return {
+                      label: category,
+                      data: ageGroups.map(age => {
+                          const item = maleData.find(d => d.Age_Group === age && d.Category === category);
+                          return item ? item.Total_Price / 1000000 : 0; // 백만원 단위
+                      }),
+                      backgroundColor: colors[index % colors.length] + '80',
+                      borderColor: colors[index % colors.length],
+                      borderWidth: 2
+                  };
+              });
+
+              demographicsCharts.male = new Chart(maleCtx, {
+                  type: 'bar',
+                  data: {
+                      labels: ageGroups,
+                      datasets: maleDatasets
+                  },
+                  options: {
+                      responsive: true,
+                      plugins: {
+                          title: {
+                              display: true,
+                              text: '👨 남성 연령대별 카테고리 매출',
+                              font: { size: 16, weight: 'bold' }
+                          },
+                          legend: {
+                              position: 'bottom'
+                          }
+                      },
+                      scales: {
+                          x: {
+                              stacked: true
+                          },
+                          y: {
+                              stacked: true,
+                              beginAtZero: true,
+                              title: {
+                                  display: true,
+                                  text: '매출 (백만원)'
+                              },
+                              ticks: {
+                                  callback: function(value) {
+                                      return new Intl.NumberFormat('ko-KR').format(value) + '백만원';
+                                  }
+                              }
+                          }
+                      }
+                  }
+              });
+
+              // 2. 여성 차트
+              const femaleCtx = document.getElementById('femaleChart').getContext('2d');
+              const femaleDatasets = categories.map((category, index) => {
+                  const colors = ['#e74c3c', '#f39c12', '#9b59b6', '#3498db', '#2ecc71'];
+                  return {
+                      label: category,
+                      data: ageGroups.map(age => {
+                          const item = femaleData.find(d => d.Age_Group === age && d.Category === category);
+                          return item ? item.Total_Price / 1000000 : 0; // 백만원 단위
+                      }),
+                      backgroundColor: colors[index % colors.length] + '80',
+                      borderColor: colors[index % colors.length],
+                      borderWidth: 2
+                  };
+              });
+
+              demographicsCharts.female = new Chart(femaleCtx, {
+                  type: 'bar',
+                  data: {
+                      labels: ageGroups,
+                      datasets: femaleDatasets
+                  },
+                  options: {
+                      responsive: true,
+                      plugins: {
+                          title: {
+                              display: true,
+                              text: '👩 여성 연령대별 카테고리 매출',
+                              font: { size: 16, weight: 'bold' }
+                          },
+                          legend: {
+                              position: 'bottom'
+                          }
+                      },
+                      scales: {
+                          x: {
+                              stacked: true
+                          },
+                          y: {
+                              stacked: true,
+                              beginAtZero: true,
+                              title: {
+                                  display: true,
+                                  text: '매출 (백만원)'
+                              },
+                              ticks: {
+                                  callback: function(value) {
+                                      return new Intl.NumberFormat('ko-KR').format(value) + '백만원';
+                                  }
+                              }
+                          }
+                      }
+                  }
+              });
+
+              // 3. Top 제품 차트 (data.top_bottom가 있다면)
+              if (data.top_bottom && data.top_bottom.top3 && data.top_bottom.top3.length > 0) {
+                  let allTopProducts = [];
+                  data.top_bottom.top3.forEach(group => {
+                      if (group.Products) {
+                          group.Products.forEach(product => {
+                              allTopProducts.push({
+                                  name: product.Product_Name,
+                                  sales: product.Total_Price,
+                                  group: `${group.Gender} ${group.Age_Group}`
+                              });
+                          });
+                      }
+                  });
+
+                  // 중복 제품 제거 및 상위 10개 선택
+                  const productMap = new Map();
+                  allTopProducts.forEach(product => {
+                      if (productMap.has(product.name)) {
+                          productMap.get(product.name).sales += product.sales;
+                      } else {
+                          productMap.set(product.name, { name: product.name, sales: product.sales });
+                      }
+                  });
+
+                  const top10Products = Array.from(productMap.values())
+                      .sort((a, b) => b.sales - a.sales)
+                      .slice(0, 10);
+
+                  const topCtx = document.getElementById('topChart').getContext('2d');
+                  demographicsCharts.top = new Chart(topCtx, {
+                      type: 'bar',
+                      data: {
+                          labels: top10Products.map(p => p.name),
+                          datasets: [{
+                              label: '매출액',
+                              data: top10Products.map(p => p.sales / 1000000), // 백만원 단위
+                              backgroundColor: 'rgba(46, 204, 113, 0.8)',
+                              borderColor: '#2ecc71',
+                              borderWidth: 2
+                          }]
+                      },
+                      options: {
+                          responsive: true,
+                          indexAxis: 'y',
+                          plugins: {
+                              title: {
+                                  display: true,
+                                  text: '🏆 인기 제품 TOP 10',
+                                  font: { size: 16, weight: 'bold' }
+                              }
+                          },
+                          scales: {
+                              x: {
+                                  beginAtZero: true,
+                                  title: {
+                                      display: true,
+                                      text: '매출액 (백만원)'
+                                  },
+                                  ticks: {
+                                      callback: function(value) {
+                                          return new Intl.NumberFormat('ko-KR').format(value) + '백만원';
+                                      }
+                                  }
+                              }
+                          }
+                      }
+                  });
+
+                  // 4. Bottom 제품 차트
+                  if (data.top_bottom.bottom3 && data.top_bottom.bottom3.length > 0) {
+                      let allBottomProducts = [];
+                      data.top_bottom.bottom3.forEach(group => {
+                          if (group.Products) {
+                              group.Products.forEach(product => {
+                                  allBottomProducts.push({
+                                      name: product.Product_Name,
+                                      sales: product.Total_Price
+                                  });
+                              });
+                          }
+                      });
+
+                      const bottom10Products = allBottomProducts
+                          .sort((a, b) => a.sales - b.sales)
+                          .slice(0, 10);
+
+                      const bottomCtx = document.getElementById('bottomChart').getContext('2d');
+                      demographicsCharts.bottom = new Chart(bottomCtx, {
+                          type: 'bar',
+                          data: {
+                              labels: bottom10Products.map(p => p.name),
+                              datasets: [{
+                                  label: '매출액',
+                                  data: bottom10Products.map(p => p.sales / 1000000), // 백만원 단위
+                                  backgroundColor: 'rgba(231, 76, 60, 0.8)',
+                                  borderColor: '#e74c3c',
+                                  borderWidth: 2
+                              }]
+                          },
+                          options: {
+                              responsive: true,
+                              indexAxis: 'y',
+                              plugins: {
+                                  title: {
+                                      display: true,
+                                      text: '📉 저조한 제품 BOTTOM 10',
+                                      font: { size: 16, weight: 'bold' }
+                                  }
+                              },
+                              scales: {
+                                  x: {
+                                      beginAtZero: true,
+                                      title: {
+                                          display: true,
+                                          text: '매출액 (백만원)'
+                                      },
+                                      ticks: {
+                                          callback: function(value) {
+                                              return new Intl.NumberFormat('ko-KR').format(value) + '백만원';
+                                          }
+                                      }
+                                  }
+                              }
+                          }
+                      });
+                  }
+              }
+
+              // 로딩 메시지 숨기기
+              loadingDiv.style.display = "none";
+          })
+          .catch(error => {
+              loadingDiv.innerText = "데이터 로딩 중 오류가 발생했습니다.";
+              console.error("❌ JSON 로딩 오류:", error);
           });
-
-          // 🔹 여성 데이터 시리즈 생성
-          const femaleSeries = categories.map(category => {
-            return {
-              x: ageGroups,
-              y: ageGroups.map(ageGroup => {
-                const item = femaleData.find(d => d.Age_Group === ageGroup && d.Category === category);
-                return item ? item.Total_Price : 0;
-              }),
-              name: `${category}`,
-              type: 'bar'
-            };
-          });
-
-          // 🔹 공통 레이아웃
-          const baseLayout = {
-            barmode: 'group',
-            xaxis: { title: '연령대' },
-            yaxis: { title: '총 매출 (원)' },
-            legend: { orientation: 'h' },
-            height: 450
-          };
-
-          // 🔹 남성/여성 각각의 차트로 나란히 출력
-          Plotly.newPlot("genderAgeChartPlotMale", maleSeries, {
-            ...baseLayout,
-            title: '👨 남성 연령대별 · 카테고리별 매출'
-          });
-          Plotly.newPlot("genderAgeChartPlotFemale", femaleSeries, {
-            ...baseLayout,
-            title: '👩 여성 연령대별 · 카테고리별 매출'
-          });
-
-          // 🔹 로딩 메시지 숨기기
-          loadingDiv.style.display = "none";
-        })
-        .catch(error => {
-          loadingDiv.innerText = "데이터 로딩 중 오류가 발생했습니다.";
-          console.error("❌ JSON 로딩 오류:", error);
-        });
-    }
+  }
 </script>
 
 <script>
   // 기본 상태
   let currentPeriod = 'month';
   let showForecast = true;
-
 
   // 차트 초기화
   function drawSalesAnalysisChart(data) {
@@ -1073,7 +1408,6 @@
       return;
     }
 
-    // 예시 데이터 형태 가정: [{date:'2025-07', sales:1000, forecast:1100}, ...]
     const x = data.map(item => item.date);
     const ySales = data.map(item => item.sales);
     const yForecast = showForecast ? data.map(item => item.forecast) : [];
@@ -1123,7 +1457,7 @@
     fetchAndDrawChart();
   });
 
-  // 서버에서 데이터 받아와서 차트 그리기 (예: /api/sales-analysis?period=month)
+  // 서버에서 데이터 받아와서 차트 그리기
   function fetchAndDrawChart(){
     const loadingDiv = document.getElementById('orderTrendsLoading');
     const plotDiv = document.getElementById('salesForecastPlot');
@@ -1147,158 +1481,13 @@
         console.error(err);
       });
   }
-
 </script>
 
-
-<script> // 카테고리별 이익률 분석 및 예측 데이터 로드 및 그래프 그리기 함수
-  function loadCategoryProfit() {
-const loadingDiv = document.getElementById("categoryProfitLoading");
-const plotDiv1 = document.getElementById("categoryProfitPlot1");
-const plotDiv2 = document.getElementById("categoryProfitPlot2");
-const plotDiv3 = document.getElementById("categoryProfitPlot3");
-
-fetch('/api/statistics/category-profit')
-  .then(res => res.json())
-  .then(data => {
-    loadingDiv.style.display = 'none';
-    plotDiv1.style.display = 'block';
-    plotDiv2.style.display = 'block';
-    plotDiv3.style.display = 'block';
-
-    const sales = data.category_sales;
-    const margin = data.category_margin;
-    const ts = data.category_timeseries;
-    const forecast = data.category_forecast;
-
-    // 차트 1: 카테고리별 총 판매금액
-      Plotly.newPlot("categoryProfitPlot1", [{
-        x: sales.map(d => d.Category),
-        y: sales.map(d => d.total_price),
-        type: 'bar',
-        marker: { color: 'goldenrod' }
-      }], {
-        title: '카테고리별 총 판매금액',
-        xaxis: { title: '카테고리' },
-        yaxis: {
-          title: '총 판매금액 (원)',
-          tickformat: ',.0f',
-          automargin: true,
-          titlefont: { size: 14 },
-          title: {
-            text: '총 판매금액 (원)',
-            standoff: 20 // ← Y축 제목과 축 사이 간격
-          }
-        },
-        margin: {
-          l: 100,
-          r: 20,
-          t: 50,
-          b: 50
-        }
-      });
-
-
-    // 차트 2: 카테고리별 평균 이익률
-    Plotly.newPlot("categoryProfitPlot2", [{
-      x: margin.map(d => d.Category),
-      y: margin.map(d => d.avg_profit_margin),
-      type: 'bar',
-      marker: { color: 'seagreen' }
-    }], {
-      title: '카테고리별 평균 이익률',
-      xaxis: { title: '카테고리' },
-      yaxis: {
-        title: '평균 이익률',
-        tickformat: ',.2%',
-        automargin: true,
-        titlefont: { size: 14 },
-        title: {
-          text: '평균 이익률',
-          standoff: 20
-        }
-      },
-      margin: {
-        l: 100,
-        r: 20,
-        t: 50,
-        b: 50
-      }
-    });
-
-   // 차트 3: 카테고리별 순이익 시계열 + 예측
-const netprofit_ts = data.category_netprofit_timeseries;
-const netprofit_forecast = data.category_netprofit_forecast;
-
-const np_categories = [...new Set(netprofit_ts.map(d => d.Category))];
-const np_traces = [];
-
-// 시계열 선
-np_categories.forEach(cat => {
-const catData = netprofit_ts.filter(d => d.Category === cat);
-np_traces.push({
-  x: catData.map(d => d.Month),
-  y: catData.map(d => d.Net_Profit),
-  mode: 'lines+markers',
-  name: cat
-});
-});
-
-
-// 카테고리별 색상 매핑
-const categoryColors = {
-"골드바": "blue",
-"기념품": "orange",
-"주얼리": "green"
-};
-
-// 예측 점
-netprofit_forecast.forEach(f => {
-np_traces.push({
-  x: [f.Month],
-  y: [f.Predicted_Net_Profit],
-  mode: 'markers+text',
-  name: `${f.Category} 예측`,
-  marker: { color: categoryColors[f.Category], size: 10 },
-  text: ['예측'],
-  textposition: 'top center'
-});
-});
-
-Plotly.newPlot("categoryProfitPlot3", np_traces, {
-title: '카테고리별 순이익 시계열 및 예측 (2025년 7월)',
-xaxis: { title: '월' },
-yaxis: {
-  title: {
-    text: '순이익 (원)',
-    standoff: 50  // ✅ 간격을 넓혀서 겹침 방지
-  },
-  tickformat: ',.0f'
-},
-margin: {
-  l: 100, // ✅ 왼쪽 마진도 넓혀줌
-  r: 20,
-  t: 50,
-  b: 50
-}
-});
-
-
-
-}); // ← fetch.then의 닫는 괄호
-} // ← 함수의 닫는 괄호
-
-</script>
-
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<script> //매출
+<script>
   let salesChartInstance = null;
 
   /**
    * 서버에서 매출 분석 데이터를 가져와 차트와 테이블을 그리는 메인 함수
-   * (HTML의 onchange 이벤트가 이 함수를 호출합니다)
    */
   function loadSalesAnalysis() {
     const unit = document.getElementById('unit').value;
@@ -1324,7 +1513,6 @@ margin: {
 
         let processedData = data;
 
-        // [1단계] 예측 기간 제한 로직 (단위별)
         if (showForecast) {
           const lastActualIndex = data.findLastIndex(d => d.y !== null && d.y !== undefined);
           if (lastActualIndex !== -1) {
@@ -1340,28 +1528,22 @@ margin: {
           }
         }
 
-        // [2단계] 표시할 과거 데이터 기간 필터링
         let filteredData = processedData;
         const dataLength = processedData.length;
 
         if (unit === 'week') {
-          const weekCount = 53; // 최근 1년
+          const weekCount = 53;
           if (dataLength > weekCount) {
             filteredData = processedData.slice(dataLength - weekCount);
           }
         } else if (unit === 'day') {
-          const dayCount = 31; // 최근 1달
+          const dayCount = 31;
           if (dataLength > dayCount) {
             filteredData = processedData.slice(dataLength - dayCount);
           }
-        }
-        // 🔽 [핵심 수정] 월 단위 데이터 필터링 (2024년 이후) 🔽
-        else if (unit === 'month') {
-            // 'ds' 필드가 '2024-01' 보다 크거나 같은 데이터만 필터링
+        } else if (unit === 'month') {
             filteredData = processedData.filter(d => d.ds >= '2024-01');
         }
-        // 🔼 [핵심 수정] 필터링 로직 끝 🔼
-
 
         loadingDiv.style.display = 'none';
         chartCanvas.style.display = 'block';
@@ -1380,7 +1562,6 @@ margin: {
 
   /**
    * 데이터를 받아 Chart.js 차트를 그리는 함수
-   * @param {Array} data - 백엔드에서 받은 '필터링된' 데이터 배열
    */
   function drawSalesChart(data) {
     const showForecast = document.getElementById('toggleForecast').checked;
@@ -1455,7 +1636,6 @@ margin: {
 
   /**
    * 데이터를 받아 HTML 테이블을 그리는 함수
-   * @param {Array} data - 필터링된 데이터 배열
    */
   function drawSalesTable(data) {
     const tableBody = document.getElementById('salesTableBody');
@@ -1485,15 +1665,12 @@ margin: {
     document.getElementById('forecastHeader').style.display = showForecast ? '' : 'none';
   }
 
-
   document.addEventListener('DOMContentLoaded', () => {
-    // salesAnalysis 탭이 초기에 활성화 되어 있다면, 데이터를 로드합니다.
     const salesAnalysisTab = document.getElementById('salesAnalysis');
     if (salesAnalysisTab && salesAnalysisTab.classList.contains('active')) {
       loadSalesAnalysis();
     }
 
-    // ✅ [추가된 부분] profitAnalysis 탭이 초기에 활성화 되어 있다면, 데이터를 로드합니다.
     const profitAnalysisTab = document.getElementById('profitAnalysis');
     if (profitAnalysisTab && profitAnalysisTab.classList.contains('active')) {
       loadProfitAnalysis();
@@ -1501,8 +1678,7 @@ margin: {
 });
 </script>
 
-
-<!-- ✅ [추가된 부분] 순이익 분석을 위한 스크립트 -->
+<!-- 순이익 분석을 위한 스크립트 -->
 <script>
   let profitChartInstance = null;
 
@@ -1523,7 +1699,6 @@ margin: {
     chartCanvas.style.display = 'none';
     tableDiv.style.display = 'none';
 
-    // ✅ API 경로를 profit-analysis로 변경
     fetch(`/api/statistics/profit-analysis?unit=${unit}&predict=${predictParam}`)
       .then(res => {
         if (!res.ok) throw new Error(`서버 응답 오류 (${res.status})`);
@@ -1586,9 +1761,9 @@ margin: {
     const forecastData = data.map(d => (d.yhat !== undefined && d.yhat !== null) ? d.yhat : null);
 
     const datasets = [{
-      label: "실제 순이익", // ✅ 레이블 변경
+      label: "실제 순이익",
       data: actualData,
-      borderColor: "rgba(75, 192, 192, 1)",   // ✅ 색상 변경 (초록 계열)
+      borderColor: "rgba(75, 192, 192, 1)",
       backgroundColor: "rgba(75, 192, 192, 0.5)",
       type: 'bar',
       order: 2
@@ -1596,9 +1771,9 @@ margin: {
 
     if (showForecast && forecastData.some(d => d !== null)) {
       datasets.push({
-        label: "예측 순이익", // ✅ 레이블 변경
+        label: "예측 순이익",
         data: forecastData,
-        borderColor: "rgba(255, 159, 64, 1)", // ✅ 색상 변경 (주황 계열)
+        borderColor: "rgba(255, 159, 64, 1)",
         backgroundColor: "rgba(255, 159, 64, 0)",
         type: 'line',
         fill: false,
@@ -1628,7 +1803,7 @@ margin: {
           title: {
             display: true,
             font: { size: 16 },
-            text: `순이익 분석 및 예측 (${{year:'연',month:'월',week:'주',day:'일'}[unit]} 단위)` // ✅ 제목 변경
+            text: `순이익 분석 및 예측 (${{year:'연',month:'월',week:'주',day:'일'}[unit]} 단위)`
           }
         }
       }
@@ -1662,173 +1837,18 @@ margin: {
   }
 </script>
 
-
-<script>
-  //성별 연령별 분석
-  const colorMap = {
-    '골드바': '#1f77b4',   // 파란색
-    '기념품': '#ff7f0e',   // 주황색
-    '주얼리': '#2ca02c'    // 초록색
-  };
-
-  //성별 연령별 분석
-  document.addEventListener("DOMContentLoaded", function () {
-    const loadingDiv = document.getElementById("sexAgeLoading");
-    const plotDivMale = document.getElementById("genderAgeChartPlotMale");
-    const plotDivFemale = document.getElementById("genderAgeChartPlotFemale");
-    if (!loadingDiv || !plotDivMale || !plotDivFemale) {
-      console.error("성별/연령대 필요한 div가 없습니다.");
-      return;
-    }
-
-    fetch("/temp_output.json")
-      .then(response => response.json())
-      .then(data => {
-        if (!data || !data.male || !data.female) {
-          loadingDiv.innerText = "데이터가 없습니다.";
-          return;
-        }
-        const maleData = data.male;
-        const femaleData = data.female;
-
-        function renderTopBottomSummaryCharts(maleData, femaleData) {
-          const combined = [...maleData, ...femaleData];
-
-          // ➤ 연령대 + 성별 + 카테고리별 매출 정리
-          const summaryList = combined.map(d => ({
-            label: `${d.Age_Group} ${d.Gender === '남' ? '남성' : '여성'}`,
-            category: d.Category,
-            value: d.Total_Price / 100000000 // 억 원 단위
-          }));
-
-          const validCategories = ['골드바', '기념품', '주얼리'];
-          const filtered = summaryList.filter(d => validCategories.includes(d.category));
-
-          // ➤ TOP3 & BOTTOM3
-          const top3 = [...filtered].sort((a, b) => b.value - a.value).slice(0, 3);
-          const bottom3 = [...filtered].sort((a, b) => a.value - b.value).slice(0, 3);
-
-          // ➤ 막대차트 트레이스 생성 함수
-          const makeTrace = (dataList) => ({
-            x: dataList.map(d => d.label),
-            y: dataList.map(d => d.value),
-            type: 'bar',
-            marker: {
-              color: dataList.map(d => colorMap[d.category])
-            },
-            text: dataList.map(d => `${d.value.toFixed(2)}억`),
-            textposition: 'auto',
-            hoverinfo: 'x+y',
-            showlegend: false
-          });
-
-          // ➤ 레이아웃 공통 옵션
-          const makeLayout = (titleText) => ({
-            title: titleText,
-            xaxis: { title: '연령대 + 성별' },
-            yaxis: { title: '매출 (억 원)', tickformat: ',' },
-            margin: { t: 60, b: 100 },
-            height: 520,
-            showlegend: false
-          });
-
-          // ➤ Plotly 차트 렌더링
-          Plotly.newPlot('topProductsChart', [makeTrace(top3)], makeLayout('연령별 선호도 TOP3'));
-          Plotly.newPlot('bottomProductsChart', [makeTrace(bottom3)], makeLayout('연령별 선호도 BOTTOM3'));
-        }
-
-      }); // ← fetch("/temp_output.json") 체인 닫기
-
-           function loadDemographicsChart() {
-            const loadingDiv = document.getElementById("sexAgeLoading");
-            const malePlotDiv = document.getElementById("genderAgeChartPlotMale");
-            const femalePlotDiv = document.getElementById("genderAgeChartPlotFemale");
-
-            fetch("/api/statistics/sex-age-chart")
-                .then(response => response.json())
-                .then(data => {
-                    if (!data || !data.male || !data.female) {
-                        loadingDiv.innerText = "데이터가 없습니다.";
-                        return;
-                    }
-
-                    const maleData = data.male;
-                    const femaleData = data.female;
-                    const ageGroups = [...new Set([...maleData, ...femaleData].map(d => d.Age_Group))].sort();
-                    const categories = [...new Set([...maleData, ...femaleData].map(d => d.Category))];
-
-                    // 남자 차트 트레이스 생성
-                    const maleTraces = categories.map(category => ({
-                        x: ageGroups,
-                        y: ageGroups.map(ageGroup => {
-                            const item = maleData.find(d => d.Age_Group === ageGroup && d.Category === category);
-                            return item ? item.Total_Price / 100000000 : 0; // 억 단위
-                        }),
-                        name: category,
-                        type: 'bar',
-                        marker: { color: colorMap[category] || '#cccccc' }
-                    }));
-
-                    // 여자 차트 트레이스 생성
-                    const femaleTraces = categories.map(category => ({
-                        x: ageGroups,
-                        y: ageGroups.map(ageGroup => {
-                            const item = femaleData.find(d => d.Age_Group === ageGroup && d.Category === category);
-                            return item ? item.Total_Price / 100000000 : 0; // 억 단위
-                        }),
-                        name: category,
-                        type: 'bar',
-                        marker: { color: colorMap[category] || '#cccccc' }
-                    }));
-
-                    // 남/녀 차트 공통 레이아웃 함수
-                    const layout = gender => ({
-                        barmode: 'stack', // 누적 막대 그래프
-                        title: `${gender} · 연령대별 카테고리 매출 (단위: 억 원)`,
-                        xaxis: { title: '연령대' },
-                        yaxis: { title: '총 매출 (억 원)', tickformat: ',' },
-                        legend: { orientation: 'h', x: 0.5, y: -0.25, xanchor: 'center', yanchor: 'top' },
-                        margin: { t: 60, b: 100 },
-                        height: 500
-                    });
-
-                    // 남/녀 차트 그리기
-                    Plotly.newPlot(malePlotDiv, maleTraces, layout("👨 남성"));
-                    Plotly.newPlot(femalePlotDiv, femaleTraces, layout("👩 여성"));
-
-                    // 선호도 Top/Bottom 차트 그리기 함수 호출
-                    renderTopBottomSummaryCharts(maleData, femaleData);
-
-                    // 모든 차트가 그려진 후 로딩 메시지 숨기기
-                    loadingDiv.style.display = "none";
-                })
-                .catch(error => {
-                    loadingDiv.innerText = "데이터 로딩 중 오류가 발생했습니다.";
-                    console.error("❌ JSON 로딩 오류:", error);
-                });
-        }
-
-        // 4. 페이지가 로드되면 차트 로딩 함수를 실행
-        document.addEventListener('DOMContentLoaded', loadDemographicsChart);
-
-  });
-</script>
-
-
 <script>
   // 장바구니 이탈 분석 전역 변수
   let cartAnalysisData = null;
 
   /**
-   * 인터랙티브 장바구니 이탈 분석 실행 (선택된 시간으로 Python 재실행)
+   * 인터랙티브 장바구니 이탈 분석 실행
    */
   function executeInteractiveCartAnalysis() {
     const threshold = document.getElementById('abandonmentThreshold').value;
     const loadingDiv = document.getElementById('interactiveAnalysisLoading');
     const executeBtn = document.getElementById('executeAnalysisBtn');
 
-
-    // UI 초기화
     hideAllAnalysisElements();
     loadingDiv.style.display = 'block';
     executeBtn.disabled = true;
@@ -1836,7 +1856,6 @@ margin: {
 
     console.log(`🛒 새로운 분석 실행 (기준: ${threshold}시간)`);
 
-    // 🔥 핵심: 선택된 시간으로 Python 스크립트 실행
     fetch('/api/cart-analysis/execute', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1848,7 +1867,6 @@ margin: {
 
       if (data.status === 'success') {
         console.log(`✅ ${threshold}시간 기준 분석 완료! 새 JSON 파일 생성됨`);
-        // 성공 시 새로 생성된 JSON 데이터 로드 (캐시 무시)
         return loadAnalysisJsonData(true);
       } else {
         throw new Error(data.message || 'Python 스크립트 실행 실패');
@@ -1873,7 +1891,7 @@ margin: {
   }
 
   /**
-   * 기존 분석 결과 로드 (Python 실행 없이 현재 JSON만 로드)
+   * 기존 분석 결과 로드
    */
   function loadExistingAnalysis() {
     console.log('📂 기존 분석 결과 로드 시도');
@@ -1881,7 +1899,7 @@ margin: {
     hideAllAnalysisElements();
     document.getElementById('interactiveAnalysisLoading').style.display = 'block';
 
-    loadAnalysisJsonData(false) // 캐시 사용
+    loadAnalysisJsonData(false)
       .then(() => {
         console.log('✅ 기존 결과 로드 완료');
         document.getElementById('interactiveAnalysisLoading').style.display = 'none';
@@ -1895,7 +1913,7 @@ margin: {
   }
 
   /**
-   * JSON 분석 데이터 로드 (static 폴더에서 직접 로드)
+   * JSON 분석 데이터 로드
    */
   function loadAnalysisJsonData() {
     console.log('📂 JSON 파일 로드 시도...');
@@ -1920,15 +1938,7 @@ margin: {
   }
 
   /**
-   * 에러 메시지 업데이트
-   */
-  function tryLoadFromFiles(fileList, index) {
-    // 이 함수는 더 이상 사용하지 않습니다.
-    // 단순화를 위해 loadAnalysisJsonData에서 직접 처리합니다.
-  }
-
-  /**
-   * 인터랙티브 분석 결과 표시 (Python 스크립트 JSON 구조에 맞게 수정)
+   * 인터랙티브 분석 결과 표시
    */
   function showInteractiveAnalysisResults() {
     if (!cartAnalysisData) {
@@ -1947,7 +1957,7 @@ margin: {
     // 시간대별 비교 차트
     drawThresholdComparisonChart(threshold_analysis);
 
-    // 인사이트 업데이트 (Python 스크립트 구조에 맞게)
+    // 인사이트 업데이트
     updateInsights(insights);
 
     // 모든 결과 영역 표시
@@ -2080,7 +2090,7 @@ margin: {
   }
 
   /**
-   * 인사이트 업데이트 (Python 스크립트 JSON 구조에 맞게 수정)
+   * 인사이트 업데이트
    */
   function updateInsights(insights) {
     // 핵심 발견사항
@@ -2114,7 +2124,5 @@ margin: {
   }
 </script>
 
-
 </body>
-
 </html>
